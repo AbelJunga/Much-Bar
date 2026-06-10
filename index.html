@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Much Bar - Sistema de Gestão</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+</head>
+<body class="bg-gray-900 text-gray-100 font-sans antialiased">
+
+    <!-- BARRA SUPERIOR (NAVBAR) -->
+    <nav class="bg-gray-800 border-b-4 border-amber-500 p-4 sticky top-0 z-50 shadow-lg">
+        <div class="container mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
+            <h1 class="text-2xl font-black text-white flex items-center gap-2 tracking-tight">
+                <span class="material-icons text-amber-500 text-3xl">local_bar</span> 
+                MUCH<span class="text-amber-500">BAR</span>
+            </h1>
+            
+            <div class="flex items-center gap-4">
+                <!-- Seletor de Utilizador Ativo -->
+                <div class="flex items-center bg-gray-900 px-3 py-1.5 rounded-lg border border-gray-700">
+                    <span class="material-icons text-gray-400 text-sm mr-1">account_circle</span>
+                    <select id="select-usuario" onchange="mudarUsuario()" class="bg-transparent text-sm font-semibold text-amber-400 focus:outline-none cursor-pointer">
+                        <!-- Gerado por JS -->
+                    </select>
+                </div>
+
+                <span class="bg-green-500/20 text-green-400 text-xs px-3 py-1 rounded-full border border-green-500/30 flex items-center gap-1">
+                    <span class="w-2 h-2 rounded-full bg-green-400 animate-pulse"></span> <span id="txt-permissao">Admin</span>
+                </span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- NAVEGAÇÃO DE ABAS (Para separar o Painel Principal das Configurações) -->
+    <div class="bg-gray-800 border-b border-gray-700">
+        <div class="container mx-auto max-w-6xl flex">
+            <button onclick="mudarAba('vendas')" id="btn-aba-vendas" class="px-6 py-3 border-b-2 border-amber-500 text-amber-500 font-bold text-sm flex items-center gap-2 transition">
+                <span class="material-icons text-sm">point_of_sale</span> Vendas e Mesas
+            </button>
+            <button onclick="mudarAba('config')" id="btn-aba-config" class="px-6 py-3 border-b-2 border-transparent text-gray-400 font-bold text-sm flex items-center gap-2 transition adm-only">
+                <span class="material-icons text-sm">settings</span> Configurações & Permissões
+            </button>
+        </div>
+    </div>
+
+    <!-- CONTEÚDO PRINCIPAL -->
+    <main class="container mx-auto p-4 max-w-6xl mt-4">
+        
+        <!-- VISÃO 1: VENDAS E MESAS -->
+        <div id="aba-vendas" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <!-- COLUNA 1: Mesas -->
+            <div class="bg-gray-800 p-4 rounded-xl border border-gray-700 shadow-xl">
+                <h2 class="text-lg font-semibold mb-4 text-gray-300 flex items-center gap-2">
+                    <span class="material-icons text-amber-500">table_bar</span> Mesas / Comandas
+                </h2>
+                <div class="grid grid-cols-2 gap-3" id="lista-mesas"></div>
+            </div>
+
+            <!-- COLUNA 2: Lançamentos -->
+            <div class="bg-gray-800 p-4 rounded-xl border border-gray-700 shadow-xl flex flex-col justify-between min-h-[450px]">
+                <div>
+                    <h2 class="text-lg font-semibold mb-2 text-gray-300 flex items-center gap-2">
+                        <span class="material-icons text-amber-500">shopping_cart</span> Comanda: <span id="mesa-selecionada-titulo" class="text-amber-500">Nenhuma</span>
+                    </h2>
+                    
+                    <div class="space-y-2 max-h-48 overflow-y-auto mb-4 mt-4" id="itens-comanda"></div>
+
+                    <div id="menu-produtos" class="hidden border-t border-gray-700 pt-4">
+                        <p class="text-xs font-semibold text-gray-400 mb-2 uppercase tracking-wider">Adicionar ao Pedido:</p>
+                        <div class="grid grid-cols-2 gap-2" id="botoes-produtos"></div>
+                    </div>
+                </div>
+
+                <div class="border-t border-gray-700 pt-4 mt-4">
+                    <div class="flex justify-between items-center mb-4">
+                        <span class="text-gray-400">Total Acumulado:</span>
+                        <span class="text-2xl font-black text-green-400" id="total-comanda">0,00 MT</span>
+                    </div>
+                    <button onclick="fecharMesaAtual()" id="btn-fechar-conta" disabled class="w-full bg-gray-700 text-gray-400 font-bold py-3 px-4 rounded-lg flex items-center justify-center gap-2 cursor-not-allowed transition">
+                        <span class="material-icons">payments</span> Fechar Conta e Abater Stock
+                    </button>
+                </div>
+            </div>
+
+            <!-- COLUNA 3: Stock Resumido -->
+            <div class="bg-gray-800 p-4 rounded-xl border border-gray-700 shadow-xl">
+                <h2 class="text-lg font-semibold mb-4 text-gray-300 flex items-center gap-2">
+                    <span class="material-icons text-amber-500">inventory</span> Inventário Rápido
+                </h2>
+                <div class="space-y-3" id="lista-stock-resumido"></div>
+
+                <!-- Visível apenas para o Dono/Admin -->
+                <div class="mt-6 p-3 bg-gray-900 rounded-lg border border-gray-700 adm-only">
+                    <p class="text-xs text-gray-400 uppercase tracking-wider font-semibold mb-1">Faturação Total do Turno</p>
+                    <p class="text-xl font-bold text-emerald-400" id="faturacao-total">0,00 MT</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- VISÃO 2: CONFIGURAÇÕES E PERMISSÕES (BLOQUEADO PARA OPERADORES) -->
+        <div id="aba-config" class="hidden grid grid-cols-1 md:grid-cols-2 gap-6">
+            
+            <!-- Painel de Modificar Produtos/Preços -->
+            <div class="bg-gray-800 p-6 rounded-xl border border-gray-700 shadow-xl">
+                <h2 class="text-lg font-semibold mb-4 text-gray-300 flex items-center gap-2">
+                    <span class="material-icons text-amber-500">edit_note</span> Ajustar Preços & Stock
+                </h2>
+                <p class="text-xs text-gray-400 mb-4">Altere os valores abaixo para atualizar o menu instantaneamente.</p>
+                
+                <div class="space-y-4" id="form-config-produtos">
+                    <!-- Gerado por JS -->
+                </div>
+            </div>
+
+            <!-- Painel de Cadastro de Utilizadores -->
+            <div class="bg-gray-800 p-6 rounded-xl border border-gray-700 shadow-xl">
+                <h2 class="text-lg font-semibold mb-4 text-gray-300 flex items-center gap-2">
+                    <span class="material-icons text-amber-500">group_add</span> Cadastrar Equipa e Permissões
+                </h2>
+                
+                <!-- Formulário de Novo Utilizador -->
+                <div class="bg-gray-900 p-4 rounded-lg border border-gray-700 mb-6">
+                    <p class="text-xs font-bold text-amber-500 uppercase mb-3">Adicionar Novo Funcionário</p>
+                    <div class="space-y-3">
+                        <input type="text" id="novo-user-nome" placeholder="Nome do Funcionário" class="w-full bg-gray-800 border border-gray-700 rounded p-2 text-sm text-gray-200 focus:outline-none focus:border-amber-500">
+                        <select id="novo-user-cargo" class="w-full bg-gray-800 border border-gray-700 rounded p-2 text-sm text-gray-200 focus:outline-none focus:border-amber-500">
+                            <option value="Operador">Operador (Apenas Vendas)</option>
+                            <option value="Administrador">Administrador (Dono - Acesso Total)</option>
+                        </select>
+                        <button onclick="adicionarUsuario()" class="w-full bg-amber-600 hover:bg-amber-500 text-gray-900 font-bold p-2 rounded text-sm transition">
+                            Salvar Funcionário
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Lista de Cadastrados -->
+                <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Funcionários Ativos:</p>
+                <div class="space-y-2" id="lista-usuarios-cadastrados"></div>
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- PROGRAMAÇÃO DO SISTEMA -->
+    <script>
+        // Dados iniciais de produtos
+        let produtos = {
+            1: { nome: "Cerveja 2M", preco: 100, stock: 48, unit: "un" },
+            2: { nome: "Cerveja Laurentina Preta", preco: 120, stock: 24, unit: "un" },
+            3: { nome: "Shot de Gin (Dose)", preco: 150, stock: 15, unit: "doses" },
+            4: { nome: "Porção de Batata Frita", preco: 250, stock: 30, unit: "un" }
+        };
+
+        // Utilizadores Iniciais (Você como dono + um padrão)
+        let usuarios = {
+            1: { nome: "Abel (Dono)", cargo: "Administrador" },
+            2: { nome: "Caixa Turno A", cargo: "Operador" }
+        };
+
+        let mesas = { 1: { status: "Livre", itens: [] }, 2: { status: "Livre", itens: [] }, 3: { status: "Livre", itens: [] }, 4: { status: "Livre", itens: [] } };
+        let faturacaoDiaria = 0;
+        let mesaActiva = null;
+        let usuarioActualId = 1; // Começa com Abel logado
+
+        function inicializar() {
+            renderizarSeletorUsuarios();
+            aplicarPermissoes();
+            renderizarMesas();
+            renderizarStockResumido();
+            renderizarPainelVenda();
+            renderizarConfigProdutos();
+            renderizarListaUsuarios();
+        }
+
+        function renderizarSeletorUsuarios() {
+            const select = document.getElementById('select-usuario');
+            select.innerHTML = '';
+            Object.keys(usuarios).forEach(id => {
+                select.innerHTML += `<option value="${id}">${usuarios[id].nome}</option>`;
+            });
+            select.value = usuarioActualId;
+        }
+
+        function mudarUsuario() {
+            usuarioActualId = document.getElementById('select-usuario').value;
+            mudarAba('vendas'); // Força voltar para vendas por segurança
+            aplicarPermissoes();
+            inicializar();
+        }
+
+        function aplicarPermissoes() {
+            const cargo = usuarios[usuarioActualId].cargo;
+            document.getElementById('txt-permissao').innerText = cargo;
+
+            // Elementos visíveis apenas para Admin
+            const elementosAdmin = document.querySelectorAll('.adm-only');
+            if (cargo === "Administrador") {
+                elementosAdmin.forEach(el => el.classList.remove('hidden'));
+            } else {
+                elementosAdmin.forEach(el => el.classList.add('hidden'));
+            }
+        }
+
+        function mudarAba(aba) {
+            if (aba === 'config' && usuarios[usuarioActualId].cargo !== "Administrador") {
+                alert("Acesso Negado: Apenas o Administrador pode aceder às configurações.");
+                return;
+            }
+
+            if (aba === 'vendas') {
+                document.getElementById('aba-vendas').classList.remove('hidden');
+                document.getElementById('aba-config').classList.add('hidden');
+                document.getElementById('btn-aba-vendas').className = "px-6 py-3 border-b-2 border-amber-500 text-amber-500 font-bold text-sm flex items-center gap-2 transition";
+                document.getElementById('btn-aba-config').className = "px-6 py-3 border-b-2 border-transparent text-gray-400 font-bold text-sm flex items-center gap-2 transition adm-only";
+            } else {
+                document.getElementById('aba-vendas').classList.add('hidden');
+                document.getElementById('aba-config').classList.remove('hidden');
+                document.getElementById('btn-aba-vendas').className = "px-6 py-3 border-b-2 border-transparent text-gray-400 font-bold text-sm flex items-center gap-2 transition";
+                document.getElementById('btn-aba-config').className = "px-6 py-3 border-b-2 border-amber-500 text-amber-500 font-bold text-sm flex items-center gap-2 transition adm-only";
+            }
+        }
+
+        function renderizarMesas() {
+            const container = document.getElementById('lista-mesas');
+            container.innerHTML = '';
+            Object.keys(mesas).forEach(id => {
+                const mesa = mesas[id];
+                const isActiva = mesaActiva == id;
+                let corStatus = mesa.status === "Ocupada" ? "bg-amber-500/20 text-amber-400 border-amber-500/40" : "bg-gray-700/50 text-gray-400 border-gray-600/30";
+                if (isActiva) corStatus = "bg-amber-500 text-gray-900 border-amber-400 font-bold shadow-lg";
+
+                container.innerHTML += `
+                    <button onclick="selecionarMesa(${id})" class="p-4 rounded-xl border text-left transition ${corStatus}">
+                        <div class="text-sm">Mesa 0${id}</div>
+                        <div class="text-xs ${isActiva ? 'text-gray-900' : 'text-gray-400'} mt-1">${mesa.status}</div>
+                    </button>
+                `;
+            });
+        }
+
+        function renderizarStockResumido() {
+            const container = document.getElementById('lista-stock-resumido');
+            container.innerHTML = '';
+            Object.keys(produtos).forEach(id => {
+                const prod = produtos[id];
+                let corStock = prod.stock <= 5 ? "text-red-400 font-bold animate-pulse" : "text-green-400";
+                container.innerHTML += `
+                    <div class="flex justify-between items-center bg-gray-900/60 p-2.5 rounded-lg border border-gray-700/50 text-sm">
+                        <span>${prod.nome}</span>
+                        <span class="${corStock}">${prod.stock} ${prod.unit}</span>
+                    </div>
+                `;
+            });
+            document.getElementById('faturacao-total').innerText = `${faturacaoDiaria.toFixed(2)} MT`;
+        }
+
+        function selecionarMesa(id) { mesaActiva = id; renderizarMesas(); renderizarPainelVenda(); }
+
+        function renderizarPainelVenda() {
+            const titulo = document.getElementById('mesa-selecionada-titulo');
+            const containerItens = document.getElementById('itens-comanda');
+            const menuProdutos = document.getElementById('menu-produtos');
+            const botoesProdutos = document.getElementById('botoes-produtos');
+            const btnFechar = document.getElementById('btn-fechar-conta');
+            const totalTexto = document.getElementById('total-comanda');
+
+            if (!mesaActiva) {
+                titulo.innerText = "Nenhuma";
+                containerItens.innerHTML = `<p class="text-gray-500 text-sm italic text-center py-8">Selecione uma mesa para gerir o pedido.</p>`;
+                menuProdutos.classList.add('hidden');
+                btnFechar.disabled = true;
+                return;
+            }
+
+            titulo.innerText = `Mesa 0${mesaActiva}`;
+            menuProdutos.classList.remove('hidden');
+            const mesa = mesas[mesaActiva];
+            
+            if (mesa.itens.length === 0) {
+                containerItens.innerHTML = `<p class="text-gray-500 text-sm italic text-center py-8">Nenhum item lançado nesta mesa.</p>`;
+                totalTexto.innerText = "0,00 MT";
+                btnFechar.disabled = true;
+            } else {
+                containerItens.innerHTML = '';
+                let total = 0;
+                mesa.itens.forEach(item => { total += item.preco; containerItens.innerHTML += `<div class="flex justify-between bg-gray-900 p-2 rounded border border-gray-700 text-sm"><span>${item.nome}</span><span class="font-semibold text-amber-400">${item.preco} MT</span></div>`; });
+                totalTexto.innerText = `${total.toFixed(2)} MT`;
+                btnFechar.disabled = false;
+            }
+
+            botoesProdutos.innerHTML = '';
+            Object.keys(produtos).forEach(pId => {
+                const prod = produtos[pId];
+                const semStock = prod.stock <= 0;
+                botoesProdutos.innerHTML += `<button onclick="adicionarItem(${pId})" ${semStock ? 'disabled' : ''} class="p-2 text-xs rounded border transition flex flex-col ${semStock ? 'bg-gray-800 text-gray-600 border-gray-700' : 'bg-gray-700 hover:bg-gray-600 border-gray-600'}"><span>${prod.nome}</span><span class="text-amber-400 mt-1">${semStock ? 'ESGOTADO' : prod.preco + ' MT'}</span></button>`;
+            });
+        }
+
+        function adicionarItem(pId) {
+            if (!mesaActiva) return;
+            mesas[mesaActiva].status = "Ocupada";
+            mesas[mesaActiva].itens.push({ id: pId, nome: produtos[pId].nome, preco: produtos[pId].preco });
+            renderizarPainelVenda();
+            renderizarMesas();
+        }
+
+        function fecharMesaAtual() {
+            const mesa = mesas[mesaActiva];
+            let totalMesa = 0;
+            mesa.itens.forEach(item => {
+                if(produtos[item.id].stock > 0) {
+                    produtos[item.id].stock -= 1;
+                    totalMesa += item.preco;
+                }
+            });
+            faturacaoDiaria += totalMesa;
+            mesa.status = "Livre";
+            mesa.itens = [];
+            alert(`Conta fechada por ${usuarios[usuarioActualId].nome}.\nTotal: ${totalMesa.toFixed(2)} MT.`);
+            mesaActiva = null;
+            inicializar();
+        }
+
+        // FUNÇÕES DA ABA DE CONFIGURAÇÃO (APENAS ADMIN)
+        function renderizarConfigProdutos() {
+            const container = document.getElementById('form-config-produtos');
+            container.innerHTML = '';
+            Object.keys(produtos).forEach(id => {
+                const prod = produtos[id];
+                container.innerHTML += `
+                    <div class="bg-gray-950 p-3 rounded-lg border border-gray-700 flex flex-col sm:flex-row gap-2 items-center justify-between">
+                        <span class="text-sm font-bold text-gray-300 w-1/3">${prod.nome}</span>
+                        <div class="flex gap-2 w-full sm:w-2/3">
+                            <div class="w-1/2">
+                                <label class="text-[10px] text-gray-500 block">Preço (MT)</label>
+                                <input type="number" value="${prod.preco}" onchange="atualizarProduto(${id}, 'preco', this.value)" class="w-full bg-gray-800 border border-gray-700 rounded p-1 text-sm text-amber-400">
+                            </div>
+                            <div class="w-1/2">
+                                <label class="text-[10px] text-gray-500 block">Stock (${prod.unit})</label>
+                                <input type="number" value="${prod.stock}" onchange="atualizarProduto(${id}, 'stock', this.value)" class="w-full bg-gray-800 border border-gray-700 rounded p-1 text-sm text-green-400">
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function atualizarProduto(id, campo, valor) {
+            produtos[id][campo] = parseFloat(valor);
+            renderizarStockResumido();
+            renderizarPainelVenda();
+        }
+
+        function renderizarListaUsuarios() {
+            const container = document.getElementById('lista-usuarios-cadastrados');
+            container.innerHTML = '';
+            Object.keys(usuarios).forEach(id => {
+                const u = usuarios[id];
+                const isAdmin = u.cargo === "Administrador";
+                container.innerHTML += `
+                    <div class="flex justify-between items-center bg-gray-900 p-2.5 rounded border border-gray-700 text-sm">
+                        <span class="font-medium text-gray-200">${u.nome}</span>
+                        <span class="text-xs px-2 py-0.5 rounded ${isAdmin ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' : 'bg-blue-500/10 text-blue-400 border border-blue-500/20'}">${u.cargo}</span>
+                    </div>
+                `;
+            });
+        }
+
+        function adicionarUsuario() {
+            const nome = document.getElementById('novo-user-nome').value.trim();
+            const cargo = document.getElementById('novo-user-cargo').value;
+            if (!nome) { alert("Insira o nome do funcionário."); return; }
+            const novoId = Object.keys(usuarios).length + 1;
+            usuarios[novoId] = { nome: nome, cargo: cargo };
+            document.getElementById('novo-user-nome').value = '';
+            renderizarSeletorUsuarios();
+            renderizarListaUsuarios();
+            alert(`${nome} cadastrado com sucesso!`);
+        }
+
+        // Início automático
+        inicializar();
+    </script>
+</body>
+</html>
