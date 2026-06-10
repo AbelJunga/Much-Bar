@@ -9,7 +9,6 @@
 </head>
 <body class="bg-gray-900 text-gray-100 font-sans antialiased">
 
-    <!-- BARRA SUPERIOR (NAVBAR) -->
     <nav class="bg-gray-800 border-b-4 border-amber-500 p-4 sticky top-0 z-50 shadow-lg">
         <div class="container mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
             <h1 class="text-2xl font-black text-white flex items-center gap-2 tracking-tight">
@@ -18,12 +17,10 @@
             </h1>
             
             <div class="flex items-center gap-4">
-                <!-- Seletor de Utilizador Ativo -->
                 <div class="flex items-center bg-gray-900 px-3 py-1.5 rounded-lg border border-gray-700">
                     <span class="material-icons text-gray-400 text-sm mr-1">account_circle</span>
-                    <select id="select-usuario" onchange="mudarUsuario()" class="bg-transparent text-sm font-semibold text-amber-400 focus:outline-none cursor-pointer">
-                        <!-- Gerado por JS -->
-                    </select>
+                    <select id="select-usuario" onchange="solicitarTrocaUsuario()" class="bg-transparent text-sm font-semibold text-amber-400 focus:outline-none cursor-pointer">
+                        </select>
                 </div>
 
                 <span class="bg-green-500/20 text-green-400 text-xs px-3 py-1 rounded-full border border-green-500/30 flex items-center gap-1">
@@ -33,7 +30,6 @@
         </div>
     </nav>
 
-    <!-- NAVEGAÇÃO DE ABAS (Para separar o Painel Principal das Configurações) -->
     <div class="bg-gray-800 border-b border-gray-700">
         <div class="container mx-auto max-w-6xl flex">
             <button onclick="mudarAba('vendas')" id="btn-aba-vendas" class="px-6 py-3 border-b-2 border-amber-500 text-amber-500 font-bold text-sm flex items-center gap-2 transition">
@@ -45,12 +41,9 @@
         </div>
     </div>
 
-    <!-- CONTEÚDO PRINCIPAL -->
     <main class="container mx-auto p-4 max-w-6xl mt-4">
         
-        <!-- VISÃO 1: VENDAS E MESAS -->
         <div id="aba-vendas" class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <!-- COLUNA 1: Mesas -->
             <div class="bg-gray-800 p-4 rounded-xl border border-gray-700 shadow-xl">
                 <h2 class="text-lg font-semibold mb-4 text-gray-300 flex items-center gap-2">
                     <span class="material-icons text-amber-500">table_bar</span> Mesas / Comandas
@@ -58,7 +51,6 @@
                 <div class="grid grid-cols-2 gap-3" id="lista-mesas"></div>
             </div>
 
-            <!-- COLUNA 2: Lançamentos -->
             <div class="bg-gray-800 p-4 rounded-xl border border-gray-700 shadow-xl flex flex-col justify-between min-h-[450px]">
                 <div>
                     <h2 class="text-lg font-semibold mb-2 text-gray-300 flex items-center gap-2">
@@ -84,14 +76,12 @@
                 </div>
             </div>
 
-            <!-- COLUNA 3: Stock Resumido -->
             <div class="bg-gray-800 p-4 rounded-xl border border-gray-700 shadow-xl">
                 <h2 class="text-lg font-semibold mb-4 text-gray-300 flex items-center gap-2">
                     <span class="material-icons text-amber-500">inventory</span> Inventário Rápido
                 </h2>
                 <div class="space-y-3" id="lista-stock-resumido"></div>
 
-                <!-- Visível apenas para o Dono/Admin -->
                 <div class="mt-6 p-3 bg-gray-900 rounded-lg border border-gray-700 adm-only">
                     <p class="text-xs text-gray-400 uppercase tracking-wider font-semibold mb-1">Faturação Total do Turno</p>
                     <p class="text-xl font-bold text-emerald-400" id="faturacao-total">0,00 MT</p>
@@ -99,34 +89,28 @@
             </div>
         </div>
 
-        <!-- VISÃO 2: CONFIGURAÇÕES E PERMISSÕES (BLOQUEADO PARA OPERADORES) -->
         <div id="aba-config" class="hidden grid grid-cols-1 md:grid-cols-2 gap-6">
             
-            <!-- Painel de Modificar Produtos/Preços -->
             <div class="bg-gray-800 p-6 rounded-xl border border-gray-700 shadow-xl">
                 <h2 class="text-lg font-semibold mb-4 text-gray-300 flex items-center gap-2">
                     <span class="material-icons text-amber-500">edit_note</span> Ajustar Preços & Stock
                 </h2>
-                <p class="text-xs text-gray-400 mb-4">Altere os valores abaixo para atualizar o menu instantaneamente.</p>
                 
-                <div class="space-y-4" id="form-config-produtos">
-                    <!-- Gerado por JS -->
-                </div>
+                <div class="space-y-4" id="form-config-produtos"></div>
             </div>
 
-            <!-- Painel de Cadastro de Utilizadores -->
             <div class="bg-gray-800 p-6 rounded-xl border border-gray-700 shadow-xl">
                 <h2 class="text-lg font-semibold mb-4 text-gray-300 flex items-center gap-2">
-                    <span class="material-icons text-amber-500">group_add</span> Cadastrar Equipa e Permissões
+                    <span class="material-icons text-amber-500">group_add</span> Cadastrar Equipa e PINs
                 </h2>
                 
-                <!-- Formulário de Novo Utilizador -->
                 <div class="bg-gray-900 p-4 rounded-lg border border-gray-700 mb-6">
                     <p class="text-xs font-bold text-amber-500 uppercase mb-3">Adicionar Novo Funcionário</p>
                     <div class="space-y-3">
-                        <input type="text" id="novo-user-nome" placeholder="Nome do Funcionário" class="w-full bg-gray-800 border border-gray-700 rounded p-2 text-sm text-gray-200 focus:outline-none focus:border-amber-500">
+                        <input type="text" id="novo-user-nome" placeholder="Nome do Funcionário (Ex: Nunes)" class="w-full bg-gray-800 border border-gray-700 rounded p-2 text-sm text-gray-200 focus:outline-none focus:border-amber-500">
+                        <input type="password" maxlength="4" id="novo-user-pin" placeholder="PIN de Acesso (4 números)" class="w-full bg-gray-800 border border-gray-700 rounded p-2 text-sm text-gray-200 focus:outline-none focus:border-amber-500">
                         <select id="novo-user-cargo" class="w-full bg-gray-800 border border-gray-700 rounded p-2 text-sm text-gray-200 focus:outline-none focus:border-amber-500">
-                            <option value="Operador">Operador (Apenas Vendas)</option>
+                            <option value="Operador">Operador (Apenas Vendas - Nunes)</option>
                             <option value="Administrador">Administrador (Dono - Acesso Total)</option>
                         </select>
                         <button onclick="adicionarUsuario()" class="w-full bg-amber-600 hover:bg-amber-500 text-gray-900 font-bold p-2 rounded text-sm transition">
@@ -135,35 +119,40 @@
                     </div>
                 </div>
 
-                <!-- Lista de Cadastrados -->
                 <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Funcionários Ativos:</p>
                 <div class="space-y-2" id="lista-usuarios-cadastrados"></div>
             </div>
-
         </div>
-
     </main>
 
-    <!-- PROGRAMAÇÃO DO SISTEMA -->
     <script>
-        // Dados iniciais de produtos
-        let produtos = {
+        const produtosPadrao = {
             1: { nome: "Cerveja 2M", preco: 100, stock: 48, unit: "un" },
             2: { nome: "Cerveja Laurentina Preta", preco: 120, stock: 24, unit: "un" },
             3: { nome: "Shot de Gin (Dose)", preco: 150, stock: 15, unit: "doses" },
             4: { nome: "Porção de Batata Frita", preco: 250, stock: 30, unit: "un" }
         };
 
-        // Utilizadores Iniciais (Você como dono + um padrão)
-        let usuarios = {
-            1: { nome: "Abel (Dono)", cargo: "Administrador" },
-            2: { nome: "Caixa Turno A", cargo: "Operador" }
+        // Utilizadores Padrão com PINs numéricos
+        const usuariosPadrao = {
+            1: { nome: "Abel (Dono)", cargo: "Administrador", pin: "1111" },
+            2: { nome: "Nunes", cargo: "Operador", pin: "2222" }
         };
 
-        let mesas = { 1: { status: "Livre", itens: [] }, 2: { status: "Livre", itens: [] }, 3: { status: "Livre", itens: [] }, 4: { status: "Livre", itens: [] } };
-        let faturacaoDiaria = 0;
+        let produtos = JSON.parse(localStorage.getItem('mb_produtos')) || produtosPadrao;
+        let usuarios = JSON.parse(localStorage.getItem('mb_usuarios')) || usuariosPadrao;
+        let faturacaoDiaria = parseFloat(localStorage.getItem('mb_faturacao')) || 0;
+        let mesas = JSON.parse(localStorage.getItem('mb_mesas')) || { 1: { status: "Livre", itens: [] }, 2: { status: "Livre", itens: [] }, 3: { status: "Livre", itens: [] }, 4: { status: "Livre", itens: [] } };
+
         let mesaActiva = null;
-        let usuarioActualId = 1; // Começa com Abel logado
+        let usuarioActualId = Object.keys(usuarios)[0]; 
+
+        function salvarDados() {
+            localStorage.setItem('mb_produtos', JSON.stringify(produtos));
+            localStorage.setItem('mb_usuarios', JSON.stringify(usuarios));
+            localStorage.setItem('mb_faturacao', faturacaoDiaria.toString());
+            localStorage.setItem('mb_mesas', JSON.stringify(mesas));
+        }
 
         function inicializar() {
             renderizarSeletorUsuarios();
@@ -184,18 +173,31 @@
             select.value = usuarioActualId;
         }
 
-        function mudarUsuario() {
-            usuarioActualId = document.getElementById('select-usuario').value;
-            mudarAba('vendas'); // Força voltar para vendas por segurança
-            aplicarPermissoes();
-            inicializar();
+        // Função que pede o PIN antes de mudar de turno/utilizador
+        function solicitarTrocaUsuario() {
+            const select = document.getElementById('select-usuario');
+            const idSelecionado = select.value;
+
+            if (idSelecionado === usuarioActualId) return;
+
+            const pinDigitado = prompt(`Digite o PIN de acesso para ${usuarios[idSelecionado].nome}:`);
+            
+            if (pinDigitado === usuarios[idSelecionado].pin) {
+                usuarioActualId = idSelecionado;
+                mudarAba('vendas'); 
+                aplicarPermissoes();
+                inicializar();
+                alert(`Sessão iniciada como ${usuarios[idSelecionado].nome}`);
+            } else {
+                alert("PIN Incorreto! Acesso negado.");
+                select.value = usuarioActualId; // Desfaz a seleção
+            }
         }
 
         function aplicarPermissoes() {
             const cargo = usuarios[usuarioActualId].cargo;
             document.getElementById('txt-permissao').innerText = cargo;
 
-            // Elementos visíveis apenas para Admin
             const elementosAdmin = document.querySelectorAll('.adm-only');
             if (cargo === "Administrador") {
                 elementosAdmin.forEach(el => el.classList.remove('hidden'));
@@ -206,7 +208,7 @@
 
         function mudarAba(aba) {
             if (aba === 'config' && usuarios[usuarioActualId].cargo !== "Administrador") {
-                alert("Acesso Negado: Apenas o Administrador pode aceder às configurações.");
+                alert("Erro: O Nunes ou outros Operadores não têm permissão para entrar nas configurações.");
                 return;
             }
 
@@ -303,6 +305,7 @@
             if (!mesaActiva) return;
             mesas[mesaActiva].status = "Ocupada";
             mesas[mesaActiva].itens.push({ id: pId, nome: produtos[pId].nome, preco: produtos[pId].preco });
+            salvarDados();
             renderizarPainelVenda();
             renderizarMesas();
         }
@@ -319,12 +322,13 @@
             faturacaoDiaria += totalMesa;
             mesa.status = "Livre";
             mesa.itens = [];
+            
+            salvarDados();
             alert(`Conta fechada por ${usuarios[usuarioActualId].nome}.\nTotal: ${totalMesa.toFixed(2)} MT.`);
             mesaActiva = null;
             inicializar();
         }
 
-        // FUNÇÕES DA ABA DE CONFIGURAÇÃO (APENAS ADMIN)
         function renderizarConfigProdutos() {
             const container = document.getElementById('form-config-produtos');
             container.innerHTML = '';
@@ -350,6 +354,7 @@
 
         function atualizarProduto(id, campo, valor) {
             produtos[id][campo] = parseFloat(valor);
+            salvarDados();
             renderizarStockResumido();
             renderizarPainelVenda();
         }
@@ -362,7 +367,10 @@
                 const isAdmin = u.cargo === "Administrador";
                 container.innerHTML += `
                     <div class="flex justify-between items-center bg-gray-900 p-2.5 rounded border border-gray-700 text-sm">
-                        <span class="font-medium text-gray-200">${u.nome}</span>
+                        <div class="flex flex-col">
+                            <span class="font-medium text-gray-200">${u.nome}</span>
+                            <span class="text-[10px] text-gray-500">PIN: ****</span>
+                        </div>
                         <span class="text-xs px-2 py-0.5 rounded ${isAdmin ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' : 'bg-blue-500/10 text-blue-400 border border-blue-500/20'}">${u.cargo}</span>
                     </div>
                 `;
@@ -371,14 +379,24 @@
 
         function adicionarUsuario() {
             const nome = document.getElementById('novo-user-nome').value.trim();
+            const pin = document.getElementById('novo-user-pin').value.trim();
             const cargo = document.getElementById('novo-user-cargo').value;
-            if (!nome) { alert("Insira o nome do funcionário."); return; }
-            const novoId = Object.keys(usuarios).length + 1;
-            usuarios[novoId] = { nome: nome, cargo: cargo };
+
+            if (!nome || pin.length !== 4 || isNaN(pin)) { 
+                alert("Por favor, insira o nome e um PIN numérico válido de exatamente 4 dígitos."); 
+                return; 
+            }
+
+            const novoId = Date.now();
+            usuarios[novoId] = { nome: nome, cargo: cargo, pin: pin };
+            
             document.getElementById('novo-user-nome').value = '';
+            document.getElementById('novo-user-pin').value = '';
+            
+            salvarDados();
             renderizarSeletorUsuarios();
             renderizarListaUsuarios();
-            alert(`${nome} cadastrado com sucesso!`);
+            alert(`${nome} cadastrado com sucesso com o PIN definido!`);
         }
 
         // Início automático
