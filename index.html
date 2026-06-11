@@ -1,257 +1,963 @@
 <!DOCTYPE html>
-<html lang="pt-PT">
+<html lang="pt-PT" class="h-full bg-gray-950 text-gray-100">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Much Bar - Gestão Profissional Pro</title>
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-</head>
-<body class="bg-gray-950 text-gray-100 font-sans antialiased min-h-screen flex flex-col md:flex-row">
 
-    <div id="tela-login" class="fixed inset-0 bg-gray-950 z-50 flex flex-col items-center justify-center p-4">
-        <div class="bg-gray-900 p-8 rounded-2xl border border-gray-800 shadow-2xl w-full max-w-sm">
-            <h1 class="text-3xl font-black text-white mb-2 text-center tracking-tight">
-                <span class="material-icons text-amber-500 text-3xl align-middle">local_bar</span> MUCH<span class="text-amber-500">BAR</span>
-            </h1>
-            <p class="text-gray-400 text-xs text-center mb-6">Gestão Comercial</p>
-            
-            <div class="space-y-3">
-                <p class="text-[10px] text-amber-500 font-bold uppercase tracking-wider">Acesso Admin (Abel)</p>
-                <input type="password" id="login-pin-admin" placeholder="Introduza o seu PIN" class="w-full bg-gray-950 border border-gray-700 rounded-lg p-3 text-center text-xl tracking-widest text-amber-400 focus:outline-none focus:border-amber-500">
-                <button onclick="tentarLoginAdmin()" class="w-full bg-amber-600 hover:bg-amber-500 text-gray-950 font-black py-3 rounded-xl transition text-sm cursor-pointer">Entrar como Dono</button>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+</head>
+<body class="h-full flex flex-col font-sans select-none antialiased selection:bg-amber-500/30 selection:text-amber-200">
+
+    <div id="tela-login" class="flex-1 flex flex-col justify-center items-center p-4 bg-gradient-to-b from-gray-950 via-gray-900 to-gray-950">
+        <div class="w-full max-w-sm bg-gray-900 border border-gray-800 p-6 rounded-2xl shadow-2xl">
+            <div class="text-center mb-6">
+                <span class="material-icons text-amber-500 text-4xl mb-2">local_bar</span>
+                <h1 class="text-xl font-black text-gray-100 tracking-tight">MUCH BAR</h1>
+                <p class="text-xs text-gray-500">Sistema de Gestão & Controlo de Caixas</p>
             </div>
 
-            <div class="my-6 border-t border-gray-800 flex items-center justify-center"><span class="bg-gray-900 px-3 text-xs text-gray-600 uppercase">Ou</span></div>
+            <div class="space-y-3 mb-6">
+                <h2 class="text-xs font-bold text-gray-400 uppercase tracking-wider">Acesso Operador</h2>
+                <input type="text" id="login-user-func" placeholder="Utilizador" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-amber-500 text-gray-200">
+                <input type="password" id="login-pass-func" placeholder="Palavra-passe" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-amber-500 text-gray-200">
+                <button onclick="tentarLoginFuncionario()" class="w-full bg-gray-800 hover:bg-gray-700 text-gray-200 font-bold py-2 px-4 rounded-xl text-xs transition">Entrar como Caixa</button>
+            </div>
+
+            <div class="relative flex py-2 items-center my-4">
+                <div class="flex-grow border-t border-gray-800"></div>
+                <span class="flex-shrink mx-3 text-[10px] text-gray-600 font-bold uppercase tracking-widest">OU</span>
+                <div class="flex-grow border-t border-gray-800"></div>
+            </div>
 
             <div class="space-y-3">
-                <p class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Acesso Funcionários</p>
-                <input type="text" id="login-user-func" placeholder="Nome de Utilizador" class="w-full bg-gray-950 border border-gray-700 rounded-lg p-3 text-sm focus:outline-none focus:border-amber-500">
-                <input type="password" id="login-pass-func" placeholder="Palavra-passe" class="w-full bg-gray-950 border border-gray-700 rounded-lg p-3 text-sm focus:outline-none focus:border-amber-500">
-                <button onclick="tentarLoginFuncionario()" class="w-full bg-gray-800 hover:bg-gray-700 text-gray-200 font-bold py-3 rounded-lg transition text-sm cursor-pointer">Entrar no Sistema</button>
+                <h2 class="text-xs font-bold text-gray-400 uppercase tracking-wider">Painel de Controlo (Dono)</h2>
+                <input type="password" id="login-pin-admin" placeholder="PIN Administrativo" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-xs text-center font-mono tracking-widest text-amber-500 focus:outline-none focus:border-amber-500">
+                <button onclick="tentarLoginAdmin()" class="w-full bg-amber-600 hover:bg-amber-500 text-gray-950 font-black py-2 px-4 rounded-xl text-xs transition shadow-lg shadow-amber-600/10">Entrar como Administrador</button>
             </div>
         </div>
     </div>
 
-    <div id="sistema-conteudo" class="hidden flex flex-col md:flex-row w-full min-h-screen">
-        
-        <aside class="w-full md:w-64 bg-gray-900 border-b md:border-b-0 md:border-r border-gray-800 flex flex-col justify-between p-4 shrink-0">
-            <div>
-                <div class="p-2 mb-6 hidden md:block">
-                    <h1 class="text-2xl font-black text-white tracking-tight">
-                        <span class="material-icons text-amber-500 text-2xl align-middle">local_bar</span> MUCH<span class="text-amber-500">BAR</span>
-                    </h1>
-                </div>
-
-                <div class="bg-gray-950 p-3 rounded-xl border border-gray-800 flex items-center gap-2 mb-6">
-                    <span class="material-icons text-amber-500 text-xl">account_circle</span>
-                    <div class="overflow-hidden">
-                        <p id="nome-usuario-ativo" class="text-xs font-bold text-gray-200 truncate">---</p>
-                        <span id="txt-permissao" class="text-[9px] uppercase font-extrabold text-amber-400">---</span>
-                    </div>
-                </div>
-
-                <nav class="space-y-1">
-                    <button onclick="mudarAba('home')" id="btn-aba-home" class="w-full px-4 py-3 rounded-xl text-left font-bold text-sm flex items-center gap-3 transition text-gray-400 hover:bg-gray-800 hover:text-gray-100 cursor-pointer">
-                        <span class="material-icons text-base">home</span> Painel de Mesas
-                    </button>
-                    <button onclick="mudarAba('vendas-diarias')" id="btn-aba-vendas-diarias" class="w-full px-4 py-3 rounded-xl text-left font-bold text-sm flex items-center gap-3 transition text-gray-400 hover:bg-gray-800 hover:text-gray-100 cursor-pointer">
-                        <span class="material-icons text-base">analytics</span> Vendas e Fluxo
-                    </button>
-                    <button onclick="mudarAba('restock')" id="btn-aba-restock" class="w-full px-4 py-3 rounded-xl text-left font-bold text-sm flex items-center gap-3 transition text-gray-400 hover:bg-gray-800 hover:text-gray-100 cursor-pointer">
-                        <span class="material-icons text-base">add_business</span> Entrada de Stock
-                    </button>
-                    <button onclick="mudarAba('financeiro-mensal')" id="btn-aba-financeiro-mensal" class="w-full px-4 py-3 rounded-xl text-left font-bold text-sm flex items-center gap-3 transition text-gray-400 hover:bg-gray-800 hover:text-gray-100 adm-only cursor-pointer">
-                        <span class="material-icons text-base">calendar_month</span> Histórico Mensal
-                    </button>
-                    <button onclick="mudarAba('produtos')" id="btn-aba-produtos" class="w-full px-4 py-3 rounded-xl text-left font-bold text-sm flex items-center gap-3 transition text-gray-400 hover:bg-gray-800 hover:text-gray-100 adm-only cursor-pointer">
-                        <span class="material-icons text-base">inventory</span> Fichas de Produtos
-                    </button>
-                </nav>
+    <div id="sistema-conteudo" class="hidden flex-1 flex flex-col overflow-hidden">
+        <header class="bg-gray-950 border-b border-gray-900 px-4 py-3 flex justify-between items-center shrink-0">
+            <div class="flex items-center gap-2">
+                <span class="material-icons text-amber-500 text-sm">local_bar</span>
+                <span class="text-xs font-black tracking-tight text-gray-200">MUCH BAR <span class="text-[10px] font-normal text-gray-600">v3.0 Cloud</span></span>
             </div>
-
-            <div class="pt-4 border-t border-gray-800 mt-4 md:mt-0">
-                <button onclick="fazerLogout()" class="w-full bg-gray-950 border border-gray-800 hover:bg-red-950/40 hover:text-red-400 hover:border-red-900/40 text-gray-400 p-3 rounded-xl transition text-xs font-bold flex items-center justify-center gap-2 cursor-pointer">
-                    <span class="material-icons text-sm">logout</span> Terminar Sessão
+            <div class="flex items-center gap-4">
+                <div class="text-right">
+                    <p id="nome-usuario-ativo" class="text-[10px] font-black text-amber-400 tracking-wide">-</p>
+                    <p id="txt-permissao" class="text-[9px] text-gray-500 uppercase tracking-wider">-</p>
+                </div>
+                <button onclick="fazerLogout()" class="text-gray-500 hover:text-red-400 p-1 rounded transition">
+                    <span class="material-icons text-sm block">logout</span>
                 </button>
             </div>
-        </aside>
+        </header>
 
-        <main class="flex-1 p-4 md:p-6 lg:p-8 max-w-7xl mx-auto w-full overflow-x-hidden">
-            
-            <div id="aba-home" class="hidden grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div class="bg-gray-900 p-4 rounded-xl border border-gray-800 shadow-xl flex flex-col justify-between min-h-[450px]">
-                    <div>
-                        <h2 class="text-base font-bold mb-3 text-gray-300 flex items-center justify-between">
-                            <span class="flex items-center gap-2"><span class="material-icons text-amber-500 text-base">table_bar</span> Controlo de Contas</span>
+        <nav class="bg-gray-950/80 border-b border-gray-900 p-2 flex gap-1 overflow-x-auto shrink-0 scrollbar-none">
+            <button id="btn-aba-home" onclick="mudarAba('home')" class="px-3 py-1.5 rounded-lg text-xs font-bold transition shrink-0 flex items-center gap-1.5">
+                <span class="material-icons text-xs">grid_view</span> Salas & Mesas
+            </button>
+            <button id="btn-aba-vendas-diarias" onclick="mudarAba('vendas-diarias')" class="px-3 py-1.5 rounded-lg text-xs font-bold transition shrink-0 flex items-center gap-1.5 text-gray-400">
+                <span class="material-icons text-xs">receipt_long</span> Turno Atual
+            </button>
+            <button id="btn-aba-restock" onclick="mudarAba('restock')" class="px-3 py-1.5 rounded-lg text-xs font-bold transition shrink-0 flex items-center gap-1.5 text-gray-400">
+                <span class="material-icons text-xs">inventory</span> Entrada de Stock
+            </button>
+            <button id="btn-aba-financeiro-mensal" onclick="mudarAba('financeiro-mensal')" class="px-3 py-1.5 rounded-lg text-xs font-bold transition shrink-0 flex items-center gap-1.5 text-gray-400 adm-only">
+                <span class="material-icons text-xs">analytics</span> Histórico Mensal
+            </button>
+            <button id="btn-aba-produtos" onclick="mudarAba('produtos')" class="px-3 py-1.5 rounded-lg text-xs font-bold transition shrink-0 flex items-center gap-1.5 text-gray-400 adm-only">
+                <span class="material-icons text-xs">settings</span> Fichas Técnicas
+            </button>
+        </nav>
+
+        <main class="flex-1 overflow-y-auto bg-gray-900/40 p-4">
+
+            <div id="aba-home" class="grid grid-cols-1 lg:grid-cols-3 gap-4 h-full hidden">
+                <div class="bg-gray-900/60 border border-gray-800 rounded-2xl p-4 flex flex-col h-fit lg:h-full overflow-hidden">
+                    <div class="flex justify-between items-center mb-3 shrink-0">
+                        <h2 class="text-xs font-black text-gray-400 uppercase tracking-wider flex items-center gap-1.5">
+                            <span class="material-icons text-xs text-amber-500">table_restaurant</span> Controlo de Mesas
                         </h2>
-                        <div class="flex gap-2 mb-4 bg-gray-950 p-2 rounded-xl border border-gray-800">
-                            <input type="text" id="novo-nome-mesa" placeholder="Nome/Nº da Mesa (Ex: Mesa 5)" class="flex-1 bg-gray-900 border border-gray-750 text-xs p-2 rounded-lg text-gray-200 focus:outline-none focus:border-amber-500">
-                            <button onclick="criarNovaMesa()" class="bg-amber-600 hover:bg-amber-500 text-gray-950 font-black px-3 rounded-lg text-xs transition cursor-pointer">Abrir</button>
-                        </div>
-                        <div class="grid grid-cols-1 gap-2 max-h-80 overflow-y-auto pr-1" id="lista-mesas"></div>
                     </div>
+                    <div class="flex gap-2 mb-4 shrink-0">
+                        <input type="text" id="novo-nome-mesa" placeholder="Ex: Mesa 12 ou Balcão Abel" class="flex-1 bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-amber-500 text-gray-200">
+                        <button onclick="criarNovaMesa()" class="bg-amber-600 hover:bg-amber-500 text-gray-950 font-black px-3 rounded-xl text-xs transition flex items-center justify-center">
+                            <span class="material-icons text-sm">add</span>
+                        </button>
+                    </div>
+                    <div id="lista-mesas" class="flex-1 overflow-y-auto space-y-2 pr-1 min-h-[150px]">
+                        </div>
                 </div>
 
-                <div class="bg-gray-900 p-4 rounded-xl border border-gray-800 shadow-xl flex flex-col justify-between min-h-[480px]">
-                    <div>
-                        <h2 class="text-base font-bold mb-2 text-gray-300 flex items-center gap-2">
-                            <span class="material-icons text-amber-500 text-base">shopping_cart</span> Alvo: <span id="mesa-selecionada-titulo" class="text-amber-500">Nenhum</span>
-                        </h2>
-                        <div class="space-y-1.5 max-h-48 overflow-y-auto mb-4 mt-4 bg-gray-950/40 p-2 rounded-lg" id="itens-comanda"></div>
-                        <div id="menu-produtos" class="hidden border-t border-gray-800 pt-3">
-                            <p class="text-[10px] font-bold text-gray-500 mb-2 uppercase tracking-wider">Registrar Saída:</p>
-                            <div class="grid grid-cols-2 gap-2 max-h-44 overflow-y-auto pr-1" id="botoes-produtos"></div>
-                        </div>
+                <div class="bg-gray-900/60 border border-gray-800 rounded-2xl p-4 flex flex-col h-fit lg:h-full overflow-hidden">
+                    <div class="flex justify-between items-center pb-2 border-b border-gray-800/60 mb-3 shrink-0">
+                        <span class="text-[10px] text-gray-500 uppercase font-bold tracking-wider">Mesa Selecionada</span>
+                        <span id="mesa-selecionada-titulo" class="text-xs font-black text-amber-400">Nenhum</span>
                     </div>
-                    <div class="border-t border-gray-800 pt-3 mt-3">
-                        <div class="flex justify-between items-center mb-3">
-                            <span class="text-gray-400 text-xs">Total Consumido:</span>
-                            <span class="text-xl font-black text-green-400" id="total-comanda">0,00 MT</span>
+                    <div id="itens-comanda" class="flex-1 overflow-y-auto space-y-2 pr-1 min-h-[150px]">
+                        <p class="text-xs text-gray-600 text-center py-4">Nenhum produto consumido.</p>
+                    </div>
+                    <div class="pt-4 border-t border-gray-800 mt-3 shrink-0 space-y-3">
+                        <div class="flex justify-between items-baseline">
+                            <span class="text-xs font-bold text-gray-400">Total a Pagar:</span>
+                            <span id="total-comanda" class="text-xl font-mono font-black text-emerald-400">0,00 MT</span>
                         </div>
-                        <button onclick="fecharMesaAtual()" id="btn-fechar-conta" disabled class="w-full bg-gray-800 text-gray-500 font-bold py-2.5 px-4 rounded-xl flex items-center justify-center gap-2 cursor-not-allowed transition text-xs">
-                            <span class="material-icons text-sm">receipt_long</span> Confirmar Pagamento e Baixar Stock
+                        <button id="btn-fechar-conta" onclick="fecharMesaAtual()" disabled class="w-full bg-gray-800 text-gray-500 font-bold py-2.5 px-4 rounded-xl flex items-center justify-center gap-2 cursor-not-allowed transition text-xs">
+                            <span class="material-icons text-sm">point_of_sale</span> Fechar Conta & Imprimir
                         </button>
                     </div>
                 </div>
 
-                <div class="bg-gray-900 p-4 rounded-xl border border-gray-800 shadow-xl">
-                    <h2 class="text-base font-bold mb-4 text-gray-300 flex items-center gap-2">
-                        <span class="material-icons text-amber-500 text-base">inventory_2</span> Estado do Stock
-                    </h2>
-                    <div class="space-y-2 max-h-[400px] overflow-y-auto pr-1" id="lista-stock-resumido"></div>
-                </div>
-            </div>
-
-            <div id="aba-vendas-diarias" class="hidden space-y-6">
-                <div id="card-financeiro-admin" class="adm-only grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    <div class="bg-gray-900 p-4 rounded-xl border border-gray-800 shadow-sm">
-                        <p class="text-[10px] text-gray-400 font-bold uppercase">Faturação do Turno</p>
-                        <p class="text-xl font-black text-amber-400" id="hoje-faturacao">0,00 MT</p>
+                <div class="space-y-4 h-fit lg:h-full flex flex-col overflow-hidden">
+                    <div id="menu-produtos" class="bg-gray-900/60 border border-gray-800 rounded-2xl p-4 flex-1 flex flex-col overflow-hidden hidden">
+                        <h2 class="text-xs font-black text-gray-400 uppercase tracking-wider mb-3 shrink-0">Toque para Adicionar</h2>
+                        <div id="botoes-produtos" class="grid grid-cols-2 gap-2 overflow-y-auto pr-1 flex-1">
+                            </div>
                     </div>
-                    <div class="bg-gray-900 p-4 rounded-xl border border-gray-800 shadow-sm">
-                        <p class="text-[10px] text-gray-400 font-bold uppercase">Despesas / Quebras</p>
-                        <p class="text-xl font-black text-red-400" id="hoje-despesas">0,00 MT</p>
-                    </div>
-                    <div class="bg-gray-900 p-4 rounded-xl border border-gray-800 shadow-sm">
-                        <p class="text-[10px] text-gray-400 font-bold uppercase">Lucro Líquido do Turno</p>
-                        <p class="text-xl font-black text-emerald-400" id="hoje-lucro">0,00 MT</p>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <div class="adm-only bg-gray-900 p-5 rounded-xl border border-gray-800 shadow-xl h-fit">
-                        <h3 class="text-sm font-bold mb-3 flex items-center gap-2 text-red-400"><span class="material-icons text-sm">money_off</span> Lançar Despesa Direta</h3>
-                        <div class="space-y-2">
-                            <input type="text" id="desdespesa-desc" placeholder="Ex: Saco de Gelo, Limpeza" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-2 text-xs focus:outline-none focus:border-red-500">
-                            <input type="number" id="despesa-valor" placeholder="Valor (MT)" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-2 text-xs focus:outline-none focus:border-red-500">
-                            <button onclick="adicionarDespesa()" class="w-full bg-red-900/60 hover:bg-red-800 border border-red-700 font-bold p-2 rounded-xl text-xs transition cursor-pointer">Gravar Gasto</button>
-                        </div>
-                        <div class="mt-4 pt-4 border-t border-gray-800">
-                            <p class="text-[10px] uppercase font-bold text-gray-400 mb-2">Despesas Registadas:</p>
-                            <div id="lista-despesas-turno" class="space-y-1 max-h-32 overflow-y-auto text-[11px]"></div>
-                        </div>
-                        <div class="mt-4 pt-4 border-t border-gray-800">
-                            <button onclick="fecharTurnoGeral()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-gray-950 font-black py-2.5 rounded-xl transition text-xs flex items-center justify-center gap-1 cursor-pointer">
-                                <span class="material-icons text-xs">save</span> Arquivar Turno e Limpar Dia
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="lg:col-span-2 bg-gray-900 p-5 rounded-xl border border-gray-800 shadow-xl">
-                        <h3 class="text-sm font-bold mb-3 flex items-center gap-2 text-amber-500"><span class="material-icons text-sm">bar_chart</span> Quantidades Globais Despachadas</h3>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-4" id="lista-quantidades-vendidas"></div>
-                        <h3 class="text-sm font-bold mb-2 pt-2 border-t border-gray-800 flex items-center gap-2 text-gray-300"><span class="material-icons text-sm">history</span> Linha Cronológica de Saídas</h3>
-                        <div class="overflow-y-auto max-h-48 border border-gray-950 rounded-xl bg-gray-950/40" id="lista-vendas-dia"></div>
+                    <div class="bg-gray-900/60 border border-gray-800 rounded-2xl p-4 shrink-0 max-h-[220px] flex flex-col overflow-hidden">
+                        <h2 class="text-xs font-black text-gray-400 uppercase tracking-wider mb-2 shrink-0">Estado Real de Stock</h2>
+                        <div id="lista-stock-resumido" class="overflow-y-auto space-y-1.5 pr-1 flex-1">
+                            </div>
                     </div>
                 </div>
             </div>
 
-            <div id="aba-restock" class="hidden space-y-6">
-                <div class="bg-gray-900 p-6 rounded-xl border border-gray-800 shadow-xl max-w-xl mx-auto">
-                    <h3 class="text-base font-bold mb-2 flex items-center gap-2 text-amber-400"><span class="material-icons">add_business</span> Entrada de Mercadoria / Restock</h3>
-                    <p class="text-xs text-gray-400 mb-6">Registe a entrada de novos produtos e insira o preço de compra atualizado do fornecedor.</p>
-                    
+            <div id="aba-vendas-diarias" class="space-y-4 hidden">
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div class="bg-gray-900 border border-gray-800 p-4 rounded-2xl">
+                        <p class="text-[10px] text-gray-500 uppercase font-black tracking-wider">Faturação Bruta</p>
+                        <p id="hoje-faturacao" class="text-xl font-mono font-black text-emerald-400 mt-1">0,00 MT</p>
+                    </div>
+                    <div class="bg-gray-900 border border-gray-800 p-4 rounded-2xl">
+                        <p class="text-[10px] text-gray-500 uppercase font-black tracking-wider">Despesas / Sangrias</p>
+                        <p id="hoje-despesas" class="text-xl font-mono font-black text-red-400 mt-1">0,00 MT</p>
+                    </div>
+                    <div class="bg-gray-900 border border-gray-800 p-4 rounded-2xl">
+                        <p class="text-[10px] text-gray-500 uppercase font-black tracking-wider">Lucro Estimado Líquido</p>
+                        <p id="hoje-lucro" class="text-xl font-mono font-black text-amber-500 mt-1">0,00 MT</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                    <div class="bg-gray-900 border border-gray-800 p-4 rounded-2xl lg:col-span-2">
+                        <h3 class="text-xs font-black text-gray-400 uppercase tracking-wider mb-3">Histórico de Saídas do Turno</h3>
+                        <div id="lista-vendas-dia" class="space-y-1 max-h-[300px] overflow-y-auto pr-1">
+                            </div>
+                    </div>
+
                     <div class="space-y-4">
-                        <div>
-                            <label class="text-[11px] text-gray-400 block font-bold mb-1 uppercase">Escolha o Artigo</label>
-                            <select id="restock-prod-id" onchange="sugerirCustoAtual()" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-sm text-gray-200 focus:outline-none focus:border-amber-500"></select>
+                        <div class="bg-gray-900 border border-gray-800 p-4 rounded-2xl space-y-3">
+                            <h3 class="text-xs font-black text-gray-400 uppercase tracking-wider">Registar Despesa / Saída</h3>
+                            <input type="text" id="desdespesa-desc" placeholder="Ex: Gelo, Compra de Limão, etc." class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-amber-500 text-gray-200">
+                            <input type="number" id="despesa-valor" placeholder="Valor (MT)" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-amber-500 text-gray-200">
+                            <button onclick="adicionarDespesa()" class="w-full bg-red-900/40 hover:bg-red-900/60 border border-red-800 text-red-200 font-bold py-2 px-4 rounded-xl text-xs transition">Gravar Gasto</button>
+                            <div id="lista-despesas-turno" class="text-xs space-y-1.5 pt-2 max-h-[120px] overflow-y-auto">
+                                </div>
                         </div>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <div>
-                                <label class="text-[11px] text-gray-400 block font-bold mb-1 uppercase">Qtd. Adicionada (Unidades)</label>
-                                <input type="number" id="restock-quantidade" placeholder="Ex: 24" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-sm text-gray-200 focus:outline-none focus:border-amber-500">
-                            </div>
-                            <div>
-                                <label class="text-[11px] text-red-400 block font-bold mb-1 uppercase">Novo Preço de Compra (Custo Unitário)</label>
-                                <input type="number" id="restock-custo-un" placeholder="Valor por unidade (MT)" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-sm text-red-400 font-bold focus:outline-none focus:border-red-500">
-                            </div>
+
+                        <div class="bg-gray-900 border border-gray-800 p-4 rounded-2xl text-center adm-only">
+                            <p class="text-[11px] text-gray-500 mb-2">Concluir o turno arquiva os dados no histórico de longo prazo.</p>
+                            <button onclick="fecharTurnoGeral()" class="w-full bg-amber-600 hover:bg-amber-500 text-gray-950 font-black py-2.5 px-4 rounded-xl text-xs transition shadow-lg shadow-amber-600/10">CONCLUIR E FECHAR TURNO</button>
                         </div>
-                        <button onclick="executarRestock()" class="w-full bg-amber-500 hover:bg-amber-400 text-gray-950 font-black p-3 rounded-xl text-sm transition cursor-pointer">Dar Entrada Física e Atualizar Custos</button>
                     </div>
+                </div>
+
+                <div class="bg-gray-900 border border-gray-800 p-4 rounded-2xl">
+                    <h3 class="text-xs font-black text-gray-400 uppercase tracking-wider mb-3">Totais Consolidados por Artigo</h3>
+                    <div id="lista-quantidades-vendidas" class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                        </div>
                 </div>
             </div>
 
-            <div id="aba-financeiro-mensal" class="hidden space-y-6">
-                <div class="bg-gray-900 p-6 rounded-xl border border-gray-800 shadow-xl">
-                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
-                        <div>
-                            <h3 class="text-base font-bold text-gray-100 flex items-center gap-2"><span class="material-icons text-amber-500">calendar_month</span> Fecho e Histórico de Meses</h3>
-                            <p class="text-xs text-gray-500">Resumo consolidado das operações diárias acumuladas.</p>
-                        </div>
-                        <button onclick="fecharMesDefinitivo()" class="bg-red-950/60 hover:bg-red-900 border border-red-700 text-red-200 font-bold py-2.5 px-5 rounded-xl text-xs flex items-center gap-1 cursor-pointer transition">
-                            <span class="material-icons text-sm">lock</span> Fechar e Consolidar Mês Atual
-                        </button>
+            <div id="aba-restock" class="max-w-md mx-auto bg-gray-900 border border-gray-800 p-6 rounded-2xl space-y-4 hidden">
+                <div class="text-center pb-2 border-b border-gray-800">
+                    <h2 class="text-sm font-black text-gray-200 uppercase tracking-wide">Dar Entrada de Mercadoria</h2>
+                    <p class="text-[11px] text-gray-500">Atualize o stock físico e o preço de custo real do artigo.</p>
+                </div>
+                <div class="space-y-1.5">
+                    <label class="text-[10px] uppercase font-bold text-gray-400">Selecione o Artigo</label>
+                    <select id="restock-prod-id" onchange="sugerirCustoAtual()" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2.5 text-xs text-gray-200 focus:outline-none focus:border-amber-500">
+                        </select>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="space-y-1.5">
+                        <label class="text-[10px] uppercase font-bold text-gray-400">Quantidade Nova (Unidades)</label>
+                        <input type="number" id="restock-quantidade" placeholder="Ex: 24" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-amber-500 text-gray-200">
                     </div>
+                    <div class="space-y-1.5">
+                        <label class="text-[10px] uppercase font-bold text-gray-400">Novo Custo Unitário (MT)</label>
+                        <input type="number" id="restock-custo-un" placeholder="Ex: 45.00" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-amber-500 text-amber-500 font-mono">
+                    </div>
+                </div>
+                <button onclick="executarRestock()" class="w-full bg-amber-600 hover:bg-amber-500 text-gray-950 font-black py-2.5 px-4 rounded-xl text-xs transition">Confirmar Entrada em Nuvem</button>
+            </div>
+
+            <div id="aba-financeiro-mensal" class="space-y-4 hidden adm-only">
+                <div class="bg-gray-900 border border-gray-800 p-4 rounded-2xl flex justify-between items-center">
+                    <div>
+                        <h3 class="text-xs font-black text-gray-400 uppercase tracking-wider">Histórico de Fechos Arquivados</h3>
+                        <p class="text-[11px] text-gray-500">Histórico permanente gerado a partir de cada fecho de turno feito.</p>
+                    </div>
+                    <button onclick="fecharMesDefinitivo()" class="bg-red-950 hover:bg-red-900 border border-red-800 text-red-400 px-3 py-1.5 rounded-xl text-xs font-bold transition">CONSOLIDAR MÊS ATUAL</button>
+                </div>
+                <div class="bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden shadow-xl">
                     <div class="overflow-x-auto">
-                        <table class="w-full text-left text-xs border-collapse">
+                        <table class="w-full text-left border-collapse text-xs">
                             <thead>
-                                <tr class="border-b border-gray-800 text-gray-400 font-bold uppercase tracking-wider">
-                                    <th class="p-3">Período / Dia</th>
-                                    <th class="p-3">Faturação Bruta</th>
-                                    <th class="p-3">Custo de Aquisição</th>
-                                    <th class="p-3">Despesas Gerais</th>
-                                    <th class="p-3">Lucro Líquido</th>
+                                <tr class="bg-gray-950 text-gray-400 border-b border-gray-800 text-[10px] uppercase tracking-wider">
+                                    <th class="p-3 font-black">Data / Período</th>
+                                    <th class="p-3 font-black">Faturação total</th>
+                                    <th class="p-3 font-black">Custo de Stock</th>
+                                    <th class="p-3 font-black">Despesas do Turno</th>
+                                    <th class="p-3 font-black">Margem Líquida</th>
                                 </tr>
                             </thead>
-                            <tbody id="tabela-historico-mensal" class="divide-y divide-gray-900 font-mono"></tbody>
+                            <tbody id="tabela-historico-mensal">
+                                </tbody>
                         </table>
                     </div>
                 </div>
             </div>
 
-            <div id="aba-produtos" class="hidden space-y-6">
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <div class="bg-gray-900 p-6 rounded-xl border border-gray-800 shadow-xl h-fit">
-                        <h3 class="text-base font-bold mb-4 flex items-center gap-2 text-gray-200"><span class="material-icons text-green-500">add_box</span> Novo Produto</h3>
-                        <div class="space-y-3">
-                            <input type="text" id="novo-prod-nome" placeholder="Nome do Produto" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-2.5 text-sm text-gray-200 focus:outline-none focus:border-amber-500">
-                            <div>
-                                <label class="text-[10px] text-gray-500 block font-bold mb-1 uppercase">Valores (MT)</label>
-                                <div class="grid grid-cols-2 gap-2">
-                                    <input type="number" id="novo-prod-custo" placeholder="Preço Compra" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-2.5 text-sm text-red-400 focus:outline-none focus:border-amber-500">
-                                    <input type="number" id="novo-prod-preco" placeholder="Preço Venda" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-2.5 text-sm text-emerald-400 focus:outline-none focus:border-amber-500">
-                                </div>
-                            </div>
-                            <input type="number" id="novo-prod-stock" placeholder="Stock Inicial" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-2.5 text-sm text-gray-200 focus:outline-none focus:border-amber-500">
-                            <button onclick="adicionarNovoProduto()" class="w-full bg-amber-600 hover:bg-amber-500 text-gray-950 font-black p-2.5 rounded-xl text-sm transition cursor-pointer">Salvar Produto</button>
-                        </div>
+            <div id="aba-produtos" class="grid grid-cols-1 lg:grid-cols-3 gap-4 hidden adm-only">
+                <div class="bg-gray-900 border border-gray-800 p-4 rounded-2xl h-fit space-y-3">
+                    <h3 class="text-xs font-black text-gray-400 uppercase tracking-wider border-b border-gray-800 pb-2">Novo Artigo de Venda</h3>
+                    <div class="space-y-1"><label class="text-[10px] text-gray-500 uppercase font-bold">Nome do Artigo</label><input type="text" id="novo-prod-nome" placeholder="Ex: Cerveja Preta" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-amber-500 text-gray-200"></div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div class="space-y-1"><label class="text-[10px] text-gray-500 uppercase font-bold">Preço Compra (Custo)</label><input type="number" id="novo-prod-custo" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-xs text-red-400 font-mono"></div>
+                        <div class="space-y-1"><label class="text-[10px] text-gray-500 uppercase font-bold">Preço Venda (Balcão)</label><input type="number" id="novo-prod-preco" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-xs text-emerald-400 font-mono"></div>
                     </div>
-
-                    <div class="bg-gray-900 p-6 rounded-xl border border-gray-800 shadow-xl lg:col-span-2">
-                        <h3 class="text-base font-bold mb-2 text-gray-200"><span class="material-icons text-amber-500">edit_note</span> Inventário Ativo</h3>
-                        <div class="space-y-3 max-h-[400px] overflow-y-auto pr-1" id="form-config-produtos"></div>
-                    </div>
+                    <div class="space-y-1"><label class="text-[10px] text-gray-500 uppercase font-bold">Stock Inicial Disponível</label><input type="number" id="novo-prod-stock" value="0" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-xs text-gray-300 font-mono"></div>
+                    <button onclick="adicionarNovoProduto()" class="w-full bg-amber-600 hover:bg-amber-500 text-gray-950 font-black py-2 px-4 rounded-xl text-xs transition pt-2">Inserir Produto</button>
                 </div>
 
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 pt-2">
-                    <div class="bg-gray-900 p-6 rounded-xl border border-gray-800 shadow-xl">
-                        <h3 class="text-base font-bold mb-4 flex items-center gap-2 text-gray-200"><span class="material-icons">person_add</span> Criar Operador</h3>
-                        <div class="space-y-3">
-                            <input type="text" id="novo-user-nome" placeholder="Username" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-2.5 text-sm text-gray-200 focus:outline-none focus:border-amber-500">
-                            <input type="password" id="novo-user-pass" placeholder="Password" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-2.5 text-sm text-gray-200 focus:outline-none focus:border-amber-500">
-                            <button onclick="adicionarUsuario()" class="w-full bg-gray-800 hover:bg-gray-700 text-gray-100 font-bold p-2.5 rounded-xl text-sm transition cursor-pointer">Criar Acesso</button>
+                <div class="bg-gray-900 border border-gray-800 p-4 rounded-2xl lg:col-span-2 space-y-3 flex flex-col max-h-[500px]">
+                    <h3 class="text-xs font-black text-gray-400 uppercase tracking-wider border-b border-gray-800 pb-2">Configuração Rápida de Valores (Edição em Tempo Real)</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-4 gap-2 px-3 text-[10px] uppercase font-bold text-gray-500 border-b border-gray-950 pb-1">
+                        <div>Artigo</div><div>Custo (MT)</div><div>Venda (MT)</div><div>Stock Físico</div>
+                    </div>
+                    <div id="form-config-produtos" class="space-y-2 overflow-y-auto flex-1 pr-1">
+                        </div>
+
+                    <div class="border-t border-gray-800 pt-4 mt-2">
+                        <h3 class="text-xs font-black text-gray-400 uppercase tracking-wider mb-3">Controlo de Operadores de Caixa</h3>
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                            <input type="text" id="novo-user-nome" placeholder="Username do Caixa" class="bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-xs text-gray-200">
+                            <input type="password" id="novo-user-pass" placeholder="Password de Entrada" class="bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-xs text-gray-200">
+                            <button onclick="adicionarUsuario()" class="bg-gray-800 hover:bg-gray-700 text-gray-200 font-bold py-2 px-4 rounded-xl text-xs transition">Criar Operador</button>
                         </div>
                     </div>
-                    <div class="bg-gray-900 p-6 rounded-xl border border-gray-800 shadow-xl lg:col-span-2">
-                        <h3 class="text-base font-bold mb-4 flex items-center gap-2 text-gray-200">
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <script>
+        // ==========================================================================
+        // CONFIGURAÇÃO E INICIALIZAÇÃO DO FIREBASE
+        // ==========================================================================
+        const firebaseConfig = {
+            apiKey: "AIzaSyCI8EDvSqMGjrJ6GNdqDyeCsYUwymPXPw4",
+            authDomain: "muchbar-c5839.firebaseapp.com",
+            databaseURL: "https://muchbar-c5839-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "muchbar-c5839",
+            storageBucket: "muchbar-c5839.firebasestorage.app",
+            messagingSenderId: "549900502538",
+            appId: "1:549900502538:web:d6a7f9d91ef75a10c5c1f3",
+            measurementId: "G-Z0KPV3V6ED"
+        };
+
+        // Inicializar o SDK do Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        // ==========================================================================
+        // ESTADO GLOBAL DO SISTEMA
+        // ==========================================================================
+        const PIN_ADMIN_PADRAO = "1234";
+
+        let produtos = [];
+        let usuarios = [];
+        let mesas = [];
+        let despesasTurno = [];
+        let vendasCronologicas = [];
+        let historicoMensal = [];
+
+        let usuarioAtivo = JSON.parse(sessionStorage.getItem('mb_sessao')) || null;
+        let mesaSelecionadaId = null;
+
+        // Salvar elemento específico
+        const salvarDadosFirebase = (caminho, dados) => {
+            db.ref(caminho).set(dados);
+        };
+
+        // ==========================================================================
+        // SINCRO EM TEMPO REAL (OUVIR REALTIME DATABASE)
+        // ==========================================================================
+        function carregarEEscutarFirebase() {
+            // Monitorizar Produtos
+            db.ref('produtos').on('value', (snapshot) => {
+                const dados = snapshot.val();
+                if (!dados) {
+                    produtos = [
+                        { id: 1, nome: "Cerveja Laurentina 2M", custo: 50, preco: 80, stock: 120 },
+                        { id: 2, nome: "Txilar", custo: 40, preco: 70, stock: 96 },
+                        { id: 3, nome: "Whisky Jameson (Dose)", custo: 120, preco: 250, stock: 30 },
+                        { id: 4, nome: "Água Mineral 500ml", custo: 15, preco: 35, stock: 50 }
+                    ];
+                    salvarDadosFirebase('produtos', produtos);
+                } else {
+                    produtos = dados;
+                }
+                if (usuarioAtivo) {
+                    renderizarBotoesProdutos();
+                    atualizarVisaoStock();
+                    atualizarConfigProdutos();
+                    popularSelectRestock();
+                }
+            });
+
+            // Monitorizar Usuários / Operadores
+            db.ref('usuarios').on('value', (snapshot) => {
+                const dados = snapshot.val();
+                if (!dados) {
+                    usuarios = [{ username: "barman1", pass: "4321" }];
+                    salvarDadosFirebase('usuarios', usuarios);
+                } else {
+                    usuarios = dados;
+                }
+            });
+
+            // Monitorizar Mesas Ativas
+            db.ref('mesas').on('value', (snapshot) => {
+                mesas = snapshot.val() || [];
+                if (usuarioAtivo) {
+                    atualizarPainelMesas();
+                    if (mesaSelecionadaId) {
+                        const mesa = mesas.find(m => m.id === mesaSelecionadaId);
+                        if (mesa) atualizarItensComanda(mesa);
+                        else fecharVisualizacaoMesa();
+                    }
+                }
+            });
+
+            // Monitorizar Despesas do Turno
+            db.ref('despesas').on('value', (snapshot) => {
+                despesasTurno = snapshot.val() || [];
+                if (usuarioAtivo) atualizarPainelVendas();
+            });
+
+            // Monitorizar Vendas Cronológicas
+            db.ref('vendas_dia').on('value', (snapshot) => {
+                vendasCronologicas = snapshot.val() || [];
+                if (usuarioAtivo) atualizarPainelVendas();
+            });
+
+            // Monitorizar Histórico Mensal
+            db.ref('historico_mes').on('value', (snapshot) => {
+                historicoMensal = snapshot.val() || [];
+                if (usuarioAtivo) atualizarTabelaMensal();
+            });
+        }
+
+        function fecharVisualizacaoMesa() {
+            mesaSelecionadaId = null;
+            document.getElementById('mesa-selecionada-titulo').innerText = "Nenhum";
+            document.getElementById('menu-produtos').classList.add('hidden');
+            document.getElementById('itens-comanda').innerHTML = "";
+            document.getElementById('total-comanda').innerText = "0,00 MT";
+            const btnFechar = document.getElementById('btn-fechar-conta');
+            btnFechar.disabled = true;
+            btnFechar.className = "w-full bg-gray-800 text-gray-500 font-bold py-2.5 px-4 rounded-xl flex items-center justify-center gap-2 cursor-not-allowed transition text-xs";
+        }
+
+        // ==========================================================================
+        // CONTROLADOR DE ACESSO (LOGIN / LOGOUT)
+        // ==========================================================================
+        function tentarLoginAdmin() {
+            const pin = document.getElementById('login-pin-admin').value;
+            if (pin === PIN_ADMIN_PADRAO) {
+                usuarioAtivo = { nome: "Abel (Dono)", permissao: "admin" };
+                sessionStorage.setItem('mb_sessao', JSON.stringify(usuarioAtivo));
+                document.getElementById('login-pin-admin').value = "";
+                inicializarSistema();
+            } else {
+                alert("PIN Administrativo Incorreto!");
+            }
+        }
+
+        function tentarLoginFuncionario() {
+            const user = document.getElementById('login-user-func').value.trim();
+            const pass = document.getElementById('login-pass-func').value;
+            
+            const usuarioValido = usuarios.find(u => u.username.toLowerCase() === user.toLowerCase() && u.pass === pass);
+            
+            if (usuarioValido) {
+                usuarioAtivo = { nome: usuarioValido.username, permissao: "funcionario" };
+                sessionStorage.setItem('mb_sessao', JSON.stringify(usuarioAtivo));
+                document.getElementById('login-user-func').value = "";
+                document.getElementById('login-pass-func').value = "";
+                inicializarSistema();
+            } else {
+                alert("Utilizador ou Palavra-passe incorretos!");
+            }
+        }
+
+        function fazerLogout() {
+            usuarioAtivo = null;
+            sessionStorage.removeItem('mb_sessao');
+            fecharVisualizacaoMesa();
+            document.getElementById('tela-login').classList.remove('hidden');
+            document.getElementById('sistema-conteudo').classList.add('hidden');
+        }
+
+        // ==========================================================================
+        // RENDERIZAÇÃO DE ABAS
+        // ==========================================================================
+        function mudarAba(abaId) {
+            const abas = ['home', 'vendas-diarias', 'restock', 'financeiro-mensal', 'produtos'];
+            abas.forEach(id => {
+                const elemento = document.getElementById(`aba-${id}`);
+                const botao = document.getElementById(`btn-aba-${id}`);
+                if (elemento) elemento.classList.add('hidden');
+                if (botao) {
+                    botao.classList.remove('bg-amber-600', 'text-gray-950', 'bg-gray-800', 'text-gray-100');
+                    botao.classList.add('text-gray-400');
+                }
+            });
+
+            const abaAtiva = document.getElementById(`aba-${abaId}`);
+            const btnAtivo = document.getElementById(`btn-aba-${abaId}`);
+            
+            if (abaAtiva) abaAtiva.classList.remove('hidden');
+            if (btnAtivo) {
+                btnAtivo.classList.remove('text-gray-400');
+                if (abaId === 'home') btnAtivo.classList.add('bg-amber-600', 'text-gray-950');
+                else btnAtivo.classList.add('bg-gray-800', 'text-gray-100');
+            }
+
+            if (abaId === 'home') { atualizarPainelMesas(); atualizarVisaoStock(); }
+            if (abaId === 'vendas-diarias') atualizarPainelVendas();
+            if (abaId === 'restock') popularSelectRestock();
+            if (abaId === 'financeiro-mensal') atualizarTabelaMensal();
+            if (abaId === 'produtos') atualizarConfigProdutos();
+        }
+
+        function aplicarRestricoesPermissao() {
+            const elementosAdmin = document.querySelectorAll('.adm-only');
+            if (usuarioAtivo.permissao === 'admin') {
+                elementosAdmin.forEach(el => el.classList.remove('hidden'));
+            } else {
+                elementosAdmin.forEach(el => el.classList.add('hidden'));
+            }
+        }
+
+        // ==========================================================================
+        // MÓDULO 1: GESTÃO DE MESAS
+        // ==========================================================================
+        function criarNovaMesa() {
+            const nomeInput = document.getElementById('novo-nome-mesa');
+            const nome = nomeInput.value.trim();
+            if (!nome) return alert("Insira uma identificação para a mesa!");
+
+            const novaMesa = { id: Date.now(), nome: nome, itens: [] };
+            mesas.push(novaMesa);
+            salvarDadosFirebase('mesas', mesas);
+            nomeInput.value = "";
+        }
+
+        function atualizarPainelMesas() {
+            const container = document.getElementById('lista-mesas');
+            container.innerHTML = "";
+
+            if (mesas.length === 0) {
+                container.innerHTML = `<p class="text-xs text-gray-500 text-center py-4">Nenhuma mesa aberta.</p>`;
+                return;
+            }
+
+            mesas.forEach(mesa => {
+                const itensValidados = mesa.itens || [];
+                const totalMesa = itensValidados.reduce((acc, cur) => acc + (cur.preco * cur.qtd), 0);
+                const ativa = mesaSelecionadaId === mesa.id ? 'border-amber-500 bg-amber-950/20' : 'border-gray-800 bg-gray-950 hover:border-gray-700';
+
+                container.innerHTML += `
+                    <div onclick="selecionarMesa(${mesa.id})" class="p-3 border rounded-xl flex justify-between items-center cursor-pointer transition ${ativa}">
+                        <div>
+                            <p class="text-xs font-bold text-gray-200">${mesa.nome}</p>
+                            <p class="text-[10px] text-gray-500">${itensValidados.length} itens lançados</p>
+                        </div>
+                        <span class="text-xs font-black text-amber-400">${totalMesa.toFixed(2)} MT</span>
+                    </div>
+                `;
+            });
+        }
+
+        function selecionarMesa(id) {
+            mesaSelecionadaId = id;
+            atualizarPainelMesas();
+            
+            const mesa = mesas.find(m => m.id === id);
+            document.getElementById('mesa-selecionada-titulo').innerText = mesa.nome;
+            document.getElementById('menu-produtos').classList.remove('hidden');
+
+            atualizarItensComanda(mesa);
+            renderizarBotoesProdutos();
+        }
+
+        function renderizarBotoesProdutos() {
+            const container = document.getElementById('botoes-produtos');
+            container.innerHTML = "";
+
+            produtos.forEach(p => {
+                const esgotado = p.stock <= 0;
+                const classeBotao = esgotado 
+                    ? "bg-gray-950 border border-gray-900 text-gray-600 cursor-not-allowed opacity-40" 
+                    : "bg-gray-950 border border-gray-800 hover:border-amber-500/50 text-gray-300 cursor-pointer";
+
+                container.innerHTML += `
+                    <button onclick="${esgotado ? '' : `adicionarItemMesa(${p.id})`}" class="p-2 rounded-lg text-left transition flex flex-col justify-between h-14 ${classeBotao}">
+                        <span class="text-[11px] font-bold block truncate w-full">${p.nome}</span>
+                        <div class="flex justify-between items-center w-full mt-1">
+                            <span class="text-[10px] font-mono text-amber-500">${p.preco.toFixed(2)} MT</span>
+                            <span class="text-[9px] px-1 rounded bg-gray-900 ${p.stock <= 5 ? 'text-red-400 font-bold' : 'text-gray-400'}">Est: ${p.stock}</span>
+                        </div>
+                    </button>
+                `;
+            });
+        }
+
+        function adicionarItemMesa(prodId) {
+            if (!mesaSelecionadaId) return;
+            const mesa = mesas.find(m => m.id === mesaSelecionadaId);
+            const produto = produtos.find(p => p.id === prodId);
+
+            if (produto.stock <= 0) return alert("Produto sem stock disponível!");
+
+            if (!mesa.itens) mesa.itens = [];
+            const itemExistente = mesa.itens.find(i => i.id === prodId);
+            
+            const qtdAtualJaLancada = itemExistente ? itemExistente.qtd : 0;
+            if (qtdAtualJaLancada + 1 > produto.stock) return alert("Não há stock físico suficiente!");
+
+            if (itemExistente) {
+                itemExistente.qtd++;
+            } else {
+                mesa.itens.push({ id: produto.id, nome: produto.nome, preco: produto.preco, custo: produto.custo, qtd: 1 });
+            }
+
+            salvarDadosFirebase('mesas', mesas);
+        }
+
+        function removerItemMesa(prodId) {
+            if (!mesaSelecionadaId) return;
+            const mesa = mesas.find(m => m.id === mesaSelecionadaId);
+            if (!mesa.itens) return;
+
+            const itemIndex = mesa.itens.findIndex(i => i.id === prodId);
+            if (itemIndex > -1) {
+                mesa.itens[itemIndex].qtd--;
+                if (mesa.itens[itemIndex].qtd <= 0) mesa.itens.splice(itemIndex, 1);
+            }
+
+            salvarDadosFirebase('mesas', mesas);
+        }
+
+        function atualizarItensComanda(mesa) {
+            const container = document.getElementById('itens-comanda');
+            container.innerHTML = "";
+
+            const itensValidados = mesa.itens || [];
+
+            if (itensValidados.length === 0) {
+                document.getElementById('total-comanda').innerText = "0,00 MT";
+                const btnFechar = document.getElementById('btn-fechar-conta');
+                btnFechar.disabled = true;
+                btnFechar.className = "w-full bg-gray-800 text-gray-500 font-bold py-2.5 px-4 rounded-xl flex items-center justify-center gap-2 cursor-not-allowed text-xs";
+                container.innerHTML = `<p class="text-xs text-gray-600 text-center py-4">Nenhum produto consumido.</p>`;
+                return;
+            }
+
+            let total = 0;
+            itensValidados.forEach(item => {
+                const subtotal = item.preco * item.qtd;
+                total += subtotal;
+
+                container.innerHTML += `
+                    <div class="flex justify-between items-center text-xs border-b border-gray-900/50 pb-1.5 pt-0.5">
+                        <div class="flex-1 pr-2">
+                            <p class="font-bold text-gray-300">${item.nome}</p>
+                            <p class="text-[10px] text-gray-500 font-mono">${item.qtd}x ${item.preco.toFixed(2)}</p>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <span class="font-mono text-gray-200 font-bold">${subtotal.toFixed(2)} MT</span>
+                            <button onclick="removerItemMesa(${item.id})" class="text-red-500 font-bold px-1 text-sm">&times;</button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            document.getElementById('total-comanda').innerText = `${total.toFixed(2)} MT`;
+            const btnFechar = document.getElementById('btn-fechar-conta');
+            btnFechar.disabled = false;
+            btnFechar.className = "w-full bg-emerald-600 hover:bg-emerald-500 text-gray-950 font-black py-2.5 px-4 rounded-xl flex items-center justify-center gap-2 cursor-pointer text-xs";
+        }
+
+        function fecharMesaAtual() {
+            if (!mesaSelecionadaId) return;
+            const mesaIndex = mesas.findIndex(m => m.id === mesaSelecionadaId);
+            const mesa = mesas[mesaIndex];
+            const itensValidados = mesa.itens || [];
+
+            if (itensValidados.length === 0) return;
+            if (!confirm(`Confirmar encerramento da ${mesa.nome}?`)) return;
+
+            itensValidados.forEach(item => {
+                const produtoOriginal = produtos.find(p => p.id === item.id);
+                if (produtoOriginal) {
+                    produtoOriginal.stock = Math.max(0, produtoOriginal.stock - item.qtd);
+                }
+
+                vendasCronologicas.push({
+                    data: new Date().toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' }),
+                    artigo: item.nome,
+                    qtd: item.qtd,
+                    custoTotal: item.custo * item.qtd,
+                    faturadoTotal: item.preco * item.qtd
+                });
+            });
+
+            mesas.splice(mesaIndex, 1);
+            
+            // Gravação Multi-Nó no Firebase
+            db.ref().update({
+                mesas: mesas,
+                produtos: produtos,
+                vendas_day: vendasCronologicas
+            }).then(() => {
+                fecharVisualizacaoMesa();
+                alert("Conta faturada com sucesso em nuvem!");
+            });
+        }
+
+        function atualizarVisaoStock() {
+            const container = document.getElementById('lista-stock-resumido');
+            container.innerHTML = "";
+
+            produtos.forEach(p => {
+                let corStock = "text-emerald-400";
+                if (p.stock <= 12) corStock = "text-amber-500";
+                if (p.stock <= 5) corStock = "text-red-500 font-black animate-pulse";
+
+                container.innerHTML += `
+                    <div class="flex justify-between items-center bg-gray-950 p-2.5 rounded-xl border border-gray-800 text-xs">
+                        <span class="font-bold text-gray-300">${p.nome}</span>
+                        <span class="font-mono ${corStock}">${p.stock} un</span>
+                    </div>
+                `;
+            });
+        }
+
+        // ==========================================================================
+        // MÓDULO 2: GESTÃO DO TURNO DE VENDAS
+        // ==========================================================================
+        function atualizarPainelVendas() {
+            let totalFaturado = vendasCronologicas.reduce((acc, cur) => acc + cur.faturadoTotal, 0);
+            let totalCusto = vendasCronologicas.reduce((acc, cur) => acc + cur.custoTotal, 0);
+            let totalDespesas = despesasTurno.reduce((acc, cur) => acc + cur.valor, 0);
+            let lucroLiquido = totalFaturado - totalCusto - totalDespesas;
+
+            document.getElementById('hoje-faturacao').innerText = `${totalFaturado.toFixed(2)} MT`;
+            document.getElementById('hoje-despesas').innerText = `${totalDespesas.toFixed(2)} MT`;
+            document.getElementById('hoje-lucro').innerText = `${lucroLiquido.toFixed(2)} MT`;
+
+            // Atualizar lista despesas
+            const containerDespesas = document.getElementById('lista-despesas-turno');
+            containerDespesas.innerHTML = "";
+            if (despesasTurno.length === 0) {
+                containerDespesas.innerHTML = `<p class="text-gray-600 italic">Nenhuma despesa registada.</p>`;
+            } else {
+                despesasTurno.forEach(d => {
+                    containerDespesas.innerHTML += `
+                        <div class="flex justify-between items-center text-gray-400 border-b border-gray-950 pb-1">
+                            <span class="truncate pr-2">• ${d.descricao}</span>
+                            <span class="font-mono text-red-400 font-bold shrink-0">-${d.valor.toFixed(2)} MT</span>
+                        </div>
+                    `;
+                });
+            }
+
+            // Agrupamento por artigo
+            const containerQuantidades = document.getElementById('lista-quantidades-vendidas');
+            containerQuantidades.innerHTML = "";
+            let mapaQuantidades = {};
+            vendasCronologicas.forEach(v => {
+                mapaQuantidades[v.artigo] = (mapaQuantidades[v.artigo] || 0) + v.qtd;
+            });
+
+            const chavesArtigos = Object.keys(mapaQuantidades);
+            if (chavesArtigos.length === 0) {
+                containerQuantidades.innerHTML = `<p class="text-xs text-gray-500 col-span-full py-2">Sem saídas.</p>`;
+            } else {
+                chavesArtigos.forEach(artigo => {
+                    containerQuantidades.innerHTML += `
+                        <div class="bg-gray-950 border border-gray-850 p-2 rounded-lg flex justify-between items-center text-xs">
+                            <span class="text-gray-400">${artigo}</span>
+                            <span class="font-mono font-black text-amber-500 bg-gray-900 px-2 py-0.5 rounded">${mapaQuantidades[artigo]} un</span>
+                        </div>
+                    `;
+                });
+            }
+
+            // Lista Cronológica
+            const containerCronologico = document.getElementById('lista-vendas-dia');
+            containerCronologico.innerHTML = "";
+            if (vendasCronologicas.length === 0) {
+                containerCronologico.innerHTML = `<p class="text-xs text-gray-600 text-center py-4">Sem movimentos transacionais.</p>`;
+            } else {
+                [...vendasCronologicas].reverse().forEach(v => {
+                    containerCronologico.innerHTML += `
+                        <div class="flex justify-between items-center p-2 border-b border-gray-900 text-[11px] hover:bg-gray-900/30">
+                            <span class="text-gray-500 font-mono">${v.data}</span>
+                            <span class="text-gray-300 font-bold flex-1 px-4">${v.artigo} (x${v.qtd})</span>
+                            <span class="text-emerald-400 font-mono font-bold">${v.faturadoTotal.toFixed(2)} MT</span>
+                        </div>
+                    `;
+                });
+            }
+        }
+
+        function adicionarDespesa() {
+            const descInput = document.getElementById('desdespesa-desc');
+            const valorInput = document.getElementById('despesa-valor');
+            const descricao = descInput.value.trim();
+            const valor = parseFloat(valorInput.value);
+
+            if (!descricao || isNaN(valor) || valor <= 0) return alert("Valores incorretos!");
+
+            despesasTurno.push({ id: Date.now(), descricao: descricao, valor: valor });
+            salvarDadosFirebase('despesas', despesasTurno);
+            descInput.value = ""; valorInput.value = "";
+        }
+
+        function fecharTurnoGeral() {
+            if (vendasCronologicas.length === 0 && despesasTurno.length === 0) return alert("Sem vendas nem gastos neste turno!");
+            if (!confirm("Confirmar fecho do turno? Os totais serão consolidados no Histórico.")) return;
+
+            let totalFaturado = vendasCronologicas.reduce((acc, cur) => acc + cur.faturadoTotal, 0);
+            let totalCusto = vendasCronologicas.reduce((acc, cur) => acc + cur.custoTotal, 0);
+            let totalDespesas = despesasTurno.reduce((acc, cur) => acc + cur.valor, 0);
+            let lucroLiquido = totalFaturado - totalCusto - totalDespesas;
+
+            const hoje = new Date().toLocaleDateString('pt-PT');
+            historicoMensal.push({ periodo: hoje, faturacao: totalFaturado, custo: totalCusto, despesas: totalDespesas, lucro: lucroLiquido });
+
+            db.ref().update({
+                despesas: [],
+                vendas_dia: [],
+                historico_mes: historicoMensal
+            }).then(() => alert("Turno finalizado com sucesso!"));
+        }
+
+        // ==========================================================================
+        // MÓDULO 3: ENTRADA DE STOCK / RESTOCK
+        // ==========================================================================
+        function popularSelectRestock() {
+            const select = document.getElementById('restock-prod-id');
+            if (!select) return;
+            select.innerHTML = "";
+            produtos.forEach(p => {
+                select.innerHTML += `<option value="${p.id}">${p.nome} (Stock: ${p.stock})</option>`;
+            });
+            sugerirCustoAtual();
+        }
+
+        function sugerirCustoAtual() {
+            const select = document.getElementById('restock-prod-id');
+            if(!select || !select.value) return;
+            const prodId = parseInt(select.value);
+            const produto = produtos.find(p => p.id === prodId);
+            if (produto) document.getElementById('restock-custo-un').value = produto.custo;
+        }
+
+        function ejecutarRestock() {
+            const select = document.getElementById('restock-prod-id');
+            const qtdInput = document.getElementById('restock-quantidade');
+            const custoInput = document.getElementById('restock-custo-un');
+
+            const prodId = parseInt(select.value);
+            const quantidade = parseInt(qtdInput.value);
+            const novoCusto = parseFloat(custoInput.value);
+
+            if (isNaN(prodId) || isNaN(quantidade) || quantidade <= 0 || isNaN(novoCusto) || novoCusto < 0) {
+                return alert("Insira valores válidos!");
+            }
+
+            const produto = produtos.find(p => p.id === prodId);
+            if (produto) {
+                produto.stock += quantidade;
+                produto.custo = novoCusto;
+                salvarDadosFirebase('produtos', produtos);
+                qtdInput.value = "";
+                alert("Stock atualizado com sucesso!");
+            }
+        }
+
+        // ==========================================================================
+        // MÓDULO 4: FECHO MENSAL DEFINITIVO
+        // ==========================================================================
+        function atualizarTabelaMensal() {
+            const tbody = document.getElementById('tabela-historico-mensal');
+            tbody.innerHTML = "";
+
+            if (historicoMensal.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-gray-500 italic">Nenhum histórico registado.</td></tr>`;
+                return;
+            }
+
+            historicoMensal.forEach(h => {
+                tbody.innerHTML += `
+                    <tr class="border-b border-gray-900 hover:bg-gray-900/20">
+                        <td class="p-3 font-bold text-gray-300">${h.periodo}</td>
+                        <td class="p-3 text-amber-400">${h.faturacao.toFixed(2)} MT</td>
+                        <td class="p-3 text-red-400/80">${h.custo.toFixed(2)} MT</td>
+                        <td class="p-3 text-red-400">${h.despesas.toFixed(2)} MT</td>
+                        <td class="p-3 ${h.lucro >= 0 ? 'text-emerald-400 font-bold' : 'text-red-500 font-bold'}">${h.lucro.toFixed(2)} MT</td>
+                    </tr>
+                `;
+            });
+        }
+
+        function fecharMesDefinitivo() {
+            if (historicoMensal.length === 0) return alert("Sem dados para consolidar.");
+            if (!confirm("Pretende unificar o mês inteiro permanentemente?")) return;
+
+            let somaFaturacao = historicoMensal.reduce((acc, cur) => acc + cur.faturacao, 0);
+            let somaCusto = historicoMensal.reduce((acc, cur) => acc + cur.custo, 0);
+            let somaDespesas = historicoMensal.reduce((acc, cur) => acc + cur.despesas, 0);
+            let somaLucro = historicoMensal.reduce((acc, cur) => acc + cur.lucro, 0);
+
+            const mesAnoAtual = new Date().toLocaleDateString('pt-PT', { month: 'long', year: 'numeric' }).toUpperCase();
+
+            historicoMensal = [{
+                periodo: `TOTAL ACUMULADO ${mesAnoAtual}`,
+                faturacao: somaFaturacao,
+                custo: somaCusto,
+                despesas: somaDespesas,
+                lucro: somaLucro
+            }];
+
+            salvarDadosFirebase('historico_mes', historicoMensal);
+        }
+
+        // ==========================================================================
+        // MÓDULO 5: ADMINISTRAÇÃO E PRODUTOS
+        // ==========================================================================
+        function atualizarConfigProdutos() {
+            const container = document.getElementById('form-config-produtos');
+            if (!container) return;
+            container.innerHTML = "";
+
+            produtos.forEach(p => {
+                container.innerHTML += `
+                    <div class="bg-gray-950 p-3 rounded-xl border border-gray-800 grid grid-cols-1 sm:grid-cols-4 gap-2 items-center text-xs">
+                        <div class="font-bold text-gray-200 truncate">${p.nome}</div>
+                        <div>
+                            <input type="number" onchange="alterarValorProduto(${p.id}, 'custo', this.value)" value="${p.custo}" class="w-full bg-gray-900 border border-gray-800 rounded px-2 py-1 text-red-400 font-mono">
+                        </div>
+                        <div>
+                            <input type="number" onchange="alterarValorProduto(${p.id}, 'preco', this.value)" value="${p.preco}" class="w-full bg-gray-900 border border-gray-800 rounded px-2 py-1 text-emerald-400 font-mono">
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <input type="number" onchange="alterarValorProduto(${p.id}, 'stock', this.value)" value="${p.stock}" class="w-full bg-gray-900 border border-gray-800 rounded px-2 py-1 text-gray-300 font-mono">
+                            <button onclick="removerProdutoDefinitivo(${p.id})" class="bg-red-950 hover:bg-red-900 text-red-400 p-1.5 rounded">
+                                <span class="material-icons text-sm block">delete</span>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function alterarValorProduto(id, propriedade, valor) {
+            const produto = produtos.find(p => p.id === id);
+            if (produto) {
+                let num = parseFloat(valor);
+                if (!isNaN(num) && num >= 0) {
+                    produto[propriedade] = num;
+                    salvarDadosFirebase('produtos', produtos);
+                }
+            }
+        }
+
+        function adicionarNovoProduto() {
+            const nomeInput = document.getElementById('novo-prod-nome');
+            const custoInput = document.getElementById('novo-prod-custo');
+            const precoInput = document.getElementById('novo-prod-preco');
+            const stockInput = document.getElementById('novo-prod-stock');
+
+            const nome = nomeInput.value.trim();
+            const custo = parseFloat(custoInput.value);
+            const preco = parseFloat(precoInput.value);
+            const stock = parseInt(stockInput.value) || 0;
+
+            if (!nome || isNaN(custo) || isNaN(preco)) return alert("Preencha todos os campos obrigatórios!");
+
+            produtos.push({ id: Date.now(), nome: nome, custo: custo, preco: preco, stock: stock });
+            salvarDadosFirebase('produtos', produtos);
+
+            nomeInput.value = ""; custoInput.value = ""; precoInput.value = ""; stockInput.value = "0";
+        }
+
+        function removerProdutoDefinitivo(id) {
+            if (!confirm("Pretende apagar o produto do menu permanentemente?")) return;
+            produtos = produtos.filter(p => p.id !== id);
+            salvarDadosFirebase('produtos', produtos);
+        }
+
+        function adicionarUsuario() {
+            const user = document.getElementById('novo-user-nome').value.trim();
+            const pass = document.getElementById('novo-user-pass').value;
+
+            if (!user || !pass) return alert("Credenciais em falta!");
+            if (usuarios.some(u => u.username.toLowerCase() === user.toLowerCase())) return alert("Esse operador já existe!");
+
+            usuarios.push({ username: user, pass: pass });
+            salvarDadosFirebase('usuarios', usuarios);
+            document.getElementById('novo-user-nome').value = "";
+            document.getElementById('novo-user-pass').value = "";
+            alert("Operador de caixa criado com sucesso!");
+        }
+
+        // ==========================================================================
+        // INICIALIZAÇÃO DE FLUXOS
+        // ==========================================================================
+        function inicializarSistema() {
+            if (usuarioAtivo) {
+                document.getElementById('tela-login').classList.add('hidden');
+                document.getElementById('sistema-conteudo').classList.remove('hidden');
+                document.getElementById('nome-usuario-ativo').innerText = usuarioAtivo.nome.toUpperCase();
+                document.getElementById('txt-permissao').innerText = usuarioAtivo.permissao === 'admin' ? "Administrador" : "Operador de Caixa";
+                
+                aplicarRestricoesPermissao();
+                mudarAba('home');
+            } else {
+                document.getElementById('tela-login').classList.remove('hidden');
+                document.getElementById('sistema-conteudo').classList.add('hidden');
+            }
+        }
+
+        window.onload = () => {
+            carregarEEscutarFirebase(); // Inicializa sincronia automática em Nuvem Realtime
+            inicializarSistema();
+        };
+    </script>
+</body>
+</html>
