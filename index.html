@@ -2,24 +2,24 @@
 <html lang="pt-PT" class="h-full bg-gray-950 text-gray-100">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Much Bar - Gestão Avançada Pro v3.6</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Much Bar - Mobile PRO v3.7</title>
     
-    <!-- Tailwind CSS para o Design -->
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Ícones -->
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 
-    <!-- SCRIPTS DO FIREBASE (Versão Compat/v9) -->
+    <!-- SCRIPTS DO FIREBASE -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 </head>
-<body class="h-full flex flex-col font-sans select-none antialiased selection:bg-amber-500/30 selection:text-amber-200">
+<body class="h-full flex flex-col font-sans select-none antialiased selection:bg-amber-500/30 selection:text-amber-200 overflow-x-hidden">
 
     <!-- ==========================================================================
-         TELA DE LOGIN
+         TELA DE LOGIN (OTIMIZADA PARA MOBILE)
          ========================================================================== -->
-    <div id="tela-login" class="flex-1 flex flex-col justify-center items-center p-4 bg-gradient-to-b from-gray-950 via-gray-900 to-gray-950">
+    <div id="tela-login" class="min-h-full flex flex-col justify-center items-center p-4 bg-gradient-to-b from-gray-950 via-gray-900 to-gray-950">
         <div class="w-full max-w-sm bg-gray-900 border border-gray-800 p-6 rounded-2xl shadow-2xl">
             <div class="text-center mb-6">
                 <span class="material-icons text-amber-500 text-4xl mb-2">local_bar</span>
@@ -30,9 +30,9 @@
             <!-- Login Operador -->
             <div class="space-y-3 mb-6">
                 <h2 class="text-xs font-bold text-gray-400 uppercase tracking-wider">Acesso Operador</h2>
-                <input type="text" id="login-user-func" placeholder="Utilizador" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-amber-500 text-gray-200">
-                <input type="password" id="login-pass-func" placeholder="Palavra-passe" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-amber-500 text-gray-200">
-                <button onclick="tentarLoginFuncionario()" class="w-full bg-gray-800 hover:bg-gray-700 text-gray-200 font-bold py-2 px-4 rounded-xl text-xs transition">Entrar como Caixa</button>
+                <input type="text" id="login-user-func" placeholder="Utilizador" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-amber-500 text-gray-200">
+                <input type="password" id="login-pass-func" placeholder="Palavra-passe" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-amber-500 text-gray-200">
+                <button onclick="tentarLoginFuncionario()" class="w-full bg-gray-800 hover:bg-gray-700 text-gray-200 font-bold py-3 px-4 rounded-xl text-xs transition">Entrar como Caixa</button>
             </div>
 
             <div class="relative flex py-2 items-center my-4">
@@ -44,8 +44,8 @@
             <!-- Login Admin -->
             <div class="space-y-3">
                 <h2 class="text-xs font-bold text-gray-400 uppercase tracking-wider">Painel de Controlo (Dono)</h2>
-                <input type="password" id="login-pin-admin" placeholder="PIN Administrativo" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-xs text-center font-mono tracking-widest text-amber-500 focus:outline-none focus:border-amber-500">
-                <button onclick="tentarLoginAdmin()" class="w-full bg-amber-600 hover:bg-amber-500 text-gray-950 font-black py-2 px-4 rounded-xl text-xs transition shadow-lg shadow-amber-600/10">Entrar como Administrador</button>
+                <input type="password" id="login-pin-admin" placeholder="PIN Administrativo" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-4 py-3 text-sm text-center font-mono tracking-widest text-amber-500 focus:outline-none focus:border-amber-500">
+                <button onclick="tentarLoginAdmin()" class="w-full bg-amber-600 hover:bg-amber-500 text-gray-950 font-black py-3 px-4 rounded-xl text-xs transition shadow-lg">Entrar como Administrador</button>
             </div>
         </div>
     </div>
@@ -58,45 +58,46 @@
         <header class="bg-gray-950 border-b border-gray-900 px-4 py-3 flex justify-between items-center shrink-0">
             <div class="flex items-center gap-2">
                 <span class="material-icons text-amber-500 text-sm">local_bar</span>
-                <span class="text-xs font-black tracking-tight text-gray-200">MUCH BAR <span class="text-[10px] font-normal text-gray-600">v3.6 Cloud</span></span>
+                <span class="text-xs font-black tracking-tight text-gray-200">MUCH BAR</span>
             </div>
-            <div class="flex items-center gap-4">
+            <div class="flex items-center gap-3">
                 <div class="text-right">
                     <p id="nome-usuario-ativo" class="text-[10px] font-black text-amber-400 tracking-wide">-</p>
                     <p id="txt-permissao" class="text-[9px] text-gray-500 uppercase tracking-wider">-</p>
                 </div>
-                <button onclick="fazerLogout()" class="text-gray-500 hover:text-red-400 p-1 rounded transition">
-                    <span class="material-icons text-sm block">logout</span>
+                <button onclick="fazerLogout()" class="text-gray-500 hover:text-red-400 p-1.5 rounded transition">
+                    <span class="material-icons text-base block">logout</span>
                 </button>
             </div>
         </header>
 
-        <!-- Menu de Navegação Global -->
-        <nav class="bg-gray-950/80 border-b border-gray-900 p-2 flex gap-1 overflow-x-auto shrink-0 scrollbar-none">
-            <button id="btn-aba-home" onclick="mudarAba('home')" class="px-3 py-1.5 rounded-lg text-xs font-bold transition shrink-0 flex items-center gap-1.5">
-                <span class="material-icons text-xs">grid_view</span> Salas & Mesas
+        <!-- Menu de Navegação Global (Otimizado com Scroll Suave no Mobile) -->
+        <nav class="bg-gray-950/80 border-b border-gray-900 p-2 flex gap-1 overflow-x-auto shrink-0 scrollbar-none snap-x">
+            <button id="btn-aba-home" onclick="mudarAba('home')" class="snap-center px-3 py-2 rounded-lg text-xs font-bold transition shrink-0 flex items-center gap-1.5">
+                <span class="material-icons text-xs">grid_view</span> Salas
             </button>
-            <button id="btn-aba-vendas-diarias" onclick="mudarAba('vendas-diarias')" class="px-3 py-1.5 rounded-lg text-xs font-bold transition shrink-0 flex items-center gap-1.5 text-gray-400">
-                <span class="material-icons text-xs">receipt_long</span> Turno Atual
+            <button id="btn-aba-vendas-diarias" onclick="mudarAba('vendas-diarias')" class="snap-center px-3 py-2 rounded-lg text-xs font-bold transition shrink-0 flex items-center gap-1.5 text-gray-400">
+                <span class="material-icons text-xs">receipt_long</span> Turno
             </button>
-            <button id="btn-aba-restock" onclick="mudarAba('restock')" class="px-3 py-1.5 rounded-lg text-xs font-bold transition shrink-0 flex items-center gap-1.5 text-gray-400">
-                <span class="material-icons text-xs">inventory</span> Entrada de Stock
+            <button id="btn-aba-restock" onclick="mudarAba('restock')" class="snap-center px-3 py-2 rounded-lg text-xs font-bold transition shrink-0 flex items-center gap-1.5 text-gray-400">
+                <span class="material-icons text-xs">inventory</span> Stock
             </button>
-            <button id="btn-aba-financeiro-mensal" onclick="mudarAba('financeiro-mensal')" class="px-3 py-1.5 rounded-lg text-xs font-bold transition shrink-0 flex items-center gap-1.5 text-gray-400 adm-only">
-                <span class="material-icons text-xs">analytics</span> Histórico Mensal
+            <button id="btn-aba-financeiro-mensal" onclick="mudarAba('financeiro-mensal')" class="snap-center px-3 py-2 rounded-lg text-xs font-bold transition shrink-0 flex items-center gap-1.5 text-gray-400 adm-only">
+                <span class="material-icons text-xs">analytics</span> Mensal
             </button>
-            <button id="btn-aba-produtos" onclick="mudarAba('produtos')" class="px-3 py-1.5 rounded-lg text-xs font-bold transition shrink-0 flex items-center gap-1.5 text-gray-400 adm-only">
-                <span class="material-icons text-xs">settings</span> Painel Admin
+            <button id="btn-aba-produtos" onclick="mudarAba('produtos')" class="snap-center px-3 py-2 rounded-lg text-xs font-bold transition shrink-0 flex items-center gap-1.5 text-gray-400 adm-only">
+                <span class="material-icons text-xs">settings</span> Admin
             </button>
         </nav>
 
         <!-- CONTEÚDO DINÂMICO DAS ABAS -->
-        <main class="flex-1 overflow-y-auto bg-gray-900/40 p-4">
+        <main class="flex-1 overflow-y-auto bg-gray-900/40 p-3 pb-6">
 
-            <!-- ABA 1: HOME (SALAS & MESAS) -->
-            <div id="aba-home" class="grid grid-cols-1 lg:grid-cols-3 gap-4 h-full hidden">
-                <!-- Painel Esquerdo: Mesas Ativas -->
-                <div class="bg-gray-900/60 border border-gray-800 rounded-2xl p-4 flex flex-col h-fit lg:h-full overflow-hidden">
+            <!-- ABA 1: HOME (SALAS & MESAS ADAPTÁVEL) -->
+            <div id="aba-home" class="flex flex-col lg:grid lg:grid-cols-3 gap-4 h-full hidden">
+                
+                <!-- Sub-Painel A: Lista de Mesas (Visível quando nenhuma mesa está selecionada no mobile) -->
+                <div id="bloco-lista-mesas" class="bg-gray-900/60 border border-gray-800 rounded-2xl p-4 flex flex-col h-full overflow-hidden">
                     <div class="flex justify-between items-center mb-3 shrink-0">
                         <h2 class="text-xs font-black text-gray-400 uppercase tracking-wider flex items-center gap-1.5">
                             <span class="material-icons text-xs text-amber-500">table_restaurant</span> Controlo de Mesas
@@ -104,225 +105,203 @@
                     </div>
                     <!-- Criar Nova Mesa -->
                     <div class="flex gap-2 mb-4 shrink-0">
-                        <input type="text" id="novo-nome-mesa" placeholder="Ex: Mesa 12 ou Balcão Abel" class="flex-1 bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-amber-500 text-gray-200">
-                        <button onclick="criarNovaMesa()" class="bg-amber-600 hover:bg-amber-500 text-gray-950 font-black px-3 rounded-xl text-xs transition flex items-center justify-center">
+                        <input type="text" id="novo-nome-mesa" placeholder="Ex: Mesa 12 ou Balcão" class="flex-1 bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-amber-500 text-gray-200">
+                        <button onclick="criarNovaMesa()" class="bg-amber-600 hover:bg-amber-500 text-gray-950 font-black px-4 rounded-xl text-sm transition flex items-center justify-center">
                             <span class="material-icons text-sm">add</span>
                         </button>
                     </div>
-                    <!-- Lista de Mesas Rolável -->
-                    <div id="lista-mesas" class="flex-1 overflow-y-auto space-y-2 pr-1 min-h-[150px]">
+                    <!-- Lista de Mesas -->
+                    <div id="lista-mesas" class="flex-1 overflow-y-auto space-y-2 pr-1 min-h-[200px]">
                         <!-- Injetado dinamicamente -->
                     </div>
                 </div>
 
-                <!-- Painel Central: Comanda Selecionada (COM BOTÕES + E -) -->
-                <div class="bg-gray-900/60 border border-gray-800 rounded-2xl p-4 flex flex-col h-fit lg:h-full overflow-hidden">
+                <!-- Sub-Painel B: Comanda Ativa (Foca no telemóvel ao selecionar) -->
+                <div id="bloco-detalhe-comanda" class="hidden lg:flex bg-gray-900/60 border border-gray-800 rounded-2xl p-4 flex-col h-full overflow-hidden">
                     <div class="flex justify-between items-center pb-2 border-b border-gray-800/60 mb-3 shrink-0">
-                        <span class="text-[10px] text-gray-500 uppercase font-bold tracking-wider">Mesa Selecionada</span>
-                        <span id="mesa-selecionada-titulo" class="text-xs font-black text-amber-400">Nenhum</span>
+                        <button onclick="fecharVisualizacaoMesa()" class="lg:hidden text-amber-500 flex items-center gap-1 text-xs font-bold">
+                            <span class="material-icons text-xs">arrow_back</span> Voltar
+                        </button>
+                        <span id="mesa-selecionada-titulo" class="text-xs font-black text-amber-400 uppercase tracking-wider">Nenhum</span>
                     </div>
-                    <!-- Itens da comanda -->
+                    <!-- Itens consumidos -->
                     <div id="itens-comanda" class="flex-1 overflow-y-auto space-y-2 pr-1 min-h-[150px]">
-                        <p class="text-xs text-gray-600 text-center py-4">Nenhum produto consumido.</p>
+                        <p class="text-xs text-gray-600 text-center py-4">Selecione uma mesa acima.</p>
                     </div>
                     <!-- Total e Fecho -->
                     <div class="pt-4 border-t border-gray-800 mt-3 shrink-0 space-y-3">
                         <div class="flex justify-between items-baseline">
                             <span class="text-xs font-bold text-gray-400">Total a Pagar:</span>
-                            <span id="total-comanda" class="text-xl font-mono font-black text-emerald-400">0,00 MT</span>
+                            <span id="total-comanda" class="text-lg font-mono font-black text-emerald-400">0,00 MT</span>
                         </div>
-                        <button id="btn-fechar-conta" onclick="fecharMesaAtual()" disabled class="w-full bg-gray-800 text-gray-500 font-bold py-2.5 px-4 rounded-xl flex items-center justify-center gap-2 cursor-not-allowed transition text-xs">
+                        <button id="btn-fechar-conta" onclick="fecharMesaAtual()" disabled class="w-full bg-gray-800 text-gray-500 font-bold py-3 px-4 rounded-xl flex items-center justify-center gap-2 cursor-not-allowed transition text-xs">
                             <span class="material-icons text-sm">point_of_sale</span> Fechar Conta & Imprimir
                         </button>
                     </div>
                 </div>
 
-                <!-- Painel Direito: Lançamento Rápido & Resumo Stock -->
-                <div class="space-y-4 h-fit lg:h-full flex flex-col overflow-hidden">
-                    <!-- Vitrine de Produtos -->
-                    <div id="menu-produtos" class="bg-gray-900/60 border border-gray-800 rounded-2xl p-4 flex-1 flex flex-col overflow-hidden hidden">
+                <!-- Sub-Painel C: Vitrine de Lançamento Rápido -->
+                <div id="bloco-vitrine-produtos" class="hidden lg:flex flex-col gap-4 h-full overflow-hidden">
+                    <div id="menu-produtos" class="bg-gray-900/60 border border-gray-800 rounded-2xl p-4 flex-1 flex flex-col overflow-hidden">
                         <h2 class="text-xs font-black text-gray-400 uppercase tracking-wider mb-3 shrink-0">Toque para Adicionar</h2>
                         <div id="botoes-produtos" class="grid grid-cols-2 gap-2 overflow-y-auto pr-1 flex-1">
                             <!-- Injetado dinamicamente -->
                         </div>
                     </div>
-                    <!-- Estado Crítico do Stock -->
-                    <div class="bg-gray-900/60 border border-gray-800 rounded-2xl p-4 shrink-0 max-h-[220px] flex flex-col overflow-hidden">
-                        <h2 class="text-xs font-black text-gray-400 uppercase tracking-wider mb-2 shrink-0">Estado Real de Stock</h2>
+                    <!-- Resumo rápido de stock (Oculto no telemóvel dentro das mesas para economizar espaço) -->
+                    <div class="hidden lg:flex bg-gray-900/60 border border-gray-800 rounded-2xl p-4 shrink-0 max-h-[180px] flex flex-col overflow-hidden">
+                        <h2 class="text-xs font-black text-gray-400 uppercase tracking-wider mb-2 shrink-0">Estado de Stock</h2>
                         <div id="lista-stock-resumido" class="overflow-y-auto space-y-1.5 pr-1 flex-1">
                             <!-- Injetado dinamicamente -->
                         </div>
                     </div>
                 </div>
+
             </div>
 
-            <!-- ABA 2: VENDAS DIÁRIAS (TURNO ATUAL) -->
+            <!-- ABA 2: VENDAS DIÁRIAS (TURNO) -->
             <div id="aba-vendas-diarias" class="space-y-4 hidden">
                 <!-- RELATÓRIO DO ADMINISTRADOR -->
                 <div class="bg-gradient-to-r from-gray-900 to-gray-950 border-l-4 border-amber-500 p-4 rounded-2xl shadow-md adm-only">
                     <h3 class="text-xs font-black text-amber-400 uppercase tracking-wider flex items-center gap-2 mb-3">
-                        <span class="material-icons text-sm">analytics</span> Relatório do Turno Corrente (Em Aberto)
+                        <span class="material-icons text-sm">analytics</span> Relatório do Turno
                     </h3>
-                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-3 border-b border-gray-800/60 pb-3">
+                    <div class="grid grid-cols-2 gap-3 mb-3 border-b border-gray-800/60 pb-3 text-xs">
                         <div>
                             <p class="text-[9px] uppercase font-bold text-gray-500">Vendas Brutas</p>
-                            <p id="rel-turno-faturado" class="text-lg font-mono font-black text-emerald-400">0,00 MT</p>
+                            <p id="rel-turno-faturado" class="text-base font-mono font-black text-emerald-400">0,00 MT</p>
                         </div>
                         <div>
-                            <p class="text-[9px] uppercase font-bold text-gray-500">Custo Total Stock</p>
-                            <p id="rel-turno-custo" class="text-lg font-mono font-black text-red-400">0,00 MT</p>
+                            <p class="text-[9px] uppercase font-bold text-gray-500">Custo Stock</p>
+                            <p id="rel-turno-custo" class="text-base font-mono font-black text-red-400">0,00 MT</p>
                         </div>
                         <div>
-                            <p class="text-[9px] uppercase font-bold text-gray-500">Ganhos Estimados</p>
-                            <p id="rel-turno-lucro" class="text-lg font-mono font-black text-amber-500">0,00 MT</p>
+                            <p class="text-[9px] uppercase font-bold text-gray-500">Ganhos Brutos</p>
+                            <p id="rel-turno-lucro" class="text-base font-mono font-black text-amber-500">0,00 MT</p>
                         </div>
                         <div>
-                            <p class="text-[9px] uppercase font-bold text-gray-500">Total Transações</p>
-                            <p id="rel-turno-contas" class="text-lg font-mono font-black text-gray-300">0</p>
+                            <p class="text-[9px] uppercase font-bold text-gray-500">Transações</p>
+                            <p id="rel-turno-contas" class="text-base font-mono font-black text-gray-300">0</p>
                         </div>
                     </div>
-                    <p class="text-[10px] font-black text-gray-400 uppercase tracking-wider mb-1.5">Artigos Consumidos no Turno:</p>
-                    <div id="rel-turno-lista-produtos" class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
+                    <p class="text-[9px] font-black text-gray-400 uppercase tracking-wider mb-1.5">Artigos Saídos:</p>
+                    <div id="rel-turno-lista-produtos" class="grid grid-cols-2 gap-2 text-[11px]">
                         <!-- Gerado por JS -->
                     </div>
                 </div>
 
-                <!-- Indicadores de Caixa -->
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    <div class="bg-gray-900 border border-gray-800 p-4 rounded-2xl">
-                        <p class="text-[10px] text-gray-500 uppercase font-black tracking-wider">Faturação Bruta Registada</p>
-                        <p id="hoje-faturacao" class="text-xl font-mono font-black text-emerald-400 mt-1">0,00 MT</p>
+                <!-- Indicadores Rápidos -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                    <div class="bg-gray-900 border border-gray-800 p-3.5 rounded-xl flex justify-between items-center">
+                        <span class="text-[10px] text-gray-500 uppercase font-black tracking-wider">Faturação</span>
+                        <span id="hoje-faturacao" class="font-mono font-black text-emerald-400">0,00 MT</span>
                     </div>
-                    <div class="bg-gray-900 border border-gray-800 p-4 rounded-2xl">
-                        <p class="text-[10px] text-gray-500 uppercase font-black tracking-wider">Despesas / Sangrias</p>
-                        <p id="hoje-despesas" class="text-xl font-mono font-black text-red-400 mt-1">0,00 MT</p>
+                    <div class="bg-gray-900 border border-gray-800 p-3.5 rounded-xl flex justify-between items-center">
+                        <span class="text-[10px] text-gray-500 uppercase font-black tracking-wider">Despesas</span>
+                        <span id="hoje-despesas" class="font-mono font-black text-red-400">0,00 MT</span>
                     </div>
-                    <div class="bg-gray-900 border border-gray-800 p-4 rounded-2xl">
-                        <p class="text-[10px] text-gray-500 uppercase font-black tracking-wider">Lucro Estimado Líquido</p>
-                        <p id="hoje-lucro" class="text-xl font-mono font-black text-amber-500 mt-1">0,00 MT</p>
+                    <div class="bg-gray-900 border border-gray-800 p-3.5 rounded-xl flex justify-between items-center">
+                        <span class="text-[10px] text-gray-500 uppercase font-black tracking-wider">Lucro Líquido</span>
+                        <span id="hoje-lucro" class="font-mono font-black text-amber-500">0,00 MT</span>
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
-                    <!-- Cronologia de Transações (GERENCIAMENTO REALTIME DE CONTAS FECHADAS) -->
-                    <div class="bg-gray-900 border border-gray-800 p-4 rounded-2xl lg:col-span-2">
-                        <h3 class="text-xs font-black text-gray-400 uppercase tracking-wider mb-3">Histórico de Saídas do Turno</h3>
-                        <div id="lista-vendas-dia" class="space-y-2 max-h-[350px] overflow-y-auto pr-1">
+                <!-- Cronologia e Gastos -->
+                <div class="flex flex-col gap-4">
+                    <div class="bg-gray-900 border border-gray-800 p-4 rounded-2xl">
+                        <h3 class="text-xs font-black text-gray-400 uppercase tracking-wider mb-3">Histórico de Saídas (Turno)</h3>
+                        <div id="lista-vendas-dia" class="space-y-2 max-h-[300px] overflow-y-auto pr-1">
                             <!-- Injetado dinamicamente -->
                         </div>
                     </div>
 
-                    <!-- Gestão de Despesas -->
-                    <div class="space-y-4">
-                        <div class="bg-gray-900 border border-gray-800 p-4 rounded-2xl space-y-3">
-                            <h3 class="text-xs font-black text-gray-400 uppercase tracking-wider">Registar Despesa / Saída</h3>
-                            <input type="text" id="desdespesa-desc" placeholder="Ex: Gelo, Compra de Limão, etc." class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-amber-500 text-gray-200">
-                            <input type="number" id="despesa-valor" placeholder="Valor (MT)" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-amber-500 text-gray-200">
-                            <button onclick="adicionarDespesa()" class="w-full bg-red-900/40 hover:bg-red-900/60 border border-red-800 text-red-200 font-bold py-2 px-4 rounded-xl text-xs transition">Gravar Gasto</button>
-                            <div id="lista-despesas-turno" class="text-xs space-y-1.5 pt-2 max-h-[120px] overflow-y-auto">
-                                <!-- Dinâmico -->
-                            </div>
+                    <div class="bg-gray-900 border border-gray-800 p-4 rounded-2xl space-y-3">
+                        <h3 class="text-xs font-black text-gray-400 uppercase tracking-wider">Registar Saída / Sangria</h3>
+                        <input type="text" id="desdespesa-desc" placeholder="Ex: Compra de Gelo" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-sm text-gray-200">
+                        <input type="number" id="despesa-valor" placeholder="Valor (MT)" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-sm text-gray-200">
+                        <button onclick="adicionarDespesa()" class="w-full bg-red-900/40 hover:bg-red-900/60 border border-red-800 text-red-200 font-bold py-2.5 px-4 rounded-xl text-xs transition">Gravar Gasto</button>
+                        <div id="lista-despesas-turno" class="text-xs space-y-1.5 pt-2 max-h-[120px] overflow-y-auto">
+                            <!-- Dinâmico -->
                         </div>
+                    </div>
 
-                        <!-- Botão de Fecho de Turno -->
-                        <div class="bg-gray-900 border border-gray-800 p-4 rounded-2xl text-center adm-only">
-                            <p class="text-[11px] text-gray-500 mb-2">Concluir o turno arquiva os dados no histórico de longo prazo.</p>
-                            <button onclick="fecharTurnoGeral()" class="w-full bg-amber-600 hover:bg-amber-500 text-gray-950 font-black py-2.5 px-4 rounded-xl text-xs transition shadow-lg shadow-amber-600/10">CONCLUIR E FECHAR TURNO</button>
-                        </div>
+                    <!-- Botão Concluir Turno -->
+                    <div class="bg-gray-900 border border-gray-800 p-4 rounded-2xl text-center adm-only">
+                        <button onclick="fecharTurnoGeral()" class="w-full bg-amber-600 hover:bg-amber-500 text-gray-950 font-black py-3 px-4 rounded-xl text-xs transition tracking-wider shadow-lg">CONCLUIR & ARQUIVAR TURNO</button>
                     </div>
                 </div>
             </div>
 
             <!-- ABA 3: ENTRADA DE STOCK -->
-            <div id="aba-restock" class="max-w-md mx-auto bg-gray-900 border border-gray-800 p-6 rounded-2xl space-y-4 hidden">
+            <div id="aba-restock" class="max-w-md mx-auto bg-gray-900 border border-gray-800 p-5 rounded-2xl space-y-4 hidden">
                 <div class="text-center pb-2 border-b border-gray-800">
                     <h2 class="text-sm font-black text-gray-200 uppercase tracking-wide">Dar Entrada de Mercadoria</h2>
-                    <p class="text-[11px] text-gray-500">Atualize o stock físico e o preço de custo real do artigo.</p>
                 </div>
                 <div class="space-y-1.5">
                     <label class="text-[10px] uppercase font-bold text-gray-400">Selecione o Artigo</label>
-                    <select id="restock-prod-id" onchange="sugerirCustoAtual()" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2.5 text-xs text-gray-200 focus:outline-none focus:border-amber-500">
+                    <select id="restock-prod-id" onchange="sugerirCustoAtual()" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-3 text-sm text-gray-200 focus:outline-none">
                         <!-- Opções por JS -->
                     </select>
                 </div>
                 <div class="grid grid-cols-2 gap-3">
                     <div class="space-y-1.5">
-                        <label class="text-[10px] uppercase font-bold text-gray-400">Quantidade Nova (Unidades)</label>
-                        <input type="number" id="restock-quantidade" placeholder="Ex: 24" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-amber-500 text-gray-200">
+                        <label class="text-[10px] uppercase font-bold text-gray-400">Quantidade Nova</label>
+                        <input type="number" id="restock-quantidade" placeholder="Ex: 24" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-sm text-gray-200">
                     </div>
                     <div class="space-y-1.5">
-                        <label class="text-[10px] uppercase font-bold text-gray-400">Novo Custo Unitário (MT)</label>
-                        <input type="number" id="restock-custo-un" placeholder="Ex: 45.00" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-amber-500 text-amber-500 font-mono">
+                        <label class="text-[10px] uppercase font-bold text-gray-400">Custo Unitário (MT)</label>
+                        <input type="number" id="restock-custo-un" placeholder="Ex: 45" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-sm text-amber-500 font-mono">
                     </div>
                 </div>
-                <button onclick="executarRestock()" class="w-full bg-amber-600 hover:bg-amber-500 text-gray-950 font-black py-2.5 px-4 rounded-xl text-xs transition">Confirmar Entrada em Nuvem</button>
+                <button onclick="executarRestock()" class="w-full bg-amber-600 hover:bg-amber-500 text-gray-950 font-black py-3 px-4 rounded-xl text-xs transition">Confirmar Entrada</button>
             </div>
 
-            <!-- ABA 4: HISTÓRICO MENSAL -->
+            <!-- ABA 4: HISTÓRICO MENSAL (CONVERTIDO EM CARDS PARA MOBILE) -->
             <div id="aba-financeiro-mensal" class="space-y-4 hidden adm-only">
-                <div class="bg-gray-900 border border-gray-800 p-4 rounded-2xl flex justify-between items-center">
+                <div class="bg-gray-900 border border-gray-800 p-4 rounded-2xl flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center">
                     <div>
                         <h3 class="text-xs font-black text-gray-400 uppercase tracking-wider">Histórico de Fechos Arquivados</h3>
-                        <p class="text-[11px] text-gray-500">Histórico permanente gerado a partir de cada fecho de turno feito.</p>
                     </div>
-                    <button onclick="fecharMesDefinitivo()" class="bg-red-950 hover:bg-red-900 border border-red-800 text-red-400 px-3 py-1.5 rounded-xl text-xs font-bold transition">CONSOLIDAR MÊS ATUAL</button>
+                    <button onclick="fecharMesDefinitivo()" class="bg-red-950 hover:bg-red-900 border border-red-800 text-red-400 px-3 py-2 rounded-xl text-xs font-bold transition w-full sm:w-auto">CONSOLIDAR MÊS ATUAL</button>
                 </div>
-                <div class="bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden shadow-xl">
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left border-collapse text-xs">
-                            <thead>
-                                <tr class="bg-gray-950 text-gray-400 border-b border-gray-800 text-[10px] uppercase tracking-wider">
-                                    <th class="p-3 font-black">Data / Período</th>
-                                    <th class="p-3 font-black">Faturação total</th>
-                                    <th class="p-3 font-black">Custo de Stock</th>
-                                    <th class="p-3 font-black">Despesas do Turno</th>
-                                    <th class="p-3 font-black">Margem Líquida</th>
-                                </tr>
-                            </thead>
-                            <tbody id="tabela-historico-mensal">
-                                <!-- JS -->
-                            </tbody>
-                        </table>
-                    </div>
+                
+                <!-- Lista de Fechos em formato móvel -->
+                <div id="cards-historico-mensal" class="space-y-2">
+                    <!-- Gerado dinamicamente via JS (Substitui tabela tradicional) -->
                 </div>
             </div>
 
-            <!-- ABA 5: PAINEL ADMIN (GESTÃO DE PRODUTOS E OPERADORES) -->
-            <div id="aba-produtos" class="grid grid-cols-1 lg:grid-cols-3 gap-4 hidden adm-only">
-                <!-- Cadastro de Produtos -->
-                <div class="bg-gray-900 border border-gray-800 p-4 rounded-2xl h-fit space-y-3">
+            <!-- ABA 5: PAINEL ADMIN -->
+            <div id="aba-produtos" class="flex flex-col gap-4 hidden adm-only">
+                <!-- Novo Artigo -->
+                <div class="bg-gray-900 border border-gray-800 p-4 rounded-2xl space-y-3">
                     <h3 class="text-xs font-black text-gray-400 uppercase tracking-wider border-b border-gray-800 pb-2">Novo Artigo de Venda</h3>
-                    <div class="space-y-1"><label class="text-[10px] text-gray-500 uppercase font-bold">Nome do Artigo</label><input type="text" id="novo-prod-nome" placeholder="Ex: Cerveja Preta" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-amber-500 text-gray-200"></div>
+                    <div class="space-y-1"><label class="text-[10px] text-gray-500 uppercase font-bold">Nome do Artigo</label><input type="text" id="novo-prod-nome" placeholder="Ex: Cerveja" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-sm text-gray-200"></div>
                     <div class="grid grid-cols-2 gap-2">
-                        <div class="space-y-1"><label class="text-[10px] text-gray-500 uppercase font-bold">Preço Compra (Custo)</label><input type="number" id="novo-prod-custo" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-xs text-red-400 font-mono"></div>
-                        <div class="space-y-1"><label class="text-[10px] text-gray-500 uppercase font-bold">Preço Venda (Balcão)</label><input type="number" id="novo-prod-preco" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-xs text-emerald-400 font-mono"></div>
+                        <div class="space-y-1"><label class="text-[10px] text-gray-500 uppercase font-bold">Custo (MT)</label><input type="number" id="novo-prod-custo" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-sm text-red-400 font-mono"></div>
+                        <div class="space-y-1"><label class="text-[10px] text-gray-500 uppercase font-bold">Venda (MT)</label><input type="number" id="novo-prod-preco" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-sm text-emerald-400 font-mono"></div>
                     </div>
-                    <div class="space-y-1"><label class="text-[10px] text-gray-500 uppercase font-bold">Stock Inicial Disponível</label><input type="number" id="novo-prod-stock" value="0" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-xs text-gray-300 font-mono"></div>
-                    <button onclick="adicionarNovoProduto()" class="w-full bg-amber-600 hover:bg-amber-500 text-gray-950 font-black py-2 px-4 rounded-xl text-xs transition pt-2">Inserir Produto</button>
+                    <div class="space-y-1"><label class="text-[10px] text-gray-500 uppercase font-bold">Stock Inicial</label><input type="number" id="novo-prod-stock" value="0" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-sm text-gray-300 font-mono"></div>
+                    <button onclick="adicionarNovoProduto()" class="w-full bg-amber-600 hover:bg-amber-500 text-gray-950 font-black py-3 px-4 rounded-xl text-xs transition">Inserir Produto</button>
                 </div>
 
-                <!-- Lista de Artigos Lançados -->
-                <div class="bg-gray-900 border border-gray-800 p-4 rounded-2xl lg:col-span-2 space-y-3 flex flex-col max-h-[550px]">
-                    <h3 class="text-xs font-black text-gray-400 uppercase tracking-wider border-b border-gray-800 pb-2">Configuração Rápida de Valores</h3>
-                    <div class="grid grid-cols-1 sm:grid-cols-4 gap-2 px-3 text-[10px] uppercase font-bold text-gray-500 border-b border-gray-950 pb-1">
-                        <div>Artigo</div><div>Custo (MT)</div><div>Venda (MT)</div><div>Stock Físico</div>
-                    </div>
-                    <div id="form-config-produtos" class="space-y-2 overflow-y-auto flex-1 pr-1">
+                <!-- Gestão e Valores -->
+                <div class="bg-gray-900 border border-gray-800 p-4 rounded-2xl space-y-3 flex flex-col">
+                    <h3 class="text-xs font-black text-gray-400 uppercase tracking-wider border-b border-gray-800 pb-2">Configuração Rápidas</h3>
+                    <div id="form-config-produtos" class="space-y-3 max-h-[350px] overflow-y-auto pr-1">
                         <!-- JS -->
                     </div>
 
-                    <!-- SECCÃO NOVA: CONFIGURAÇÃO E LISTAGEM DE OPERADORES -->
+                    <!-- Operadores -->
                     <div class="border-t border-gray-800 pt-4 mt-2">
-                        <h3 class="text-xs font-black text-gray-400 uppercase tracking-wider mb-2">Controlo de Operadores de Caixa</h3>
-                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-3">
-                            <input type="text" id="novo-user-nome" placeholder="Username do Caixa" class="bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-xs text-gray-200">
-                            <input type="password" id="novo-user-pass" placeholder="Password de Entrada" class="bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-xs text-gray-200">
-                            <button onclick="adicionarUsuario()" class="bg-amber-600 hover:bg-amber-500 text-gray-950 font-black py-2 px-4 rounded-xl text-xs transition">Criador Operador</button>
+                        <h3 class="text-xs font-black text-gray-400 uppercase tracking-wider mb-2">Controlo de Operadores</h3>
+                        <div class="space-y-2 mb-3">
+                            <input type="text" id="novo-user-nome" placeholder="Username do Caixa" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-sm text-gray-200">
+                            <input type="password" id="novo-user-pass" placeholder="Password" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-sm text-gray-200">
+                            <button onclick="adicionarUsuario()" class="w-full bg-amber-600 text-gray-950 font-black py-2.5 px-4 rounded-xl text-xs transition">Criar Operador</button>
                         </div>
                         
-                        <!-- Lista Dinâmica de Caixas Ativos -->
-                        <p class="text-[10px] text-gray-500 uppercase font-black tracking-wider mb-2">Lista de Operadores no Sistema:</p>
-                        <div id="lista-operadores-sistema" class="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-[120px] overflow-y-auto pr-1">
+                        <div id="lista-operadores-sistema" class="grid grid-cols-1 gap-2 max-h-[150px] overflow-y-auto">
                             <!-- Injetado via JS -->
                         </div>
                     </div>
@@ -333,12 +312,9 @@
     </div>
 
     <!-- ==========================================================================
-         LÓGICA JAVASCRIPT DO SISTEMA
+         JAVASCRIPT DE SESSÃO & ADAPTABILIDADE EM TEMPO REAL
          ========================================================================== -->
     <script>
-        // ==========================================================================
-        // CONFIGURAÇÃO DO FIREBASE
-        // ==========================================================================
         const firebaseConfig = {
             apiKey: "AIzaSyCI8EDvSqMGjrJ6GNdqDyeCsYUwymPXPw4",
             authDomain: "muchbar-c5839.firebaseapp.com",
@@ -353,7 +329,6 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // ESTADO GLOBAL
         const PIN_ADMIN_PADRAO = "1234";
         let produtos = [];
         let usuarios = [];
@@ -367,15 +342,11 @@
 
         const salvarDadosFirebase = (caminho, dados) => { db.ref(caminho).set(dados); };
 
-        // ==========================================================================
-        // LEITURA EM TEMPO REAL (REALTIME)
-        // ==========================================================================
         function carregarEEscutarFirebase() {
             db.ref('produtos').on('value', (snapshot) => {
                 produtos = snapshot.val() || [];
                 if (usuarioAtivo) {
                     renderizarBotoesProdutos();
-                    atualizarVisaoStock();
                     atualizarConfigProdutos();
                     popularSelectRestock();
                 }
@@ -414,20 +385,38 @@
             });
         }
 
+        // CONTROLAR RESPONSIVIDADE INTERNA DE MESAS NO MOBILE
         function fecharVisualizacaoMesa() {
             mesaSelecionadaId = null;
+            
+            // Reajusta visibilidade de blocos no Mobile
+            document.getElementById('bloco-lista-mesas').classList.remove('hidden');
+            document.getElementById('bloco-detalhe-comanda').classList.add('hidden', 'lg:flex');
+            document.getElementById('bloco-vitrine-produtos').classList.add('hidden', 'lg:flex');
+
             document.getElementById('mesa-selecionada-titulo').innerText = "Nenhum";
-            document.getElementById('menu-produtos').classList.add('hidden');
-            document.getElementById('itens-comanda').innerHTML = "<p class='text-xs text-gray-600 text-center py-4'>Nenhum produto consumido.</p>";
+            document.getElementById('itens-comanda').innerHTML = "<p class='text-xs text-gray-600 text-center py-4'>Selecione uma mesa acima.</p>";
             document.getElementById('total-comanda').innerText = "0,00 MT";
+            
             const btnFechar = document.getElementById('btn-fechar-conta');
             btnFechar.disabled = true;
-            btnFechar.className = "w-full bg-gray-800 text-gray-500 font-bold py-2.5 px-4 rounded-xl flex items-center justify-center gap-2 cursor-not-allowed text-xs";
+            btnFechar.className = "w-full bg-gray-800 text-gray-500 font-bold py-3 px-4 rounded-xl flex items-center justify-center gap-2 cursor-not-allowed text-xs";
+            atualizarPainelMesas();
         }
 
-        // ==========================================================================
-        // SESSÃO / ACESSO
-        // ==========================================================================
+        function selecionarMesa(id) {
+            mesaSelecionadaId = id;
+            
+            // Alterna blocos no Mobile para focar na venda
+            document.getElementById('bloco-lista-mesas').classList.add('hidden');
+            document.getElementById('bloco-detalhe-comanda').classList.remove('hidden', 'lg:flex');
+            document.getElementById('bloco-vitrine-produtos').classList.remove('hidden', 'lg:flex');
+
+            const m = mesas.find(x => x.id === id);
+            document.getElementById('mesa-selecionada-titulo').innerText = m.nome;
+            atualizarItensComanda(m);
+        }
+
         function tentarLoginAdmin() {
             const pin = document.getElementById('login-pin-admin').value;
             if (pin === PIN_ADMIN_PADRAO) {
@@ -465,7 +454,10 @@
             });
             document.getElementById(`aba-${abaId}`).classList.remove('hidden');
             const btn = document.getElementById(`btn-aba-${abaId}`);
-            if (abaId === 'home') btn.classList.add('bg-amber-600', 'text-gray-950');
+            if (abaId === 'home') {
+                btn.classList.add('bg-amber-600', 'text-gray-950');
+                fecharVisualizacaoMesa(); // Sempre limpa foco ao voltar a aba
+            }
             else btn.classList.add('bg-gray-800', 'text-gray-100');
         }
 
@@ -476,53 +468,37 @@
             });
         }
 
-        // ==========================================================================
-        // GESTÃO DE OPERADORES (REQUISITO 1)
-        // ==========================================================================
         function adicionarUsuario() {
             const u = document.getElementById('novo-user-nome').value.trim();
             const p = document.getElementById('novo-user-pass').value;
             if(!u || !p) return alert("Preencha todos os campos do operador!");
-            
-            if(usuarios.some(user => user.username.toLowerCase() === u.toLowerCase())) {
-                return alert("Este nome de operador já existe no sistema!");
-            }
+            if(usuarios.some(user => user.username.toLowerCase() === u.toLowerCase())) return alert("Este nome já existe!");
 
             usuarios.push({ username: u, pass: p });
             db.ref('usuarios').set(usuarios).then(() => {
                 document.getElementById('novo-user-nome').value = "";
                 document.getElementById('novo-user-pass').value = "";
-                alert("Operador de caixa criado com sucesso!");
             });
         }
 
         function eliminarUsuario(username) {
-            if(!confirm(`Tem a certeza que deseja remover o operador "${username}"? Ele perderá acesso ao caixa.`)) return;
+            if(!confirm(`Remover operador "${username}"?`)) return;
             usuarios = usuarios.filter(u => u.username !== username);
             db.ref('usuarios').set(usuarios);
         }
 
         function atualizarListaOperadores() {
             const container = document.getElementById('lista-operadores-sistema');
-            if(!container) return;
-            container.innerHTML = "";
+            if(!container) return; container.innerHTML = "";
             usuarios.forEach(u => {
                 container.innerHTML += `
-                    <div class="bg-gray-950 p-2 border border-gray-850 rounded-xl flex justify-between items-center text-xs">
-                        <div>
-                            <p class="font-bold text-gray-200">${u.username}</p>
-                            <p class="text-[10px] text-gray-500">Pass: ${u.pass}</p>
-                        </div>
-                        <button onclick="eliminarUsuario('${u.username}')" class="text-red-400 hover:text-red-500 p-1 rounded transition">
-                            <span class="material-icons text-sm">person_remove</span>
-                        </button>
+                    <div class="bg-gray-950 p-3 border border-gray-850 rounded-xl flex justify-between items-center text-xs">
+                        <div><p class="font-bold text-gray-200">${u.username}</p><p class="text-[10px] text-gray-500">Pass: ${u.pass}</p></div>
+                        <button onclick="eliminarUsuario('${u.username}')" class="text-red-400 p-1"><span class="material-icons text-sm">person_remove</span></button>
                     </div>`;
             });
         }
 
-        // ==========================================================================
-        // SALA & COMANDAS ACTIVE
-        // ==========================================================================
         function criarNovaMesa() {
             const inp = document.getElementById('novo-nome-mesa');
             if (!inp.value.trim()) return;
@@ -533,84 +509,69 @@
 
         function atualizarPainelMesas() {
             const container = document.getElementById('lista-mesas');
+            if(!container) return;
             container.innerHTML = mesas.length === 0 ? `<p class="text-xs text-gray-500 text-center py-4">Nenhuma mesa ativa.</p>` : "";
             mesas.forEach(m => {
                 const total = (m.itens || []).reduce((acc, cur) => acc + (cur.preco * cur.qtd), 0);
-                const activeCls = mesaSelecionadaId === m.id ? 'border-amber-500 bg-amber-950/20' : 'border-gray-800 bg-gray-950 hover:border-gray-700';
+                const activeCls = mesaSelecionadaId === m.id ? 'border-amber-500 bg-amber-950/20' : 'border-gray-800 bg-gray-950';
                 container.innerHTML += `
-                    <div onclick="selecionarMesa(${m.id})" class="p-3 border rounded-xl flex justify-between items-center cursor-pointer transition ${activeCls}">
-                        <div><p class="text-xs font-bold text-gray-200">${m.nome}</p><p class="text-[10px] text-gray-500">${(m.itens || []).length} itens</p></div>
-                        <span class="text-xs font-black text-amber-400">${total.toFixed(2)} MT</span>
+                    <div onclick="selecionarMesa(${m.id})" class="p-3.5 border rounded-xl flex justify-between items-center cursor-pointer active:scale-[0.99] transition ${activeCls}">
+                        <div><p class="text-sm font-bold text-gray-200">${m.nome}</p><p class="text-[11px] text-gray-500">${(m.itens || []).length} produtos na lista</p></div>
+                        <span class="text-sm font-black text-amber-400">${total.toFixed(2)} MT</span>
                     </div>`;
             });
         }
 
-        function selecionarMesa(id) {
-            mesaSelecionadaId = id;
-            atualizarPainelMesas();
-            const m = mesas.find(x => x.id === id);
-            document.getElementById('mesa-selecionada-titulo').innerText = m.nome;
-            document.getElementById('menu-produtos').classList.remove('hidden');
-            atualizarItensComanda(m);
-        }
-
         function atualizarItensComanda(mesa) {
             const container = document.getElementById('itens-comanda');
+            if(!container) return;
             const itens = mesa.itens || [];
             if (itens.length === 0) {
                 document.getElementById('total-comanda').innerText = "0,00 MT";
                 document.getElementById('btn-fechar-conta').disabled = true;
-                document.getElementById('btn-fechar-conta').className = "w-full bg-gray-800 text-gray-500 font-bold py-2.5 px-4 rounded-xl flex items-center justify-center gap-2 cursor-not-allowed text-xs";
+                document.getElementById('btn-fechar-conta').className = "w-full bg-gray-800 text-gray-500 font-bold py-3 px-4 rounded-xl flex items-center justify-center gap-2 cursor-not-allowed text-xs";
                 container.innerHTML = `<p class="text-xs text-gray-600 text-center py-4">Nenhum produto consumido.</p>`;
                 return;
             }
 
-            let total = 0;
-            container.innerHTML = "";
+            let total = 0; container.innerHTML = "";
             itens.forEach(item => {
-                const sub = item.preco * item.qtd;
-                total += sub;
+                const sub = item.preco * item.qtd; total += sub;
                 container.innerHTML += `
-                    <div class="flex justify-between items-center bg-gray-950/40 p-2 border border-gray-850 rounded-xl text-xs">
-                        <div class="flex-1 min-w-0 pr-2">
+                    <div class="bg-gray-950/50 p-2.5 border border-gray-850 rounded-xl flex justify-between items-center text-xs">
+                        <div class="flex-1 min-w-0 pr-1">
                             <p class="font-bold text-gray-300 truncate">${item.nome}</p>
-                            <p class="text-[10px] text-gray-500 font-mono">${item.preco.toFixed(2)} MT</p>
+                            <p class="text-[10px] text-amber-500 font-mono">${item.preco.toFixed(2)} MT</p>
                         </div>
-                        <div class="flex items-center gap-2 mx-2 shrink-0">
-                            <button onclick="ajustarQtdItemMesa(${mesa.id}, ${item.id}, -1)" class="w-6 h-6 rounded-full bg-red-950/60 border border-red-800 text-red-400 font-black flex items-center justify-center hover:bg-red-900/40 text-sm transition">-</button>
-                            <span class="font-mono font-black text-gray-200 min-w-[16px] text-center">${item.qtd}</span>
-                            <button onclick="ajustarQtdItemMesa(${mesa.id}, ${item.id}, 1)" class="w-6 h-6 rounded-full bg-emerald-950/60 border border-emerald-800 text-emerald-400 font-black flex items-center justify-center hover:bg-emerald-200/20 text-sm transition">+</button>
+                        <div class="flex items-center gap-2.5 mx-2 shrink-0">
+                            <button onclick="ajustarQtdItemMesa(${mesa.id}, ${item.id}, -1)" class="w-7 h-7 rounded-full bg-red-950 border border-red-800 text-red-400 font-black flex items-center justify-center text-base">-</button>
+                            <span class="font-mono font-black text-gray-200 text-xs min-w-[14px] text-center">${item.qtd}</span>
+                            <button onclick="ajustarQtdItemMesa(${mesa.id}, ${item.id}, 1)" class="w-7 h-7 rounded-full bg-emerald-950 border border-emerald-800 text-emerald-400 font-black flex items-center justify-center text-base">+</button>
                         </div>
-                        <div class="text-right font-mono font-bold text-gray-300 min-w-[70px]">${sub.toFixed(2)} MT</div>
+                        <div class="text-right font-mono font-bold text-gray-300 min-w-[65px]">${sub.toFixed(2)} MT</div>
                     </div>`;
             });
 
             document.getElementById('total-comanda').innerText = `${total.toFixed(2)} MT`;
             const btn = document.getElementById('btn-fechar-conta');
             btn.disabled = false;
-            btn.className = "w-full bg-emerald-600 hover:bg-emerald-500 text-gray-950 font-black py-2.5 px-4 rounded-xl flex items-center justify-center gap-2 cursor-pointer text-xs shadow-lg transition";
+            btn.className = "w-full bg-emerald-600 text-gray-950 font-black py-3 px-4 rounded-xl flex items-center justify-center gap-2 text-xs shadow-lg transition";
         }
 
         function ajustarQtdItemMesa(mesaId, prodId, alteracao) {
             const mesa = mesas.find(m => m.id === mesaId);
             const produtoOriginal = produtos.find(p => p.id === prodId);
-            if (!mesa) return;
+            if (!mesa || !produtoOriginal) return;
 
             const item = mesa.itens.find(i => i.id === prodId);
             if (!item) return;
 
-            if (alteracao > 0 && produtoOriginal.stock <= 0) {
-                alert("Não existem mais unidades em Stock Geral!");
-                return;
-            }
+            if (alteracao > 0 && produtoOriginal.stock <= 0) return alert("Falta de Stock Geral!");
 
             item.qtd += alteracao;
             produtoOriginal.stock -= alteracao;
 
-            if (item.qtd <= 0) {
-                mesa.itens = mesa.itens.filter(i => i.id !== prodId);
-            }
-
+            if (item.qtd <= 0) mesa.itens = mesa.itens.filter(i => i.id !== prodId);
             db.ref().update({ mesas: mesas, produtos: produtos });
         }
 
@@ -627,22 +588,21 @@
                 mesa.itens.push({ id: prod.id, nome: prod.nome, preco: prod.preco, custo: prod.custo, qtd: 1 });
             }
             prod.stock--;
-
             db.ref().update({ mesas: mesas, produtos: produtos });
         }
 
         function renderizarBotoesProdutos() {
             const container = document.getElementById('botoes-produtos');
-            container.innerHTML = "";
+            if(!container) return; container.innerHTML = "";
             produtos.forEach(p => {
                 const esgotado = p.stock <= 0;
-                const cls = esgotado ? "bg-gray-950 border border-gray-900 text-gray-600 opacity-40 cursor-not-allowed" : "bg-gray-950 border border-gray-800 hover:border-amber-500/50 text-gray-300";
+                const cls = esgotado ? "bg-gray-950 border-gray-900 text-gray-600 opacity-40" : "bg-gray-950 border-gray-800 text-gray-300 active:border-amber-500";
                 container.innerHTML += `
-                    <button onclick="${esgotado ? '' : `adicionarItemMesa(${p.id})`}" class="p-2 rounded-lg text-left transition flex flex-col justify-between h-14 ${cls}">
+                    <button onclick="${esgotado ? '' : `adicionarItemMesa(${p.id})`}" class="p-2 rounded-xl text-left flex flex-col justify-between h-14 ${cls}">
                         <span class="text-[11px] font-bold block truncate w-full">${p.nome}</span>
-                        <div class="flex justify-between items-center w-full mt-1">
-                            <span class="text-[10px] font-mono text-amber-500">${p.preco.toFixed(2)} MT</span>
-                            <span class="text-[9px] px-1 rounded bg-gray-900">Est: ${p.stock}</span>
+                        <div class="flex justify-between items-center w-full text-[10px]">
+                            <span class="font-mono text-amber-500 font-bold">${p.preco.toFixed(0)} MT</span>
+                            <span class="text-[9px] px-1 rounded bg-gray-900/60">Stk: ${p.stock}</span>
                         </div>
                     </button>`;
             });
@@ -654,22 +614,17 @@
             const m = mesas[idx];
             if (!m || (m.itens || []).length === 0) return;
 
-            if (!confirm(`Deseja fechar a conta da ${m.nome}?`)) return;
+            if (!confirm(`Fechar conta da ${m.nome}?`)) return;
             const horaFecho = new Date().toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' });
             
             const itensVenda = m.itens.map(i => ({
-                id: i.id,
-                nome: i.nome,
-                qtd: i.qtd,
-                custoTotal: i.custo * i.qtd,
-                faturadoTotal: i.preco * i.qtd
+                id: i.id, nome: i.nome, qtd: i.qtd, custoTotal: i.custo * i.qtd, faturadoTotal: i.preco * i.qtd
             }));
 
             vendasCronologicas.push({
                 id: "venda_" + Date.now(),
                 mesa: m.nome.replace(" (Reaberta)", ""),
-                hora: horaFecho,
-                produtos: itensVenda,
+                hora: horaFecho, produtos: itensVenda,
                 total: itensVenda.reduce((s, c) => s + c.faturadoTotal, 0),
                 custoTotal: itensVenda.reduce((s, c) => s + c.custoTotal, 0)
             });
@@ -677,83 +632,54 @@
             mesas.splice(idx, 1);
             db.ref().update({ mesas: mesas, vendas_dia: vendasCronologicas }).then(() => {
                 fecharVisualizacaoMesa();
-                alert("Conta faturada com sucesso!");
             });
         }
 
-        // ==========================================================================
-        // REABRIR E APAGAR CONTAS EM TEMPO REAL NO CLOUD (REQUISITO 2 - CORREÇÃO)
-        // ==========================================================================
         function reabrirMesaFechada(idVenda) {
-            if (!confirm("Pretende REABRIR esta conta? Ela sairá do histórico do turno e voltará ativa para o Salão.")) return;
-            
+            if (!confirm("Pretende REABRIR esta conta?")) return;
             db.ref('vendas_dia').once('value', snapshot => {
                 let listagem = snapshot.val() || [];
                 const venda = listagem.find(v => v.id === idVenda);
-                if (!venda) return alert("Erro: Venda não localizada!");
+                if (!venda) return;
 
-                // Reconverte produtos do histórico para a comanda ativa
                 const itensReabertos = venda.produtos.map(p => {
                     const prodGeral = produtos.find(x => x.id === p.id);
                     return {
-                        id: p.id,
-                        nome: p.nome,
-                        qtd: p.qtd,
+                        id: p.id, nome: p.nome, qtd: p.qtd,
                         preco: p.faturadoTotal / p.qtd,
                         custo: prodGeral ? prodGeral.custo : p.custoTotal / p.qtd
                     };
                 });
 
-                mesas.push({
-                    id: Date.now(),
-                    nome: venda.mesa + " (Reaberta)",
-                    itens: itensReabertos
-                });
-
-                const novaListaVendas = listagem.filter(v => v.id !== idVenda);
-
-                db.ref().update({
-                    mesas: mesas,
-                    vendas_dia: novaListaVendas
-                }).then(() => alert("Conta restaurada com sucesso!"));
+                mesas.push({ id: Date.now(), nome: venda.mesa + " (Reaberta)", itens: itensReabertos });
+                db.ref().update({ mesas: mesas, vendas_dia: listagem.filter(v => v.id !== idVenda) });
             });
         }
 
         function apagarMesaFechadaDefinitivo(idVenda) {
-            if (!confirm("⚠️ ALERTA CRÍTICO: Deseja ELIMINAR esta venda para sempre? O stock saído será devolvido ao inventário.")) return;
-            
+            if (!confirm("Eliminar esta venda para sempre? O stock saído retornará.")) return;
             db.ref('vendas_dia').once('value', snapshot => {
                 let listagem = snapshot.val() || [];
                 const venda = listagem.find(v => v.id === idVenda);
-                if (!venda) return alert("Erro: Venda não localizada!");
+                if (!venda) return;
 
-                // Devolve as quantidades compradas de volta para o stock principal
                 venda.produtos.forEach(p => {
                     const prodGeral = produtos.find(x => x.id === p.id);
                     if (prodGeral) prodGeral.stock += p.qtd;
                 });
 
-                const novaListaVendas = listagem.filter(v => v.id !== idVenda);
-
-                db.ref().update({
-                    produtos: produtos,
-                    vendas_dia: novaListaVendas
-                }).then(() => alert("Venda eliminada e inventário atualizado!"));
+                db.ref().update({ produtos: produtos, vendas_dia: listagem.filter(v => v.id !== idVenda) });
             });
         }
 
-        // ==========================================================================
-        // FECHO DE TURNO & INDICADORES
-        // ==========================================================================
         function atualizarPainelVendas() {
             let totalFaturado = vendasCronologicas.reduce((acc, cur) => acc + cur.total, 0);
             let totalCusto = vendasCronologicas.reduce((acc, cur) => acc + cur.custoTotal, 0);
             let totalDespesas = despesasTurno.reduce((acc, cur) => acc + cur.valor, 0);
-            let lucroLiquido = totalFaturado - totalCusto - totalDespesas;
 
             document.getElementById('hoje-faturacao').innerText = `${totalFaturado.toFixed(2)} MT`;
             document.getElementById('hoje-despesas').innerText = `${totalDespesas.toFixed(2)} MT`;
-            document.getElementById('hoje-lucro').innerText = `${lucroLiquido.toFixed(2)} MT`;
+            document.getElementById('hoje-lucro').innerText = `${(totalFaturado - totalCusto - totalDespesas).toFixed(2)} MT`;
 
             document.getElementById('rel-turno-faturado').innerText = `${totalFaturado.toFixed(2)} MT`;
             document.getElementById('rel-turno-custo').innerText = `${totalCusto.toFixed(2)} MT`;
@@ -766,17 +692,13 @@
             });
 
             const divProdReport = document.getElementById('rel-turno-lista-produtos');
-            divProdReport.innerHTML = Object.keys(resumoProdutos).length === 0 ? `<p class="text-gray-500 col-span-full">Nenhum artigo saído.</p>` : "";
+            divProdReport.innerHTML = Object.keys(resumoProdutos).length === 0 ? `<p class="text-gray-500">Sem saídas.</p>` : "";
             Object.entries(resumoProdutos).forEach(([nome, qtd]) => {
-                divProdReport.innerHTML += `
-                    <div class="bg-gray-950 p-2 border border-gray-800 rounded-xl flex justify-between items-center">
-                        <span class="text-gray-400 truncate">${nome}</span>
-                        <span class="font-mono text-amber-500 font-bold ml-1">${qtd} un</span>
-                    </div>`;
+                divProdReport.innerHTML += `<div class="bg-gray-950 p-2 border border-gray-800 rounded-xl flex justify-between"><span>${nome}</span><span class="text-amber-500 font-bold">${qtd} un</span></div>`;
             });
 
             const containerCronologico = document.getElementById('lista-vendas-dia');
-            containerCronologico.innerHTML = vendasCronologicas.length === 0 ? `<p class="text-xs text-gray-600 text-center py-4">Nenhum movimento.</p>` : "";
+            containerCronologico.innerHTML = vendasCronologicas.length === 0 ? `<p class="text-xs text-gray-600 text-center py-2">Nenhum registo.</p>` : "";
             
             const isAdmin = usuarioAtivo && usuarioAtivo.permissao === 'admin';
 
@@ -784,34 +706,26 @@
                 let botoesAcao = "";
                 if (isAdmin) {
                     botoesAcao = `
-                        <div class="flex items-center gap-1 shrink-0">
-                            <button onclick="reabrirMesaFechada('${v.id}')" class="px-2 py-1 bg-amber-950 border border-amber-800 rounded text-[10px] font-bold text-amber-400 hover:bg-amber-900/40 transition">✏️ Reabrir</button>
-                            <button onclick="apagarMesaFechadaDefinitivo('${v.id}')" class="px-2 py-1 bg-red-950 border border-red-800 rounded text-[10px] font-bold text-red-400 hover:bg-red-900/40 transition">🗑️ Apagar</button>
+                        <div class="flex gap-2 w-full justify-end mt-1.5 border-t border-gray-900 pt-1.5">
+                            <button onclick="reabrirMesaFechada('${v.id}')" class="px-3 py-1 bg-amber-950 border border-amber-900 rounded text-[10px] text-amber-400 font-bold">✏️ Reabrir</button>
+                            <button onclick="apagarMesaFechadaDefinitivo('${v.id}')" class="px-3 py-1 bg-red-950 border border-red-900 rounded text-[10px] text-red-400 font-bold">🗑️ Apagar</button>
                         </div>`;
                 }
 
                 containerCronologico.innerHTML += `
-                    <div class="flex flex-col sm:flex-row justify-between sm:items-center p-2.5 bg-gray-950/40 border border-gray-850 rounded-xl text-xs gap-2">
-                        <div class="flex items-center gap-2 min-w-0">
-                            <span class="text-gray-500 font-mono">${v.hora}</span>
-                            <span class="text-gray-200 font-bold truncate">${v.mesa}</span>
-                            <span class="text-gray-400">(${v.produtos.reduce((s,p)=> s+p.qtd, 0)} un)</span>
-                        </div>
-                        <div class="flex items-center justify-between sm:justify-end gap-3">
+                    <div class="bg-gray-950 p-3 border border-gray-850 rounded-xl text-xs flex flex-col">
+                        <div class="flex justify-between items-center">
+                            <div class="truncate"><span class="text-gray-500 font-mono">${v.hora}</span> <span class="font-bold text-gray-200">${v.mesa}</span></div>
                             <span class="font-mono font-black text-emerald-400">${v.total.toFixed(2)} MT</span>
-                            ${botoesAcao}
                         </div>
+                        ${botoesAcao}
                     </div>`;
             });
 
             const containerDespesas = document.getElementById('lista-despesas-turno');
             containerDespesas.innerHTML = despesasTurno.length === 0 ? `<p class="text-gray-600 italic">Sem gastos.</p>` : "";
             despesasTurno.forEach(d => {
-                containerDespesas.innerHTML += `
-                    <div class="flex justify-between items-center text-gray-400 border-b border-gray-950 pb-1">
-                        <span class="truncate pr-2">• ${d.descricao}</span>
-                        <span class="font-mono text-red-400 font-bold shrink-0">-${d.valor.toFixed(2)} MT</span>
-                    </div>`;
+                containerDespesas.innerHTML += `<div class="flex justify-between border-b border-gray-950 pb-1"><span>• ${d.descricao}</span><span class="text-red-400">-${d.valor.toFixed(0)} MT</span></div>`;
             });
         }
 
@@ -819,58 +733,65 @@
             const desc = document.getElementById('desdespesa-desc');
             const val = document.getElementById('despesa-valor');
             const v = parseFloat(val.value);
-            if (!desc.value.trim() || isNaN(v) || v <= 0) return alert("Valores inválidos!");
+            if (!desc.value.trim() || isNaN(v) || v <= 0) return;
             despesasTurno.push({ id: Date.now(), descricao: desc.value.trim(), valor: v });
             salvarDadosFirebase('despesas', despesasTurno);
             desc.value = ""; val.value = "";
         }
 
         function fecharTurnoGeral() {
-            if (vendasCronologicas.length === 0 && despesasTurno.length === 0) return alert("Sem dados para fechar o turno!");
-            if (!confirm("Finalizar turno?")) return;
+            if (vendasCronologicas.length === 0 && despesasTurno.length === 0) return alert("Sem dados!");
+            if (!confirm("Finalizar turno corrente?")) return;
 
             let totalFaturado = vendasCronologicas.reduce((acc, cur) => acc + cur.total, 0);
             let totalCusto = vendasCronologicas.reduce((acc, cur) => acc + cur.custoTotal, 0);
             let totalDespesas = despesasTurno.reduce((acc, cur) => acc + cur.valor, 0);
-            let lucroLiquido = totalFaturado - totalCusto - totalDespesas;
 
             historicoMensal.push({
                 periodo: new Date().toLocaleDateString('pt-PT'),
-                faturacao: totalFaturado,
-                custo: totalCusto,
-                despesas: totalDespesas,
-                lucro: lucroLiquido
+                faturacao: totalFaturado, custo: totalCusto, despesas: totalDespesas,
+                lucro: totalFaturado - totalCusto - totalDespesas
             });
 
-            db.ref().update({
-                despesas: [],
-                vendas_dia: [],
-                historico_mes: historicoMensal
-            }).then(() => alert("Turno arquivado com sucesso!"));
+            db.ref().update({ despesas: [], vendas_dia: [], historico_mes: historicoMensal });
         }
 
-        // ==========================================================================
-        // OUTROS SUPORTES (STOCK, PRODUTOS, CONSOLIDAÇÃO)
-        // ==========================================================================
-        function atualizarVisaoStock() {
-            const container = document.getElementById('lista-stock-resumido');
-            container.innerHTML = "";
-            produtos.forEach(p => {
-                let cor = "text-emerald-400";
-                if (p.stock <= 12) cor = "text-amber-500";
-                if (p.stock <= 5) cor = "text-red-500 font-black animate-pulse";
+        // FORMATO DE CARDS MOBILE PARA O HISTÓRICO MENSAL
+        function atualizarTabelaMensal() {
+            const container = document.getElementById('cards-historico-mensal');
+            if(!container) return;
+            container.innerHTML = historicoMensal.length === 0 ? `<p class="text-xs text-center text-gray-500 py-4">Sem fechos arquivados.</p>` : "";
+            
+            [...historicoMensal].reverse().forEach(h => {
                 container.innerHTML += `
-                    <div class="flex justify-between items-center bg-gray-950 p-2 rounded-xl border border-gray-800 text-xs">
-                        <span class="font-bold text-gray-300 truncate">${p.nome}</span>
-                        <span class="font-mono ${cor}">${p.stock} un</span>
+                    <div class="bg-gray-900 border border-gray-800 p-3 rounded-xl text-xs space-y-1">
+                        <div class="flex justify-between font-black text-gray-200 border-b border-gray-800 pb-1 mb-1">
+                            <span>📅 Data: ${h.periodo}</span>
+                            <span class="${h.lucro >= 0 ? 'text-emerald-400':'text-red-400'}">${h.lucro.toFixed(2)} MT</span>
+                        </div>
+                        <div class="flex justify-between text-gray-400 text-[11px]">
+                            <span>Faturado: <b class="text-gray-200 font-mono">${h.faturacao.toFixed(0)} MT</b></span>
+                            <span>Custo Stock: <b class="text-gray-200 font-mono">${h.custo.toFixed(0)} MT</b></span>
+                            <span>Gastos: <b class="text-gray-200 font-mono">${h.despesas.toFixed(0)} MT</b></span>
+                        </div>
                     </div>`;
             });
+        }
+
+        function fecharMesDefinitivo() {
+            if (historicoMensal.length === 0 || !confirm("Consolidar dados do mês?")) return;
+            let f = historicoMensal.reduce((s,c)=>s+c.faturacao,0);
+            let c = historicoMensal.reduce((s,c)=>s+c.custo,0);
+            let d = historicoMensal.reduce((s,c)=>s+c.despesas,0);
+            let l = historicoMensal.reduce((s,c)=>s+c.lucro,0);
+            historicoMensal = [{ periodo: `CONSOLIDADO ACUMULADO`, faturacao: f, custo: c, despesas: d, lucro: l }];
+            salvarDadosFirebase('historico_mes', historicoMensal);
         }
 
         function popularSelectRestock() {
             const s = document.getElementById('restock-prod-id');
             if(!s) return; s.innerHTML = "";
-            produtos.forEach(p => s.innerHTML += `<option value="${p.id}">${p.nome} (Stock: ${p.stock})</option>`);
+            produtos.forEach(p => s.innerHTML += `<option value="${p.id}">${p.nome} (Stk: ${p.stock})</option>`);
             sugerirCustoAtual();
         }
 
@@ -884,40 +805,15 @@
             const id = parseInt(document.getElementById('restock-prod-id').value);
             const qty = parseInt(document.getElementById('restock-quantidade').value);
             const cst = parseFloat(document.getElementById('restock-custo-un').value);
-            if (isNaN(qty) || qty <= 0 || isNaN(cst)) return alert("Dados inválidos");
+            if (isNaN(qty) || qty <= 0 || isNaN(cst)) return;
 
             const p = produtos.find(x => x.id === id);
             if (p) {
                 p.stock += qty; p.custo = cst;
                 salvarDadosFirebase('produtos', produtos);
                 document.getElementById('restock-quantidade').value = "";
-                alert("Inventário incrementado!");
+                alert("Stock Atualizado!");
             }
-        }
-
-        function atualizarTabelaMensal() {
-            const b = document.getElementById('tabela-historico-mensal');
-            b.innerHTML = historicoMensal.length === 0 ? `<tr><td colspan="5" class="p-4 text-center text-gray-500">Sem histórico acumulado.</td></tr>` : "";
-            historicoMensal.forEach(h => {
-                b.innerHTML += `
-                    <tr class="border-b border-gray-900 hover:bg-gray-900/20">
-                        <td class="p-3 font-bold text-gray-300">${h.periodo}</td>
-                        <td class="p-3 text-amber-400">${h.faturacao.toFixed(2)} MT</td>
-                        <td class="p-3 text-red-400/80">${h.custo.toFixed(2)} MT</td>
-                        <td class="p-3 text-red-400">${h.despesas.toFixed(2)} MT</td>
-                        <td class="p-3 ${h.lucro >= 0 ? 'text-emerald-400 font-bold' : 'text-red-500 font-bold'}">${h.lucro.toFixed(2)} MT</td>
-                    </tr>`;
-            });
-        }
-
-        function fecharMesDefinitivo() {
-            if (historicoMensal.length === 0 || !confirm("Consolidar dados arquivados do mês?")) return;
-            let f = historicoMensal.reduce((s,c)=>s+c.faturacao,0);
-            let c = historicoMensal.reduce((s,c)=>s+c.custo,0);
-            let d = historicoMensal.reduce((s,c)=>s+c.despesas,0);
-            let l = historicoMensal.reduce((s,c)=>s+c.lucro,0);
-            historicoMensal = [{ periodo: `TOTAL CONSOLIDADO ACUMULADO`, faturacao: f, custo: c, despesas: d, lucro: l }];
-            salvarDadosFirebase('historico_mes', historicoMensal);
         }
 
         function atualizarConfigProdutos() {
@@ -925,13 +821,15 @@
             if(!container) return; container.innerHTML = "";
             produtos.forEach(p => {
                 container.innerHTML += `
-                    <div class="bg-gray-950 p-2 rounded-xl border border-gray-800 grid grid-cols-1 sm:grid-cols-4 gap-2 items-center text-xs">
-                        <div class="font-bold text-gray-200 truncate">${p.nome}</div>
-                        <input type="number" onchange="altProd(${p.id}, 'custo', this.value)" value="${p.custo}" class="bg-gray-900 border border-gray-800 rounded px-2 py-1 text-red-400 font-mono">
-                        <input type="number" onchange="altProd(${p.id}, 'preco', this.value)" value="${p.preco}" class="bg-gray-900 border border-gray-800 rounded px-2 py-1 text-emerald-400 font-mono">
-                        <div class="flex items-center gap-2">
-                            <input type="number" onchange="altProd(${p.id}, 'stock', this.value)" value="${p.stock}" class="w-full bg-gray-900 border border-gray-800 rounded px-2 py-1 text-gray-300 font-mono">
-                            <button onclick="delProd(${p.id})" class="bg-red-950 hover:bg-red-900 text-red-400 p-1 rounded"><span class="material-icons text-sm block">delete</span></button>
+                    <div class="bg-gray-950 p-3 rounded-xl border border-gray-850 space-y-2 text-xs">
+                        <div class="flex justify-between items-center font-bold text-gray-200">
+                            <span class="truncate">${p.nome}</span>
+                            <button onclick="delProd(${p.id})" class="text-red-400 p-1"><span class="material-icons text-sm">delete</span></button>
+                        </div>
+                        <div class="grid grid-cols-3 gap-2 text-[11px]">
+                            <div><label class="text-gray-500 block mb-0.5">Custo</label><input type="number" onchange="altProd(${p.id}, 'custo', this.value)" value="${p.custo}" class="w-full bg-gray-900 border border-gray-800 rounded px-1.5 py-1 text-red-400 font-mono text-center"></div>
+                            <div><label class="text-gray-500 block mb-0.5">Venda</label><input type="number" onchange="altProd(${p.id}, 'preco', this.value)" value="${p.preco}" class="w-full bg-gray-900 border border-gray-800 rounded px-1.5 py-1 text-emerald-400 font-mono text-center"></div>
+                            <div><label class="text-gray-500 block mb-0.5">Físico</label><input type="number" onchange="altProd(${p.id}, 'stock', this.value)" value="${p.stock}" class="w-full bg-gray-900 border border-gray-800 rounded px-1.5 py-1 text-gray-300 font-mono text-center"></div>
                         </div>
                     </div>`;
             });
@@ -943,7 +841,7 @@
         }
 
         function delProd(id) {
-            if (confirm("Remover artigo definitivamente?")) { produtos = produtos.filter(x => x.id !== id); salvarDadosFirebase('produtos', produtos); }
+            if (confirm("Remover produto?")) { produtos = produtos.filter(x => x.id !== id); salvarDadosFirebase('produtos', produtos); }
         }
 
         function adicionarNovoProduto() {
@@ -951,7 +849,7 @@
             const c = parseFloat(document.getElementById('novo-prod-custo').value);
             const p = parseFloat(document.getElementById('novo-prod-preco').value);
             const s = parseInt(document.getElementById('novo-prod-stock').value) || 0;
-            if(!n || isNaN(c) || isNaN(p)) return alert("Campos obrigatórios em falta!");
+            if(!n || isNaN(c) || isNaN(p)) return;
             produtos.push({ id: Date.now(), nome: n, custo: c, preco: p, stock: s });
             salvarDadosFirebase('produtos', produtos);
             document.getElementById('novo-prod-nome').value = "";
@@ -964,7 +862,7 @@
                 document.getElementById('tela-login').classList.add('hidden');
                 document.getElementById('sistema-conteudo').classList.remove('hidden');
                 document.getElementById('nome-usuario-ativo').innerText = usuarioAtivo.nome.toUpperCase();
-                document.getElementById('txt-permissao').innerText = usuarioAtivo.permissao === 'admin' ? "Administrador" : "Operador de Caixa";
+                document.getElementById('txt-permissao').innerText = usuarioAtivo.permissao === 'admin' ? "Administrador" : "Caixa";
                 aplicarRestricoesPermissao();
                 atualizarListaOperadores();
                 mudarAba('home');
