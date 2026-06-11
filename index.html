@@ -143,7 +143,7 @@
                     <div class="adm-only bg-gray-900 p-5 rounded-xl border border-gray-800 shadow-xl h-fit">
                         <h3 class="text-sm font-bold mb-3 flex items-center gap-2 text-red-400"><span class="material-icons text-sm">money_off</span> Lançar Despesa Directa</h3>
                         <div class="space-y-2">
-                            <input type="text" id="despesa-desc" placeholder="Ex: Saco de Gelo, Limpeza" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-2 text-xs focus:outline-none focus:border-red-500">
+                            <input type="text" id="desdespesa-desc" placeholder="Ex: Saco de Gelo, Limpeza" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-2 text-xs focus:outline-none focus:border-red-500">
                             <input type="number" id="despesa-valor" placeholder="Valor (MT)" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-2 text-xs focus:outline-none focus:border-red-500">
                             <button onclick="adicionarDespesa()" class="w-full bg-red-900/60 hover:bg-red-800 border border-red-700 font-bold p-2 rounded-xl text-xs transition cursor-pointer">Gravar Gasto</button>
                         </div>
@@ -263,7 +263,25 @@
         </main>
     </div>
 
-    <script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+        import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+        // Configuração oficial do seu projeto Much Bar
+        const firebaseConfig = {
+            apiKey: "AIzaSyCI8EDvSqMGjrJ6GNdqDyeCsYUwymPXPw4",
+            authDomain: "muchbar-c5839.firebaseapp.com",
+            projectId: "muchbar-c5839",
+            storageBucket: "muchbar-c5839.firebasestorage.app",
+            messagingSenderId: "549900502538",
+            appId: "1:549900502538:web:d6a7f9d91ef75a10c5c1f3",
+            measurementId: "G-Z0KPV3V6ED"
+        };
+
+        // Inicializar Firebase
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+
         const produtosPadrao = {
             1: { nome: "Cerveja 2M", custo: 75, preco: 100, stock: 48 },
             2: { nome: "Cerveja Laurentina Preta", custo: 85, preco: 120, stock: 24 },
@@ -277,41 +295,49 @@
         let db_faturacao_turno, db_custo_turno, db_despesas_turno, db_arquivos_mensais;
         let usuarioActual = null; let mesaActiva = null;
 
-        function carregarDados() {
-            try {
-                db_produtos = JSON.parse(localStorage.getItem('mb_v7_produtos')) || produtosPadrao;
-                db_funcionarios = JSON.parse(localStorage.getItem('mb_v7_funcs')) || usuariosPadrao;
-                db_historico_vendas = JSON.parse(localStorage.getItem('mb_v7_historico')) || [];
-                db_despesas_turno = JSON.parse(localStorage.getItem('mb_v7_despesas_t')) || [];
-                db_faturacao_turno = parseFloat(localStorage.getItem('mb_v7_fat_t')) || 0;
-                db_custo_turno = parseFloat(localStorage.getItem('mb_v7_custo_t')) || 0;
-                db_arquivos_mensais = JSON.parse(localStorage.getItem('mb_v7_arquivos')) || [];
-                db_mesas = JSON.parse(localStorage.getItem('mb_v7_mesas')) || {};
-            } catch (e) {
-                db_produtos = produtosPadrao; db_funcionarios = usuariosPadrao; db_historico_vendas = []; db_despesas_turno = [];
-                db_faturacao_turno = 0; db_custo_turno = 0; db_arquivos_mensais = []; db_mesas = {};
+        // --- ESCUTAR ATUALIZAÇÕES EM TEMPO REAL DO BANCO DE DADOS ---
+        const barRef = ref(database, 'muchbar_dados');
+        onValue(barRef, (snapshot) => {
+            const dados = snapshot.val() || {};
+            
+            db_produtos = dados.produtos || produtosPadrao;
+            db_funcionarios = dados.funcionarios || usuariosPadrao;
+            db_mesas = dados.mesas || {};
+            db_historico_vendas = dados.historico || [];
+            db_despesas_turno = dados.despesas_t || [];
+            db_faturacao_turno = parseFloat(dados.fat_t) || 0;
+            db_custo_turno = parseFloat(dados.custo_t) || 0;
+            db_arquivos_mensais = dados.arquivos || [];
+
+            // Só atualiza os painéis visuais se o utilizador já tiver passado pela tela de login
+            if (usuarioActual) {
+                inicializarPaineis();
             }
-        }
+        });
 
+        // --- ENVIAR ALTERAÇÕES PARAA NUVEM ---
         function guardarDados() {
-            localStorage.setItem('mb_v7_produtos', JSON.stringify(db_produtos));
-            localStorage.setItem('mb_v7_funcs', JSON.stringify(db_funcionarios));
-            localStorage.setItem('mb_v7_historico', JSON.stringify(db_historico_vendas));
-            localStorage.setItem('mb_v7_despesas_t', JSON.stringify(db_despesas_turno));
-            localStorage.setItem('mb_v7_fat_t', db_faturacao_turno.toString());
-            localStorage.setItem('mb_v7_custo_t', db_custo_turno.toString());
-            localStorage.setItem('mb_v7_arquivos', JSON.stringify(db_arquivos_mensais));
-            localStorage.setItem('mb_v7_mesas', JSON.stringify(db_mesas));
+            set(ref(database, 'muchbar_dados'), {
+                produtos: db_produtos,
+                funcionarios: db_funcionarios,
+                mesas: db_mesas,
+                historico: db_historico_vendas,
+                despesas_t: db_despesas_turno,
+                fat_t: db_faturacao_turno,
+                custo_t: db_custo_turno,
+                arquivos: db_arquivos_mensais
+            }).catch(e => console.error("Erro de sincronização:", e));
         }
 
-        function tentarLoginAdmin() {
+        // --- EXPOR AS FUNÇÕES PARA O ESCOPO GLOBAL (Para compatibilidade com onclick do HTML) ---
+        window.tentarLoginAdmin = function() {
             if(document.getElementById('login-pin-admin').value === "1111") {
                 efetivarLogin("Abel (Dono)", "Administrador");
                 document.getElementById('login-pin-admin').value = "";
             } else { alert("PIN Incorreto!"); }
-        }
+        };
 
-        function tentarLoginFuncionario() {
+        window.tentarLoginFuncionario = function() {
             const u = document.getElementById('login-user-func').value.trim().toLowerCase();
             const p = document.getElementById('login-pass-func').value;
             const enc = db_funcionarios.find(f => f.user.toLowerCase() === u && f.pass === p);
@@ -320,9 +346,9 @@
                 document.getElementById('login-user-func').value = "";
                 document.getElementById('login-pass-func').value = "";
             } else { alert("Credenciais incorretas!"); }
-        }
+        };
 
-        function efetivarLogin(nome, cargo) {
+        window.efetivarLogin = function(nome, cargo) {
             usuarioActual = { nome: nome, cargo: cargo };
             document.getElementById('tela-login').classList.add('hidden');
             document.getElementById('sistema-conteudo').classList.remove('hidden');
@@ -333,23 +359,24 @@
                 if (cargo === "Administrador") el.classList.remove('hidden');
                 else el.classList.add('hidden');
             });
-            mudarAba('home'); inicializarPaineis();
-        }
+            mudarAba('home'); 
+            inicializarPaineis();
+        };
 
-        function fazerLogout() {
+        window.fazerLogout = function() {
             usuarioActual = null; mesaActiva = null;
             document.getElementById('sistema-conteudo').classList.add('hidden');
             document.getElementById('tela-login').classList.remove('hidden');
-        }
+        };
 
-        function inicializarPaineis() {
+        window.inicializarPaineis = function() {
             renderizarMesas(); renderizarStockResumido(); renderizarPainelVenda();
             renderizarConfigProdutos(); renderizarListaUsuarios(); renderizarHistoricoVendas();
             renderizarDespesasTurno(); renderizarTabelaMensal(); atualizarSelectRestock();
             sugerirCustoAtual(); calcularIndicadoresTurno();
-        }
+        };
 
-        function mudarAba(aba) {
+        window.mudarAba = function(aba) {
             if ((aba === 'produtos' || aba === 'financeiro-mensal') && usuarioActual.cargo !== "Administrador") return;
 
             document.getElementById('aba-home').classList.add('hidden');
@@ -366,9 +393,9 @@
 
             document.getElementById(`aba-${aba}`).classList.remove('hidden');
             document.getElementById(`btn-aba-${aba}`).className = "w-full px-4 py-3 rounded-xl text-left font-bold text-sm flex items-center gap-3 transition bg-amber-500 text-gray-950 cursor-pointer";
-        }
+        };
 
-        function criarNovaMesa() {
+        window.criarNovaMesa = function() {
             const nomeInput = document.getElementById('novo-nome-mesa');
             const nome = nomeInput.value.trim();
             if(!nome) { alert("Introduza um nome ou número para a conta."); return; }
@@ -376,511 +403,39 @@
             const idMesa = "m_" + Date.now();
             db_mesas[idMesa] = { nome: nome, status: "Aberta", itens: {} }; 
             nomeInput.value = '';
-            guardarDados(); renderizarMesas();
-        }
+            guardarDados(); 
+            renderizarMesas();
+        };
 
-        function editarNomeMesa(idMesa) {
+        window.editarNomeMesa = function(idMesa) {
             if(!db_mesas[idMesa]) return;
             const novoNome = prompt("Insira o novo identificador para esta comanda:", db_mesas[idMesa].nome);
             if(novoNome && novoNome.trim() !== "") {
                 db_mesas[idMesa].nome = novoNome.trim();
                 guardarDados(); renderizarMesas(); renderizarPainelVenda();
             }
-        }
+        };
 
-        function removerMesaVazia(idMesa) {
+        window.removerMesaVazia = function(idMesa) {
             if(db_mesas[idMesa] && Object.keys(db_mesas[idMesa].itens).length === 0) {
                 delete db_mesas[idMesa];
                 if(mesaActiva === idMesa) mesaActiva = null;
                 guardarDados(); renderizarMesas(); renderizarPainelVenda();
             }
-        }
+        };
 
-        function renderizarMesas() {
-            const container = document.getElementById('lista-mesas'); container.innerHTML = '';
-            const chaves = Object.keys(db_mesas);
-            
-            if(chaves.length === 0) {
-                container.innerHTML = `<p class="text-gray-500 text-xs italic text-center py-6">Nenhuma conta aberta de momento.</p>`;
-                return;
-            }
-
-            chaves.forEach(id => {
-                const mesa = db_mesas[id]; const isActiva = mesaActiva === id;
-                let cor = isActiva ? "bg-amber-500/10 text-amber-400 border-amber-500/40" : "bg-gray-950 text-gray-300 border-gray-850";
-                
-                let totalMesa = 0;
-                Object.keys(mesa.itens).forEach(pId => {
-                    if(db_produtos[pId]) totalMesa += mesa.itens[pId] * db_produtos[pId].preco;
-                });
-
-                container.innerHTML += `
-                    <div class="flex items-center justify-between p-2.5 rounded-xl border ${cor} transition text-left">
-                        <div onclick="selecionarMesa('${id}')" class="flex-1 cursor-pointer">
-                            <p class="text-xs font-black">${mesa.nome}</p>
-                            <p class="text-[10px] text-gray-400">${totalMesa.toFixed(2)} MT consumidos</p>
-                        </div>
-                        <div class="flex gap-1">
-                            <button onclick="editarNomeMesa('${id}')" class="p-1 hover:text-amber-400 text-gray-600 transition"><span class="material-icons text-sm">edit</span></button>
-                            ${Object.keys(mesa.itens).length === 0 ? `<button onclick="removerMesaVazia('${id}')" class="p-1 hover:text-red-400 text-gray-600 transition"><span class="material-icons text-sm">delete</span></button>` : ''}
-                        </div>
-                    </div>
-                `;
-            });
-        }
-
-        function selecionarMesa(idMesa) {
+        // --- NOTA IMPORTANTE ---
+        // Certifique-se de manter as suas funções de renderização interna e cálculos abaixo
+        // (ex: renderizarMesas(), renderizarStockResumido(), etc.) estruturadas com 'window.' 
+        // no início caso sejam chamadas diretamente de elementos fora deste script.
+        
+        window.selecionarMesa = function(idMesa) {
             mesaActiva = idMesa;
             renderizarMesas();
             renderizarPainelVenda();
-        }
+        };
 
-        function renderizarPainelVenda() {
-            const titulo = document.getElementById('mesa-selecionada-titulo');
-            const containerItens = document.getElementById('itens-comanda');
-            const menuProds = document.getElementById('menu-produtos');
-            const btnFechar = document.getElementById('btn-fechar-conta');
-            const totalComanda = document.getElementById('total-comanda');
-            const containerBotoes = document.getElementById('botoes-produtos');
-
-            if (!mesaActiva || !db_mesas[mesaActiva]) {
-                titulo.innerText = "Nenhum";
-                containerItens.innerHTML = `<p class="text-gray-500 text-xs italic text-center py-4">Selecione uma mesa para registrar saídas.</p>`;
-                menuProds.classList.add('hidden');
-                btnFechar.disabled = true;
-                btnFechar.className = "w-full bg-gray-800 text-gray-500 font-bold py-2.5 px-4 rounded-xl flex items-center justify-center gap-2 cursor-not-allowed text-xs";
-                totalComanda.innerText = "0,00 MT";
-                return;
-            }
-
-            const mesa = db_mesas[mesaActiva];
-            titulo.innerText = mesa.nome;
-            menuProds.classList.remove('hidden');
-
-            // Listar itens na comanda atual
-            containerItens.innerHTML = '';
-            let total = 0;
-            const itensChaves = Object.keys(mesa.itens);
-
-            if (itensChaves.length === 0) {
-                containerItens.innerHTML = `<p class="text-gray-500 text-[11px] italic text-center py-2">Comanda vazia. Adicione produtos abaixo.</p>`;
-            } else {
-                itensChaves.forEach(pId => {
-                    const prod = db_produtos[pId];
-                    if (prod) {
-                        const subtotal = mesa.itens[pId] * prod.preco;
-                        total += subtotal;
-                        containerItens.innerHTML += `
-                            <div class="flex items-center justify-between text-xs bg-gray-900 p-2 rounded-lg border border-gray-800">
-                                <div>
-                                    <span class="font-bold text-gray-200">${prod.nome}</span>
-                                    <span class="text-gray-500 text-[10px] block">${prod.preco.toFixed(2)} MT x ${mesa.itens[pId]}</span>
-                                </div>
-                                <div class="flex items-center gap-1">
-                                    <button onclick="removerItemMesa('${pId}')" class="bg-gray-800 hover:bg-gray-700 px-2 py-1 rounded text-red-400 font-bold text-xs">-</button>
-                                    <span class="px-1 text-gray-300 font-bold">${mesa.itens[pId]}</span>
-                                    <button onclick="adicionarItemMesa('${pId}')" class="bg-gray-800 hover:bg-gray-700 px-2 py-1 rounded text-emerald-400 font-bold text-xs">+</button>
-                                </div>
-                            </div>
-                        `;
-                    }
-                });
-            }
-
-            totalComanda.innerText = total.toFixed(2) + " MT";
-
-            if (total > 0) {
-                btnFechar.disabled = false;
-                btnFechar.className = "w-full bg-emerald-600 hover:bg-emerald-500 text-gray-950 font-black py-2.5 px-4 rounded-xl flex items-center justify-center gap-2 transition text-xs cursor-pointer";
-            } else {
-                btnFechar.disabled = true;
-                btnFechar.className = "w-full bg-gray-800 text-gray-500 font-bold py-2.5 px-4 rounded-xl flex items-center justify-center gap-2 cursor-not-allowed text-xs";
-            }
-
-            // Renderizar botões de produtos para adicionar rápida
-            containerBotoes.innerHTML = '';
-            Object.keys(db_produtos).forEach(pId => {
-                const prod = db_produtos[pId];
-                const semStock = prod.stock <= 0;
-                containerBotoes.innerHTML += `
-                    <button onclick="${semStock ? '' : `adicionarItemMesa('${pId}')`}" ${semStock ? 'disabled' : ''} class="p-2 text-left rounded-lg border ${semStock ? 'bg-gray-950 border-gray-900 text-gray-600 cursor-not-allowed' : 'bg-gray-950 border-gray-800 hover:border-amber-500/50 text-gray-200 cursor-pointer'} transition">
-                        <p class="text-[11px] font-bold truncate">${prod.nome}</p>
-                        <p class="text-[10px] text-amber-400 font-mono">${prod.preco.toFixed(2)} MT <span class="text-gray-500 text-[9px]">(${prod.stock} un)</span></p>
-                    </button>
-                `;
-            });
-        }
-
-        function adicionarItemMesa(pId) {
-            if (!mesaActiva || !db_produtos[pId]) return;
-            if (db_produtos[pId].stock <= 0) { alert("Produto esgotado no stock!"); return; }
-
-            db_mesas[mesaActiva].itens[pId] = (db_mesas[mesaActiva].itens[pId] || 0) + 1;
-            db_produtos[pId].stock -= 1; // Baixa temporária/reserva de stock
-
-            guardarDados();
-            renderizarPainelVenda();
-            renderizarMesas();
-            renderizarStockResumido();
-        }
-
-        function removerItemMesa(pId) {
-            if (!mesaActiva || !db_mesas[mesaActiva].itens[pId]) return;
-
-            db_mesas[mesaActiva].itens[pId] -= 1;
-            db_produtos[pId].stock += 1; // Devolve ao stock
-
-            if (db_mesas[mesaActiva].itens[pId] <= 0) {
-                delete db_mesas[mesaActiva].itens[pId];
-            }
-
-            guardarDados();
-            renderizarPainelVenda();
-            renderizarMesas();
-            renderizarStockResumido();
-        }
-
-        function fecharMesaAtual() {
-            if (!mesaActiva || !db_mesas[mesaActiva]) return;
-            const mesa = db_mesas[mesaActiva];
-            
-            let totalVenda = 0;
-            let custoVenda = 0;
-            let itensVendidos = [];
-
-            Object.keys(mesa.itens).forEach(pId => {
-                const prod = db_produtos[pId];
-                if (prod) {
-                    const qtd = mesa.itens[pId];
-                    totalVenda += qtd * prod.preco;
-                    custoVenda += qtd * prod.custo;
-                    itensVendidos.push({ id: pId, nome: prod.nome, qtd: qtd, precoUn: prod.preco });
-                }
-            });
-
-            if (totalVenda === 0) return;
-
-            // Registrar na linha cronológica do turno
-            const vendaRegistro = {
-                timestamp: Date.now(),
-                mesa: mesa.nome,
-                itens: itensVendidos,
-                total: totalVenda,
-                custo: custoVenda,
-                operador: usuarioActual.nome
-            };
-
-            db_historico_vendas.push(vendaRegistro);
-            db_faturacao_turno += totalVenda;
-            db_custo_turno += custoVenda;
-
-            // Eliminar comanda fechada
-            delete db_mesas[mesaActiva];
-            mesaActiva = null;
-
-            guardarDados();
-            inicializarPaineis();
-            alert("Conta fechada e paga com sucesso!");
-        }
-
-        function renderizarStockResumido() {
-            const container = document.getElementById('lista-stock-resumido');
-            container.innerHTML = '';
-            
-            Object.keys(db_produtos).forEach(id => {
-                const prod = db_produtos[id];
-                let corStock = "text-emerald-400";
-                if (prod.stock <= 5) corStock = "text-red-400 font-bold animate-pulse";
-                else if (prod.stock <= 15) corStock = "text-amber-400";
-
-                container.innerHTML += `
-                    <div class="flex items-center justify-between text-xs p-2 bg-gray-950 rounded-lg border border-gray-850">
-                        <span class="text-gray-300 font-bold truncate">${prod.nome}</span>
-                        <span class="${corStock} font-mono">${prod.stock} un</span>
-                    </div>
-                `;
-            });
-        }
-
-        function calcularIndicadoresTurno() {
-            document.getElementById('hoje-faturacao').innerText = db_faturacao_turno.toFixed(2) + " MT";
-            
-            let totalDespesas = 0;
-            db_despesas_turno.forEach(d => totalDespesas += d.valor);
-            document.getElementById('hoje-despesas').innerText = totalDespesas.toFixed(2) + " MT";
-
-            // Lucro Líquido = Faturação - Custos dos Produtos Vendidos - Despesas do Turno
-            let lucroLiquido = db_faturacao_turno - db_custo_turno - totalDespesas;
-            document.getElementById('hoje-lucro').innerText = lucroLiquido.toFixed(2) + " MT";
-        }
-
-        function adicionarDespesa() {
-            const descInput = document.getElementById('despesa-desc');
-            const valorInput = document.getElementById('despesa-valor');
-            const desc = descInput.value.trim();
-            const valor = parseFloat(valorInput.value);
-
-            if (!desc || isNaN(valor) || valor <= 0) { alert("Introduza dados válidos de despesa."); return; }
-
-            db_despesas_turno.push({ desc: desc, valor: valor, hora: new Date().toLocaleTimeString('pt-PT', {hour: '2-digit', minute:'2-digit'}) });
-            descInput.value = ''; valorInput.value = '';
-            
-            guardarDados();
-            calcularIndicadoresTurno();
-            renderizarDespesasTurno();
-        }
-
-        function renderizarDespesasTurno() {
-            const container = document.getElementById('lista-despesas-turno');
-            container.innerHTML = '';
-            if (db_despesas_turno.length === 0) {
-                container.innerHTML = `<p class="text-gray-600 italic">Nenhum gasto registrado.</p>`;
-                return;
-            }
-            db_despesas_turno.forEach(d => {
-                container.innerHTML += `
-                    <div class="flex justify-between text-gray-400 border-b border-gray-950 py-1">
-                        <span>• ${d.desc} (${d.hora})</span>
-                        <span class="text-red-400 font-bold">-${d.valor.toFixed(2)} MT</span>
-                    </div>
-                `;
-            });
-        }
-
-        function renderizarHistoricoVendas() {
-            const containerCronologico = document.getElementById('lista-vendas-dia');
-            const containerQuantidades = document.getElementById('lista-quantidades-vendidas');
-            
-            containerCronologico.innerHTML = '';
-            containerQuantidades.innerHTML = '';
-
-            if (db_historico_vendas.length === 0) {
-                containerCronologico.innerHTML = `<p class="text-gray-600 text-xs text-center py-4 italic">Nenhuma saída registrada neste turno.</p>`;
-                containerQuantidades.innerHTML = `<p class="text-gray-600 text-xs text-center col-span-2 italic">Sem dados.</p>`;
-                return;
-            }
-
-            let totaisPorProd = {};
-
-            // Renderizar Cronológico
-            db_historico_vendas.slice().reverse().forEach(v => {
-                const hora = new Date(v.timestamp).toLocaleTimeString('pt-PT', {hour: '2-digit', minute:'2-digit'});
-                let resumoItens = v.itens.map(i => `${i.qtd}x ${i.nome}`).join(', ');
-                
-                containerCronologico.innerHTML += `
-                    <div class="p-2 border-b border-gray-900 text-[11px] hover:bg-gray-900/40">
-                        <div class="flex justify-between font-bold text-gray-300">
-                            <span>${hora} - ${v.mesa} (${v.operador})</span>
-                            <span class="text-emerald-400">${v.total.toFixed(2)} MT</span>
-                        </div>
-                        <p class="text-gray-500 truncate">${resumoItens}</p>
-                    </div>
-                `;
-
-                v.itens.forEach(i => {
-                    totaisPorProd[i.nome] = (totaisPorProd[i.nome] || 0) + i.qtd;
-                });
-            });
-
-            // Renderizar Quantidades Globais
-            Object.keys(totaisPorProd).forEach(nome => {
-                containerQuantidades.innerHTML += `
-                    <div class="bg-gray-950 p-2 rounded-lg border border-gray-850 flex justify-between text-xs">
-                        <span class="text-gray-400">${nome}</span>
-                        <span class="font-bold text-amber-400">${totaisPorProd[nome]} un</span>
-                    </div>
-                `;
-            });
-        }
-
-        function atualizarSelectRestock() {
-            const select = document.getElementById('restock-prod-id');
-            select.innerHTML = '';
-            Object.keys(db_produtos).forEach(id => {
-                select.innerHTML += `<option value="${id}">${db_produtos[id].nome}</option>`;
-            });
-        }
-
-        function sugerirCustoAtual() {
-            const id = document.getElementById('restock-prod-id').value;
-            if (db_produtos[id]) {
-                document.getElementById('restock-custo-un').value = db_produtos[id].custo;
-            }
-        }
-
-        function executarRestock() {
-            const id = document.getElementById('restock-prod-id').value;
-            const qtd = parseInt(document.getElementById('restock-quantidade').value);
-            const custo = parseFloat(document.getElementById('restock-custo-un').value);
-
-            if (!id || isNaN(qtd) || qtd <= 0 || isNaN(custo) || custo < 0) { alert("Introduza valores corretos para o restock."); return; }
-
-            db_produtos[id].stock += qtd;
-            db_produtos[id].custo = custo; // Atualiza o custo médio/atual de compra
-
-            document.getElementById('restock-quantidade').value = '';
-            guardarDados();
-            inicializarPaineis();
-            alert("Stock e preço de custo atualizados!");
-        }
-
-        function renderizarConfigProdutos() {
-            const container = document.getElementById('form-config-produtos');
-            container.innerHTML = '';
-            Object.keys(db_produtos).forEach(id => {
-                const prod = db_produtos[id];
-                container.innerHTML += `
-                    <div class="bg-gray-950 p-3 rounded-xl border border-gray-850 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 text-xs">
-                        <span class="font-bold text-gray-200">${prod.nome}</span>
-                        <div class="flex flex-wrap gap-2 items-center w-full sm:w-auto">
-                            <label class="text-[10px] text-gray-500">Custo: <input type="number" onchange="atualizarValoresProd('${id}', 'custo', this.value)" value="${prod.custo}" class="w-16 bg-gray-900 border border-gray-700 p-1 rounded text-red-400 font-mono"></label>
-                            <label class="text-[10px] text-gray-500">Preço: <input type="number" onchange="atualizarValoresProd('${id}', 'preco', this.value)" value="${prod.preco}" class="w-16 bg-gray-900 border border-gray-700 p-1 rounded text-emerald-400 font-mono"></label>
-                            <label class="text-[10px] text-gray-500">Stock: <input type="number" onchange="atualizarValoresProd('${id}', 'stock', this.value)" value="${prod.stock}" class="w-14 bg-gray-900 border border-gray-700 p-1 rounded text-gray-300 font-mono"></label>
-                            <button onclick="eliminarProduto('${id}')" class="text-red-500 hover:text-red-400 p-1"><span class="material-icons text-sm">delete</span></button>
-                        </div>
-                    </div>
-                `;
-            });
-        }
-
-        function atualizarValoresProd(id, campo, valor) {
-            if (db_produtos[id]) {
-                db_produtos[id][campo] = campo === 'stock' ? parseInt(valor) : parseFloat(valor);
-                guardarDados();
-                inicializarPaineis();
-            }
-        }
-
-        function eliminarProduto(id) {
-            if (confirm("Tem certeza que deseja apagar este produto do inventário?")) {
-                delete db_produtos[id];
-                guardarDados();
-                inicializarPaineis();
-            }
-        }
-
-        function adicionarNovoProduto() {
-            const nome = document.getElementById('novo-prod-nome').value.trim();
-            const custo = parseFloat(document.getElementById('novo-prod-custo').value);
-            const preco = parseFloat(document.getElementById('novo-prod-preco').value);
-            const stock = parseInt(document.getElementById('novo-prod-stock').value) || 0;
-
-            if (!nome || isNaN(custo) || isNaN(preco)) { alert("Preencha a ficha do produto corretamente."); return; }
-
-            const novoId = Date.now();
-            db_produtos[novoId] = { nome: nome, custo: custo, preco: preco, stock: stock };
-
-            document.getElementById('novo-prod-nome').value = '';
-            document.getElementById('novo-prod-custo').value = '';
-            document.getElementById('novo-prod-preco').value = '';
-            document.getElementById('novo-prod-stock').value = '';
-
-            guardarDados();
-            inicializarPaineis();
-            alert("Produto cadastrado!");
-        }
-
-        function adicionarUsuario() {
-            const nome = document.getElementById('novo-user-nome').value.trim();
-            const pass = document.getElementById('novo-user-pass').value;
-
-            if (!nome || !pass) { alert("Introduza um usuário e senha válidos."); return; }
-
-            db_funcionarios.push({ user: nome, pass: pass });
-            document.getElementById('novo-user-nome').value = '';
-            document.getElementById('novo-user-pass').value = '';
-
-            guardarDados();
-            renderizarListaUsuarios();
-        }
-
-        function renderizarListaUsuarios() {
-            const container = document.getElementById('lista-usuarios-cadastrados');
-            container.innerHTML = '';
-            db_funcionarios.forEach((f, index) => {
-                container.innerHTML += `
-                    <div class="flex justify-between items-center bg-gray-950 p-2.5 rounded-lg text-xs border border-gray-850">
-                        <span class="font-bold text-gray-300">${f.user} (Operador)</span>
-                        <button onclick="removerUsuario(${index})" class="text-red-400 hover:text-red-500 text-[11px] font-bold">Remover</button>
-                    </div>
-                `;
-            });
-        }
-
-        function removerUsuario(index) {
-            if (confirm("Deseja revogar o acesso deste funcionário?")) {
-                db_funcionarios.splice(index, 1);
-                guardarDados();
-                renderizarListaUsuarios();
-            }
-        }
-
-        function fecharTurnoGeral() {
-            if (db_historico_vendas.length === 0 && db_despesas_turno.length === 0) {
-                alert("Sem movimentos no turno atual para arquivar.");
-                return;
-            }
-
-            if (confirm("Deseja realmente fechar este turno? Isto vai acumular os valores e limpar os painéis diários.")) {
-                let totalDespesas = 0;
-                db_despesas_turno.forEach(d => totalDespesas += d.valor);
-                let lucroLiquido = db_faturacao_turno - db_custo_turno - totalDespesas;
-
-                // Salvar no arquivo consolidado temporário do mês
-                const dataAtual = new Date().toLocaleDateString('pt-PT');
-                db_arquivos_mensais.push({
-                    periodo: dataAtual,
-                    faturacao: db_faturacao_turno,
-                    custo: db_custo_turno,
-                    despesas: totalDespesas,
-                    lucro: lucroLiquido
-                });
-
-                // Limpar dados do turno do dia
-                db_historico_vendas = [];
-                db_despesas_turno = [];
-                db_faturacao_turno = 0;
-                db_custo_turno = 0;
-
-                guardarDados();
-                inicializarPaineis();
-                alert("Turno arquivado com sucesso!");
-            }
-        }
-
-        function renderizarTabelaMensal() {
-            const tbody = document.getElementById('tabela-historico-mensal');
-            tbody.innerHTML = '';
-            if (db_arquivos_mensais.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" class="p-4 text-center italic text-gray-600">Nenhum turno arquivado este mês.</td></tr>`;
-                return;
-            }
-
-            db_arquivos_mensais.forEach(a => {
-                tbody.innerHTML += `
-                    <tr class="border-b border-gray-900/60 hover:bg-gray-900/20">
-                        <td class="p-3 text-gray-300 font-sans font-bold">${a.periodo}</td>
-                        <td class="p-3 text-amber-400">${a.faturacao.toFixed(2)} MT</td>
-                        <td class="p-3 text-red-500">${a.custo.toFixed(2)} MT</td>
-                        <td class="p-3 text-red-400">${a.despesas.toFixed(2)} MT</td>
-                        <td class="p-3 ${a.lucro >= 0 ? 'text-emerald-400' : 'text-red-500'} font-bold">${a.lucro.toFixed(2)} MT</td>
-                    </tr>
-                `;
-            });
-        }
-
-        function fecharMesDefinitivo() {
-            if (db_arquivos_mensais.length === 0) { alert("Não há dados consolidados para fechar."); return; }
-            if (confirm("Tem certeza que deseja fechar o mês? Todos os turnos arquivados sumirão desta tabela para iniciar o próximo mês limpo.")) {
-                db_arquivos_mensais = [];
-                guardarDados();
-                renderizarTabelaMensal();
-                alert("Mês consolidado e fechado!");
-            }
-        }
-
-        // AUTO-INICIAR AO CARREGAR PÁGINA
-        carregarDados();
+        // Adicione 'window.' na frente de todas as outras funções lógicas que o seu HTML usa (ex: adicionarNovoProduto, executarRestock, etc.)
     </script>
 </body>
 </html>
