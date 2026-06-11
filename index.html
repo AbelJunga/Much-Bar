@@ -1,19 +1,915 @@
-<!-- Secção a inserir no Painel do Administrador -->
-<div class="admin-card turn-report-card">
-    <h3>📊 Turno Atual (Em Aberto)</h3>
-    <div class="turn-stats">
-        <div class="stat-box">
-            <span class="stat-label">Total Faturado</span>
-            <span id="turn-total-val" class="stat-value">0,00 MT</span>
-        </div>
-        <div class="stat-box">
-            <span class="stat-label">Contas Fechadas</span>
-            <span id="turn-closed-counts" class="stat-value">0</span>
+<!DOCTYPE html>
+<html lang="pt-PT" class="h-full bg-gray-950 text-gray-100">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Much Bar - Gestão Profissional Pro v3.5</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+</head>
+<body class="h-full flex flex-col font-sans select-none antialiased selection:bg-amber-500/30 selection:text-amber-200">
+
+    <div id="tela-login" class="flex-1 flex flex-col justify-center items-center p-4 bg-gradient-to-b from-gray-950 via-gray-900 to-gray-950">
+        <div class="w-full max-w-sm bg-gray-900 border border-gray-800 p-6 rounded-2xl shadow-2xl">
+            <div class="text-center mb-6">
+                <span class="material-icons text-amber-500 text-4xl mb-2">local_bar</span>
+                <h1 class="text-xl font-black text-gray-100 tracking-tight">MUCH BAR</h1>
+                <p class="text-xs text-gray-500">Sistema de Gestão & Controlo de Caixas</p>
+            </div>
+
+            <div class="space-y-3 mb-6">
+                <h2 class="text-xs font-bold text-gray-400 uppercase tracking-wider">Acesso Operador</h2>
+                <input type="text" id="login-user-func" placeholder="Utilizador" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-amber-500 text-gray-200">
+                <input type="password" id="login-pass-func" placeholder="Palavra-passe" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-amber-500 text-gray-200">
+                <button onclick="tentarLoginFuncionario()" class="w-full bg-gray-800 hover:bg-gray-700 text-gray-200 font-bold py-2 px-4 rounded-xl text-xs transition">Entrar como Caixa</button>
+            </div>
+
+            <div class="relative flex py-2 items-center my-4">
+                <div class="flex-grow border-t border-gray-800"></div>
+                <span class="flex-shrink mx-3 text-[10px] text-gray-600 font-bold uppercase tracking-widest">OU</span>
+                <div class="flex-grow border-t border-gray-800"></div>
+            </div>
+
+            <div class="space-y-3">
+                <h2 class="text-xs font-bold text-gray-400 uppercase tracking-wider">Painel de Controlo (Dono)</h2>
+                <input type="password" id="login-pin-admin" placeholder="PIN Administrativo" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-xs text-center font-mono tracking-widest text-amber-500 focus:outline-none focus:border-amber-500">
+                <button onclick="tentarLoginAdmin()" class="w-full bg-amber-600 hover:bg-amber-500 text-gray-950 font-black py-2 px-4 rounded-xl text-xs transition shadow-lg shadow-amber-600/10">Entrar como Administrador</button>
+            </div>
         </div>
     </div>
-    <h4>Produtos Vendidos no Turno:</h4>
-    <ul id="turn-products-list" class="styled-list">
-        <!-- Injetado dinamicamente via JS -->
-        <li class="empty-notice">Nenhuma venda registada neste turno ainda.</li>
-    </ul>
-</div>
+
+    <div id="sistema-conteudo" class="hidden flex-1 flex flex-col overflow-hidden">
+        <header class="bg-gray-950 border-b border-gray-900 px-4 py-3 flex justify-between items-center shrink-0">
+            <div class="flex items-center gap-2">
+                <span class="material-icons text-amber-500 text-sm">local_bar</span>
+                <span class="text-xs font-black tracking-tight text-gray-200">MUCH BAR <span class="text-[10px] font-normal text-gray-600">v3.5 Cloud</span></span>
+            </div>
+            <div class="flex items-center gap-4">
+                <div class="text-right">
+                    <p id="nome-usuario-ativo" class="text-[10px] font-black text-amber-400 tracking-wide">-</p>
+                    <p id="txt-permissao" class="text-[9px] text-gray-500 uppercase tracking-wider">-</p>
+                </div>
+                <button onclick="fazerLogout()" class="text-gray-500 hover:text-red-400 p-1 rounded transition">
+                    <span class="material-icons text-sm block">logout</span>
+                </button>
+            </div>
+        </header>
+
+        <nav class="bg-gray-950/80 border-b border-gray-900 p-2 flex gap-1 overflow-x-auto shrink-0 scrollbar-none">
+            <button id="btn-aba-home" onclick="mudarAba('home')" class="px-3 py-1.5 rounded-lg text-xs font-bold transition shrink-0 flex items-center gap-1.5">
+                <span class="material-icons text-xs">grid_view</span> Salas & Mesas
+            </button>
+            <button id="btn-aba-vendas-diarias" onclick="mudarAba('vendas-diarias')" class="px-3 py-1.5 rounded-lg text-xs font-bold transition shrink-0 flex items-center gap-1.5 text-gray-400">
+                <span class="material-icons text-xs">receipt_long</span> Turno Atual
+            </button>
+            <button id="btn-aba-restock" onclick="mudarAba('restock')" class="px-3 py-1.5 rounded-lg text-xs font-bold transition shrink-0 flex items-center gap-1.5 text-gray-400">
+                <span class="material-icons text-xs">inventory</span> Entrada de Stock
+            </button>
+            <button id="btn-aba-financeiro-mensal" onclick="mudarAba('financeiro-mensal')" class="px-3 py-1.5 rounded-lg text-xs font-bold transition shrink-0 flex items-center gap-1.5 text-gray-400 adm-only">
+                <span class="material-icons text-xs">analytics</span> Histórico Mensal
+            </button>
+            <button id="btn-aba-produtos" onclick="mudarAba('produtos')" class="px-3 py-1.5 rounded-lg text-xs font-bold transition shrink-0 flex items-center gap-1.5 text-gray-400 adm-only">
+                <span class="material-icons text-xs">settings</span> Fichas Técnicas
+            </button>
+        </nav>
+
+        <main class="flex-1 overflow-y-auto bg-gray-900/40 p-4">
+
+            <div id="aba-home" class="grid grid-cols-1 lg:grid-cols-3 gap-4 h-full hidden">
+                <div class="bg-gray-900/60 border border-gray-800 rounded-2xl p-4 flex flex-col h-fit lg:h-full overflow-hidden">
+                    <div class="flex justify-between items-center mb-3 shrink-0">
+                        <h2 class="text-xs font-black text-gray-400 uppercase tracking-wider flex items-center gap-1.5">
+                            <span class="material-icons text-xs text-amber-500">table_restaurant</span> Controlo de Mesas
+                        </h2>
+                    </div>
+                    <div class="flex gap-2 mb-4 shrink-0">
+                        <input type="text" id="novo-nome-mesa" placeholder="Ex: Mesa 12 ou Balcão Abel" class="flex-1 bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-amber-500 text-gray-200">
+                        <button onclick="criarNovaMesa()" class="bg-amber-600 hover:bg-amber-500 text-gray-950 font-black px-3 rounded-xl text-xs transition flex items-center justify-center">
+                            <span class="material-icons text-sm">add</span>
+                        </button>
+                    </div>
+                    <div id="lista-mesas" class="flex-1 overflow-y-auto space-y-2 pr-1 min-h-[150px]">
+                        </div>
+                </div>
+
+                <div class="bg-gray-900/60 border border-gray-800 rounded-2xl p-4 flex flex-col h-fit lg:h-full overflow-hidden">
+                    <div class="flex justify-between items-center pb-2 border-b border-gray-800/60 mb-3 shrink-0">
+                        <span class="text-[10px] text-gray-500 uppercase font-bold tracking-wider">Mesa Selecionada</span>
+                        <span id="mesa-selecionada-titulo" class="text-xs font-black text-amber-400">Nenhum</span>
+                    </div>
+                    <div id="itens-comanda" class="flex-1 overflow-y-auto space-y-2 pr-1 min-h-[150px]">
+                        <p class="text-xs text-gray-600 text-center py-4">Nenhum produto consumido.</p>
+                    </div>
+                    <div class="pt-4 border-t border-gray-800 mt-3 shrink-0 space-y-3">
+                        <div class="flex justify-between items-baseline">
+                            <span class="text-xs font-bold text-gray-400">Total a Pagar:</span>
+                            <span id="total-comanda" class="text-xl font-mono font-black text-emerald-400">0,00 MT</span>
+                        </div>
+                        <button id="btn-fechar-conta" onclick="fecharMesaAtual()" disabled class="w-full bg-gray-800 text-gray-500 font-bold py-2.5 px-4 rounded-xl flex items-center justify-center gap-2 cursor-not-allowed transition text-xs">
+                            <span class="material-icons text-sm">point_of_sale</span> Fechar Conta & Imprimir
+                        </button>
+                    </div>
+                </div>
+
+                <div class="space-y-4 h-fit lg:h-full flex flex-col overflow-hidden">
+                    <div id="menu-produtos" class="bg-gray-900/60 border border-gray-800 rounded-2xl p-4 flex-1 flex flex-col overflow-hidden hidden">
+                        <h2 class="text-xs font-black text-gray-400 uppercase tracking-wider mb-3 shrink-0">Toque para Adicionar</h2>
+                        <div id="botoes-produtos" class="grid grid-cols-2 gap-2 overflow-y-auto pr-1 flex-1">
+                            </div>
+                    </div>
+                    <div class="bg-gray-900/60 border border-gray-800 rounded-2xl p-4 shrink-0 max-h-[220px] flex flex-col overflow-hidden">
+                        <h2 class="text-xs font-black text-gray-400 uppercase tracking-wider mb-2 shrink-0">Estado Real de Stock</h2>
+                        <div id="lista-stock-resumido" class="overflow-y-auto space-y-1.5 pr-1 flex-1">
+                            </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="aba-vendas-diarias" class="space-y-4 hidden">
+                <div class="bg-gradient-to-r from-gray-900 to-gray-950 border-l-4 border-amber-500 p-4 rounded-2xl shadow-md adm-only">
+                    <h3 class="text-xs font-black text-amber-400 uppercase tracking-wider flex items-center gap-2 mb-3">
+                        <span class="material-icons text-sm">analytics</span> Relatório do Turno Corrente (Em Aberto)
+                    </h3>
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-3 border-b border-gray-800/60 pb-3">
+                        <div>
+                            <p class="text-[9px] uppercase font-bold text-gray-500">Vendas Brutas</p>
+                            <p id="rel-turno-faturado" class="text-lg font-mono font-black text-emerald-400">0,00 MT</p>
+                        </div>
+                        <div>
+                            <p class="text-[9px] uppercase font-bold text-gray-500">Custo Total Stock</p>
+                            <p id="rel-turno-custo" class="text-lg font-mono font-black text-red-400">0,00 MT</p>
+                        </div>
+                        <div>
+                            <p class="text-[9px] uppercase font-bold text-gray-500">Ganhos Estimados</p>
+                            <p id="rel-turno-lucro" class="text-lg font-mono font-black text-amber-500">0,00 MT</p>
+                        </div>
+                        <div>
+                            <p class="text-[9px] uppercase font-bold text-gray-500">Total Transações</p>
+                            <p id="rel-turno-contas" class="text-lg font-mono font-black text-gray-300">0</p>
+                        </div>
+                    </div>
+                    <p class="text-[10px] font-black text-gray-400 uppercase tracking-wider mb-1.5">Artigos Consumidos no Turno:</p>
+                    <div id="rel-turno-lista-produtos" class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
+                        </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div class="bg-gray-900 border border-gray-800 p-4 rounded-2xl">
+                        <p class="text-[10px] text-gray-500 uppercase font-black tracking-wider">Faturação Bruta Registada</p>
+                        <p id="hoje-faturacao" class="text-xl font-mono font-black text-emerald-400 mt-1">0,00 MT</p>
+                    </div>
+                    <div class="bg-gray-900 border border-gray-800 p-4 rounded-2xl">
+                        <p class="text-[10px] text-gray-500 uppercase font-black tracking-wider">Despesas / Sangrias</p>
+                        <p id="hoje-despesas" class="text-xl font-mono font-black text-red-400 mt-1">0,00 MT</p>
+                    </div>
+                    <div class="bg-gray-900 border border-gray-800 p-4 rounded-2xl">
+                        <p class="text-[10px] text-gray-500 uppercase font-black tracking-wider">Lucro Estimado Líquido</p>
+                        <p id="hoje-lucro" class="text-xl font-mono font-black text-amber-500 mt-1">0,00 MT</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                    <div class="bg-gray-900 border border-gray-800 p-4 rounded-2xl lg:col-span-2">
+                        <h3 class="text-xs font-black text-gray-400 uppercase tracking-wider mb-3">Histórico de Saídas do Turno</h3>
+                        <div id="lista-vendas-dia" class="space-y-2 max-h-[350px] overflow-y-auto pr-1">
+                            </div>
+                    </div>
+
+                    <div class="space-y-4">
+                        <div class="bg-gray-900 border border-gray-800 p-4 rounded-2xl space-y-3">
+                            <h3 class="text-xs font-black text-gray-400 uppercase tracking-wider">Registar Despesa / Saída</h3>
+                            <input type="text" id="desdespesa-desc" placeholder="Ex: Gelo, Compra de Limão, etc." class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-amber-500 text-gray-200">
+                            <input type="number" id="despesa-valor" placeholder="Valor (MT)" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-amber-500 text-gray-200">
+                            <button onclick="adicionarDespesa()" class="w-full bg-red-900/40 hover:bg-red-900/60 border border-red-800 text-red-200 font-bold py-2 px-4 rounded-xl text-xs transition">Gravar Gasto</button>
+                            <div id="lista-despesas-turno" class="text-xs space-y-1.5 pt-2 max-h-[120px] overflow-y-auto">
+                                </div>
+                        </div>
+
+                        <div class="bg-gray-900 border border-gray-800 p-4 rounded-2xl text-center adm-only">
+                            <p class="text-[11px] text-gray-500 mb-2">Concluir o turno arquiva os dados no histórico de longo prazo.</p>
+                            <button onclick="fecharTurnoGeral()" class="w-full bg-amber-600 hover:bg-amber-500 text-gray-950 font-black py-2.5 px-4 rounded-xl text-xs transition shadow-lg shadow-amber-600/10">CONCLUIR E FECHAR TURNO</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="aba-restock" class="max-w-md mx-auto bg-gray-900 border border-gray-800 p-6 rounded-2xl space-y-4 hidden">
+                <div class="text-center pb-2 border-b border-gray-800">
+                    <h2 class="text-sm font-black text-gray-200 uppercase tracking-wide">Dar Entrada de Mercadoria</h2>
+                    <p class="text-[11px] text-gray-500">Atualize o stock físico e o preço de custo real do artigo.</p>
+                </div>
+                <div class="space-y-1.5">
+                    <label class="text-[10px] uppercase font-bold text-gray-400">Selecione o Artigo</label>
+                    <select id="restock-prod-id" onchange="sugerirCustoAtual()" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2.5 text-xs text-gray-200 focus:outline-none focus:border-amber-500">
+                        </select>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="space-y-1.5">
+                        <label class="text-[10px] uppercase font-bold text-gray-400">Quantidade Nova (Unidades)</label>
+                        <input type="number" id="restock-quantidade" placeholder="Ex: 24" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-amber-500 text-gray-200">
+                    </div>
+                    <div class="space-y-1.5">
+                        <label class="text-[10px] uppercase font-bold text-gray-400">Novo Custo Unitário (MT)</label>
+                        <input type="number" id="restock-custo-un" placeholder="Ex: 45.00" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-amber-500 text-amber-500 font-mono">
+                    </div>
+                </div>
+                <button onclick="executarRestock()" class="w-full bg-amber-600 hover:bg-amber-500 text-gray-950 font-black py-2.5 px-4 rounded-xl text-xs transition">Confirmar Entrada em Nuvem</button>
+            </div>
+
+            <div id="aba-financeiro-mensal" class="space-y-4 hidden adm-only">
+                <div class="bg-gray-900 border border-gray-800 p-4 rounded-2xl flex justify-between items-center">
+                    <div>
+                        <h3 class="text-xs font-black text-gray-400 uppercase tracking-wider">Histórico de Fechos Arquivados</h3>
+                        <p class="text-[11px] text-gray-500">Histórico permanente gerado a partir de cada fecho de turno feito.</p>
+                    </div>
+                    <button onclick="fecharMesDefinitivo()" class="bg-red-950 hover:bg-red-900 border border-red-800 text-red-400 px-3 py-1.5 rounded-xl text-xs font-bold transition">CONSOLIDAR MÊS ATUAL</button>
+                </div>
+                <div class="bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden shadow-xl">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse text-xs">
+                            <thead>
+                                <tr class="bg-gray-950 text-gray-400 border-b border-gray-800 text-[10px] uppercase tracking-wider">
+                                    <th class="p-3 font-black">Data / Período</th>
+                                    <th class="p-3 font-black">Faturação total</th>
+                                    <th class="p-3 font-black">Custo de Stock</th>
+                                    <th class="p-3 font-black">Despesas do Turno</th>
+                                    <th class="p-3 font-black">Margem Líquida</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabela-historico-mensal">
+                                </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div id="aba-produtos" class="grid grid-cols-1 lg:grid-cols-3 gap-4 hidden adm-only">
+                <div class="bg-gray-900 border border-gray-800 p-4 rounded-2xl h-fit space-y-3">
+                    <h3 class="text-xs font-black text-gray-400 uppercase tracking-wider border-b border-gray-800 pb-2">Novo Artigo de Venda</h3>
+                    <div class="space-y-1"><label class="text-[10px] text-gray-500 uppercase font-bold">Nome do Artigo</label><input type="text" id="novo-prod-nome" placeholder="Ex: Cerveja Preta" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-amber-500 text-gray-200"></div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div class="space-y-1"><label class="text-[10px] text-gray-500 uppercase font-bold">Preço Compra (Custo)</label><input type="number" id="novo-prod-custo" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-xs text-red-400 font-mono"></div>
+                        <div class="space-y-1"><label class="text-[10px] text-gray-500 uppercase font-bold">Preço Venda (Balcão)</label><input type="number" id="novo-prod-preco" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-xs text-emerald-400 font-mono"></div>
+                    </div>
+                    <div class="space-y-1"><label class="text-[10px] text-gray-500 uppercase font-bold">Stock Inicial Disponível</label><input type="number" id="novo-prod-stock" value="0" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-xs text-gray-300 font-mono"></div>
+                    <button onclick="adicionarNovoProduto()" class="w-full bg-amber-600 hover:bg-amber-500 text-gray-950 font-black py-2 px-4 rounded-xl text-xs transition pt-2">Inserir Produto</button>
+                </div>
+
+                <div class="bg-gray-900 border border-gray-800 p-4 rounded-2xl lg:col-span-2 space-y-3 flex flex-col max-h-[500px]">
+                    <h3 class="text-xs font-black text-gray-400 uppercase tracking-wider border-b border-gray-800 pb-2">Configuração Rápida de Valores</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-4 gap-2 px-3 text-[10px] uppercase font-bold text-gray-500 border-b border-gray-950 pb-1">
+                        <div>Artigo</div><div>Custo (MT)</div><div>Venda (MT)</div><div>Stock Físico</div>
+                    </div>
+                    <div id="form-config-produtos" class="space-y-2 overflow-y-auto flex-1 pr-1">
+                        </div>
+
+                    <div class="border-t border-gray-800 pt-4 mt-2">
+                        <h3 class="text-xs font-black text-gray-400 uppercase tracking-wider mb-3">Controlo de Operadores de Caixa</h3>
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                            <input type="text" id="novo-user-nome" placeholder="Username do Caixa" class="bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-xs text-gray-200">
+                            <input type="password" id="novo-user-pass" placeholder="Password de Entrada" class="bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-xs text-gray-200">
+                            <button onclick="adicionarUsuario()" class="bg-gray-800 hover:bg-gray-700 text-gray-200 font-bold py-2 px-4 rounded-xl text-xs transition">Criar Operador</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <script>
+        // ==========================================================================
+        // CONFIGURAÇÃO E INICIALIZAÇÃO DO FIREBASE
+        // ==========================================================================
+        const firebaseConfig = {
+            apiKey: "AIzaSyCI8EDvSqMGjrJ6GNdqDyeCsYUwymPXPw4",
+            authDomain: "muchbar-c5839.firebaseapp.com",
+            databaseURL: "https://muchbar-c5839-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "muchbar-c5839",
+            storageBucket: "muchbar-c5839.firebasestorage.app",
+            messagingSenderId: "549900502538",
+            appId: "1:549900502538:web:d6a7f9d91ef75a10c5c1f3",
+            measurementId: "G-Z0KPV3V6ED"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        // ==========================================================================
+        // ESTADO GLOBAL
+        // ==========================================================================
+        const PIN_ADMIN_PADRAO = "1234";
+
+        let produtos = [];
+        let usuarios = [];
+        let mesas = [];
+        let despesasTurno = [];
+        let vendasCronologicas = [];
+        let historicoMensal = [];
+
+        let usuarioAtivo = JSON.parse(sessionStorage.getItem('mb_sessao')) || null;
+        let mesaSelecionadaId = null;
+
+        const salvarDadosFirebase = (caminho, dados) => {
+            db.ref(caminho).set(dados);
+        };
+
+        // ==========================================================================
+        // ESCUTA REALTIME EM TEMPO REAL
+        // ==========================================================================
+        function carregarEEscutarFirebase() {
+            db.ref('produtos').on('value', (snapshot) => {
+                const dados = snapshot.val();
+                if (!dados) {
+                    produtos = [
+                        { id: 1, nome: "Cerveja Laurentina 2M", custo: 50, preco: 80, stock: 120 },
+                        { id: 2, nome: "Txilar", custo: 40, preco: 70, stock: 96 },
+                        { id: 3, nome: "Whisky Jameson (Dose)", custo: 120, preco: 250, stock: 30 },
+                        { id: 4, nome: "Água Mineral 500ml", custo: 15, preco: 35, stock: 50 }
+                    ];
+                    salvarDadosFirebase('produtos', produtos);
+                } else {
+                    produtos = dados;
+                }
+                if (usuarioAtivo) {
+                    renderizarBotoesProdutos();
+                    atualizarVisaoStock();
+                    atualizarConfigProdutos();
+                    popularSelectRestock();
+                }
+            });
+
+            db.ref('usuarios').on('value', (snapshot) => {
+                usuarios = snapshot.val() || [{ username: "barman1", pass: "4321" }];
+            });
+
+            db.ref('mesas').on('value', (snapshot) => {
+                mesas = snapshot.val() || [];
+                if (usuarioAtivo) {
+                    atualizarPainelMesas();
+                    if (mesaSelecionadaId) {
+                        const mesa = mesas.find(m => m.id === mesaSelecionadaId);
+                        if (mesa) atualizarItensComanda(mesa);
+                        else fecharVisualizacaoMesa();
+                    }
+                }
+            });
+
+            db.ref('despesas').on('value', (snapshot) => {
+                despesasTurno = snapshot.val() || [];
+                if (usuarioAtivo) atualizarPainelVendas();
+            });
+
+            db.ref('vendas_dia').on('value', (snapshot) => {
+                vendasCronologicas = snapshot.val() || [];
+                if (usuarioAtivo) atualizarPainelVendas();
+            });
+
+            db.ref('historico_mes').on('value', (snapshot) => {
+                historicoMensal = snapshot.val() || [];
+                if (usuarioAtivo) atualizarTabelaMensal();
+            });
+        }
+
+        function fecharVisualizacaoMesa() {
+            mesaSelecionadaId = null;
+            document.getElementById('mesa-selecionada-titulo').innerText = "Nenhum";
+            document.getElementById('menu-produtos').classList.add('hidden');
+            document.getElementById('itens-comanda').innerHTML = "<p class='text-xs text-gray-600 text-center py-4'>Nenhum produto consumido.</p>";
+            document.getElementById('total-comanda').innerText = "0,00 MT";
+            const btnFechar = document.getElementById('btn-fechar-conta');
+            btnFechar.disabled = true;
+            btnFechar.className = "w-full bg-gray-800 text-gray-500 font-bold py-2.5 px-4 rounded-xl flex items-center justify-center gap-2 cursor-not-allowed text-xs";
+        }
+
+        // ==========================================================================
+        // LOGIN / LOGOUT
+        // ==========================================================================
+        function tentarLoginAdmin() {
+            const pin = document.getElementById('login-pin-admin').value;
+            if (pin === PIN_ADMIN_PADRAO) {
+                usuarioAtivo = { nome: "Abel (Dono)", permissao: "admin" };
+                sessionStorage.setItem('mb_sessao', JSON.stringify(usuarioAtivo));
+                document.getElementById('login-pin-admin').value = "";
+                inicializarSistema();
+            } else {
+                alert("PIN Administrativo Incorreto!");
+            }
+        }
+
+        function tentarLoginFuncionario() {
+            const user = document.getElementById('login-user-func').value.trim();
+            const pass = document.getElementById('login-pass-func').value;
+            const val = usuarios.find(u => u.username.toLowerCase() === user.toLowerCase() && u.pass === pass);
+            if (val) {
+                usuarioAtivo = { nome: val.username, permissao: "funcionario" };
+                sessionStorage.setItem('mb_sessao', JSON.stringify(usuarioAtivo));
+                inicializarSistema();
+            } else {
+                alert("Credenciais incorretas!");
+            }
+        }
+
+        function fazerLogout() {
+            usuarioAtivo = null;
+            sessionStorage.removeItem('mb_sessao');
+            fecharVisualizacaoMesa();
+            inicializarSistema();
+        }
+
+        function mudarAba(abaId) {
+            const abas = ['home', 'vendas-diarias', 'restock', 'financeiro-mensal', 'produtos'];
+            abas.forEach(id => {
+                document.getElementById(`aba-${id}`).classList.add('hidden');
+                document.getElementById(`btn-aba-${id}`).classList.remove('bg-amber-600', 'text-gray-950', 'bg-gray-800', 'text-gray-100');
+                document.getElementById(`btn-aba-${id}`).classList.add('text-gray-400');
+            });
+            document.getElementById(`aba-${abaId}`).classList.remove('hidden');
+            const btn = document.getElementById(`btn-aba-${abaId}`);
+            if (abaId === 'home') btn.classList.add('bg-amber-600', 'text-gray-950');
+            else btn.classList.add('bg-gray-800', 'text-gray-100');
+        }
+
+        function aplicarRestricoesPermissao() {
+            document.querySelectorAll('.adm-only').forEach(el => {
+                if (usuarioAtivo.permissao === 'admin') el.classList.remove('hidden');
+                else el.classList.add('hidden');
+            });
+        }
+
+        // ==========================================================================
+        // GESTÃO DE MESAS ATIVAS
+        // ==========================================================================
+        function criarNovaMesa() {
+            const inp = document.getElementById('novo-nome-mesa');
+            if (!inp.value.trim()) return;
+            mesas.push({ id: Date.now(), nome: inp.value.trim(), itens: [] });
+            salvarDadosFirebase('mesas', mesas);
+            inp.value = "";
+        }
+
+        function atualizarPainelMesas() {
+            const container = document.getElementById('lista-mesas');
+            container.innerHTML = mesas.length === 0 ? `<p class="text-xs text-gray-500 text-center py-4">Nenhuma mesa ativa.</p>` : "";
+            mesas.forEach(m => {
+                const total = (m.itens || []).reduce((acc, cur) => acc + (cur.preco * cur.qtd), 0);
+                const activeCls = mesaSelecionadaId === m.id ? 'border-amber-500 bg-amber-950/20' : 'border-gray-800 bg-gray-950 hover:border-gray-700';
+                container.innerHTML += `
+                    <div onclick="selecionarMesa(${m.id})" class="p-3 border rounded-xl flex justify-between items-center cursor-pointer transition ${activeCls}">
+                        <div><p class="text-xs font-bold text-gray-200">${m.nome}</p><p class="text-[10px] text-gray-500">${(m.itens || []).length} itens</p></div>
+                        <span class="text-xs font-black text-amber-400">${total.toFixed(2)} MT</span>
+                    </div>`;
+            });
+        }
+
+        function selecionarMesa(id) {
+            mesaSelecionadaId = id;
+            atualizarPainelMesas();
+            const m = mesas.find(x => x.id === id);
+            document.getElementById('mesa-selecionada-titulo').innerText = m.nome;
+            document.getElementById('menu-produtos').classList.remove('hidden');
+            atualizarItensComanda(m);
+        }
+
+        // ==========================================================================
+        // MAGIA DO CONTROLADOR: AUMENTAR / DIMINUIR QUANTIDADE NA MESA
+        // ==========================================================================
+        function atualizarItensComanda(mesa) {
+            const container = document.getElementById('itens-comanda');
+            const itens = mesa.itens || [];
+            if (itens.length === 0) {
+                document.getElementById('total-comanda').innerText = "0,00 MT";
+                document.getElementById('btn-fechar-conta').disabled = true;
+                document.getElementById('btn-fechar-conta').className = "w-full bg-gray-800 text-gray-500 font-bold py-2.5 px-4 rounded-xl flex items-center justify-center gap-2 cursor-not-allowed text-xs";
+                container.innerHTML = `<p class="text-xs text-gray-600 text-center py-4">Nenhum produto consumido.</p>`;
+                return;
+            }
+
+            let total = 0;
+            container.innerHTML = "";
+            itens.forEach(item => {
+                const sub = item.preco * item.qtd;
+                total += sub;
+                container.innerHTML += `
+                    <div class="flex justify-between items-center bg-gray-950/40 p-2 border border-gray-850 rounded-xl text-xs">
+                        <div class="flex-1 min-w-0 pr-2">
+                            <p class="font-bold text-gray-300 truncate">${item.nome}</p>
+                            <p class="text-[10px] text-gray-500 font-mono">${item.preco.toFixed(2)} MT</p>
+                        </div>
+                        <div class="flex items-center gap-2 mx-2 shrink-0">
+                            <button onclick="ajustarQtdItemMesa(${mesa.id}, ${item.id}, -1)" class="w-6 h-6 rounded-full bg-red-950/60 border border-red-800 text-red-400 font-black flex items-center justify-center hover:bg-red-900/40 text-sm transition">-</button>
+                            <span class="font-mono font-black text-gray-200 min-w-[16px] text-center">${item.qtd}</span>
+                            <button onclick="ajustarQtdItemMesa(${mesa.id}, ${item.id}, 1)" class="w-6 h-6 rounded-full bg-emerald-950/60 border border-emerald-800 text-emerald-400 font-black flex items-center justify-center hover:bg-emerald-200/20 text-sm transition">+</button>
+                        </div>
+                        <div class="text-right font-mono font-bold text-gray-300 min-w-[70px]">${sub.toFixed(2)} MT</div>
+                    </div>`;
+            });
+
+            document.getElementById('total-comanda').innerText = `${total.toFixed(2)} MT`;
+            const btn = document.getElementById('btn-fechar-conta');
+            btn.disabled = false;
+            btn.className = "w-full bg-emerald-600 hover:bg-emerald-500 text-gray-950 font-black py-2.5 px-4 rounded-xl flex items-center justify-center gap-2 cursor-pointer text-xs shadow-lg transition";
+        }
+
+        function ajustarQtdItemMesa(mesaId, prodId, alteracao) {
+            const mesa = mesas.find(m => m.id === mesaId);
+            const produtoOriginal = produtos.find(p => p.id === prodId);
+            if (!mesa) return;
+
+            const item = mesa.itens.find(i => i.id === prodId);
+            if (!item) return;
+
+            if (alteracao > 0 && produtoOriginal.stock <= 0) {
+                alert("Não existem mais unidades em Stock Geral!");
+                return;
+            }
+
+            // Aplicar alteração diretamente no stock provisório e na comanda
+            item.qtd += alteracao;
+            produtoOriginal.stock -= alteracao;
+
+            if (item.qtd <= 0) {
+                mesa.itens = mesa.itens.filter(i => i.id !== prodId);
+            }
+
+            db.ref().update({
+                mesas: mesas,
+                produtos: produtos
+            });
+        }
+
+        function adicionarItemMesa(prodId) {
+            if (!mesaSelecionadaId) return;
+            const mesa = mesas.find(m => m.id === mesaSelecionadaId);
+            const prod = produtos.find(p => p.id === prodId);
+
+            if (prod.stock <= 0) return alert("Artigo esgotado!");
+            if (!mesa.itens) mesa.itens = [];
+
+            const exist = mesa.itens.find(i => i.id === prodId);
+            if (exist) {
+                exist.qtd++;
+            } else {
+                mesa.itens.push({ id: prod.id, nome: prod.nome, preco: prod.preco, custo: prod.custo, qtd: 1 });
+            }
+            prod.stock--;
+
+            db.ref().update({ mesas: mesas, produtos: produtos });
+        }
+
+        function renderizarBotoesProdutos() {
+            const container = document.getElementById('botoes-produtos');
+            container.innerHTML = "";
+            produtos.forEach(p => {
+                const esgotado = p.stock <= 0;
+                const cls = esgotado ? "bg-gray-950 border border-gray-900 text-gray-600 opacity-40 cursor-not-allowed" : "bg-gray-950 border border-gray-800 hover:border-amber-500/50 text-gray-300";
+                container.innerHTML += `
+                    <button onclick="${esgotado ? '' : `adicionarItemMesa(${p.id})`}" class="p-2 rounded-lg text-left transition flex flex-col justify-between h-14 ${cls}">
+                        <span class="text-[11px] font-bold block truncate w-full">${p.nome}</span>
+                        <div class="flex justify-between items-center w-full mt-1">
+                            <span class="text-[10px] font-mono text-amber-500">${p.preco.toFixed(2)} MT</span>
+                            <span class="text-[9px] px-1 rounded bg-gray-900">Est: ${p.stock}</span>
+                        </div>
+                    </button>`;
+            });
+        }
+
+        // ==========================================================================
+        // FECHO DE CONTA COM AGREGADOR DE HISTÓRICO DE TURNO
+        // ==========================================================================
+        function fecharMesaAtual() {
+            if (!mesaSelecionadaId) return;
+            const idx = mesas.findIndex(m => m.id === mesaSelecionadaId);
+            const m = mesas[idx];
+            if (!m || (m.itens || []).length === 0) return;
+
+            if (!confirm(`Deseja fechar a conta da ${m.nome}?`)) return;
+
+            const horaFecho = new Date().toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' });
+            
+            // Registar os itens faturados permanentemente no Turno
+            const itensVenda = (m.itens || []).map(i => ({
+                id: i.id,
+                nome: i.nome,
+                qtd: i.qtd,
+                custoTotal: i.custo * i.qtd,
+                faturadoTotal: i.preco * i.qtd
+            }));
+
+            vendasCronologicas.push({
+                id: "venda_" + Date.now(),
+                mesa: m.nome,
+                hora: horaFecho,
+                produtos: itensVenda,
+                total: itensVenda.reduce((s, c) => s + c.faturadoTotal, 0),
+                custoTotal: itensVenda.reduce((s, c) => s + c.custoTotal, 0)
+            });
+
+            mesas.splice(idx, 1);
+
+            db.ref().update({
+                mesas: mesas,
+                vendas_dia: vendasCronologicas
+            }).then(() => {
+                fecharVisualizacaoMesa();
+                alert("Conta faturada e guardada com sucesso!");
+            });
+        }
+
+        // ==========================================================================
+        // RETORNO E EDIÇÃO DE CONTAS FECHADAS (EXCLUSIVO ADMIN)
+        // ==========================================================================
+        function reabrirMesaFechada(idVenda) {
+            if (!confirm("Pretende REABRIR esta conta? Ela sairá do histórico e voltará ativa para o Salão.")) return;
+            
+            const vIdx = vendasCronologicas.findIndex(v => v.id === idVenda);
+            const venda = vendasCronologicas[vIdx];
+            
+            // Reconverte o formato de vendas para comanda ativa
+            const itensReabertos = venda.produtos.map(p => {
+                const prodOrig = produtos.find(x => x.id === p.id);
+                return {
+                    id: p.id,
+                    nome: p.nome,
+                    qtd: p.qtd,
+                    preco: p.faturadoTotal / p.qtd,
+                    custo: prodOrig ? prodOrig.custo : p.custoTotal / p.qtd
+                };
+            });
+
+            mesas.push({
+                id: Date.now(),
+                nome: venda.mesa + " (Reaberta)",
+                itens: itensReabertos
+            });
+
+            vendasCronologicas.splice(vIdx, 1);
+            db.ref().update({ mesas: mesas, vendas_dia: vendasCronologicas });
+        }
+
+        function apagarMesaFechadaDefinitivo(idVenda) {
+            if (!confirm("⚠️ ALERTA CRÍTICO: Deseja ELIMINAR esta venda? O stock dos produtos será restabelecido.")) return;
+            
+            const vIdx = vendasCronologicas.findIndex(v => v.id === idVenda);
+            const venda = vendasCronologicas[vIdx];
+
+            // Devolve as quantidades ao stock geral
+            venda.produtos.forEach(p => {
+                const prodOrig = produtos.find(x => x.id === p.id);
+                if (prodOrig) prodOrig.stock += p.qtd;
+            });
+
+            vendasCronologicas.splice(vIdx, 1);
+            db.ref().update({ produtos: produtos, vendas_dia: vendasCronologicas });
+        }
+
+        // ==========================================================================
+        // GESTÃO DE TURNOS & MONITORIZAÇÃO DINÂMICA
+        // ==========================================================================
+        function atualizarPainelVendas() {
+            let totalFaturado = vendasCronologicas.reduce((acc, cur) => acc + cur.total, 0);
+            let totalCusto = vendasCronologicas.reduce((acc, cur) => acc + cur.custoTotal, 0);
+            let totalDespesas = despesasTurno.reduce((acc, cur) => acc + cur.valor, 0);
+            let lucroLiquido = totalFaturado - totalCusto - totalDespesas;
+
+            document.getElementById('hoje-faturacao').innerText = `${totalFaturado.toFixed(2)} MT`;
+            document.getElementById('hoje-despesas').innerText = `${totalDespesas.toFixed(2)} MT`;
+            document.getElementById('hoje-lucro').innerText = `${lucroLiquido.toFixed(2)} MT`;
+
+            // Atualizar Relatório Avançado do Admin (1. O que foi lançado antes do fecho)
+            document.getElementById('rel-turno-faturado').innerText = `${totalFaturado.toFixed(2)} MT`;
+            document.getElementById('rel-turno-custo').innerText = `${totalCusto.toFixed(2)} MT`;
+            document.getElementById('rel-turno-lucro').innerText = `${(totalFaturado - totalCusto).toFixed(2)} MT`;
+            document.getElementById('rel-turno-contas').innerText = vendasCronologicas.length;
+
+            let resumoProdutos = {};
+            vendasCronologicas.forEach(v => {
+                v.produtos.forEach(p => {
+                    resumoProdutos[p.nome] = (resumoProdutos[p.nome] || 0) + p.qtd;
+                });
+            });
+
+            const divProdReport = document.getElementById('rel-turno-lista-produtos');
+            divProdReport.innerHTML = Object.keys(resumoProdutos).length === 0 ? `<p class="text-gray-500 col-span-full">Nenhum artigo saído.</p>` : "";
+            Object.entries(resumoProdutos).forEach(([nome, qtd]) => {
+                divProdReport.innerHTML += `
+                    <div class="bg-gray-950 p-2 border border-gray-800 rounded-xl flex justify-between items-center">
+                        <span class="text-gray-400 truncate">${nome}</span>
+                        <span class="font-mono text-amber-500 font-bold ml-1">${qtd} un</span>
+                    </div>`;
+            });
+
+            // Listar Histórico de Contas Correntes com Botões Administrativos Reabrir/Apagar
+            const containerCronologico = document.getElementById('lista-vendas-dia');
+            containerCronologico.innerHTML = vendasCronologicas.length === 0 ? `<p class="text-xs text-gray-600 text-center py-4">Nenhum movimento.</p>` : "";
+            
+            const isAdmin = usuarioAtivo && usuarioAtivo.permissao === 'admin';
+
+            [...vendasCronologicas].reverse().forEach(v => {
+                let botoesAcao = "";
+                if (isAdmin) {
+                    botoesAcao = `
+                        <div class="flex items-center gap-1 shrink-0">
+                            <button onclick="reabrirMesaFechada('${v.id}')" class="px-2 py-1 bg-amber-950 border border-amber-800 rounded text-[10px] font-bold text-amber-400 hover:bg-amber-900/40">✏️ Reabrir</button>
+                            <button onclick="apagarMesaFechadaDefinitivo('${v.id}')" class="px-2 py-1 bg-red-950 border border-red-800 rounded text-[10px] font-bold text-red-400 hover:bg-red-900/40">🗑️ Apagar</button>
+                        </div>`;
+                }
+
+                containerCronologico.innerHTML += `
+                    <div class="flex flex-col sm:flex-row justify-between sm:items-center p-2.5 bg-gray-950/40 border border-gray-850 rounded-xl text-xs gap-2">
+                        <div class="flex items-center gap-2 min-w-0">
+                            <span class="text-gray-500 font-mono">${v.hora}</span>
+                            <span class="text-gray-200 font-bold truncate">${v.mesa}</span>
+                            <span class="text-gray-400">(${v.produtos.reduce((s,p)=> s+p.qtd, 0)} un)</span>
+                        </div>
+                        <div class="flex items-center justify-between sm:justify-end gap-3">
+                            <span class="font-mono font-black text-emerald-400">${v.total.toFixed(2)} MT</span>
+                            ${botoesAcao}
+                        </div>
+                    </div>`;
+            });
+
+            // Atualizar Bloco de Despesas Simples
+            const containerDespesas = document.getElementById('lista-despesas-turno');
+            containerDespesas.innerHTML = despesasTurno.length === 0 ? `<p class="text-gray-600 italic">Sem gastos.</p>` : "";
+            despesasTurno.forEach(d => {
+                containerDespesas.innerHTML += `
+                    <div class="flex justify-between items-center text-gray-400 border-b border-gray-950 pb-1">
+                        <span class="truncate pr-2">• ${d.descricao}</span>
+                        <span class="font-mono text-red-400 font-bold shrink-0">-${d.valor.toFixed(2)} MT</span>
+                    </div>`;
+            });
+        }
+
+        function adicionarDespesa() {
+            const desc = document.getElementById('desdespesa-desc');
+            const val = document.getElementById('despesa-valor');
+            const v = parseFloat(val.value);
+            if (!desc.value.trim() || isNaN(v) || v <= 0) return alert("Valores inválidos!");
+            despesasTurno.push({ id: Date.now(), descricao: desc.value.trim(), valor: v });
+            salvarDadosFirebase('despesas', despesasTurno);
+            desc.value = ""; val.value = "";
+        }
+
+        function fecharTurnoGeral() {
+            if (vendasCronologicas.length === 0 && despesasTurno.length === 0) return alert("Sem dados!");
+            if (!confirm("Finalizar turno?")) return;
+
+            let totalFaturado = vendasCronologicas.reduce((acc, cur) => acc + cur.total, 0);
+            let totalCusto = vendasCronologicas.reduce((acc, cur) => acc + cur.custoTotal, 0);
+            let totalDespesas = despesasTurno.reduce((acc, cur) => acc + cur.valor, 0);
+            let lucroLiquido = totalFaturado - totalCusto - totalDespesas;
+
+            historicoMensal.push({
+                periodo: new Date().toLocaleDateString('pt-PT'),
+                faturacao: totalFaturado,
+                custo: totalCusto,
+                despesas: totalDespesas,
+                lucro: lucroLiquido
+            });
+
+            db.ref().update({
+                despesas: [],
+                vendas_dia: [],
+                historico_mes: historicoMensal
+            }).then(() => alert("Turno encerrado arquivado com sucesso!"));
+        }
+
+        // ==========================================================================
+        // COMPONENTES AUXILIARES DE PRODUTOS E CONFIGURAÇÃO
+        // ==========================================================================
+        function atualizarVisaoStock() {
+            const container = document.getElementById('lista-stock-resumido');
+            container.innerHTML = "";
+            produtos.forEach(p => {
+                let cor = "text-emerald-400";
+                if (p.stock <= 12) cor = "text-amber-500";
+                if (p.stock <= 5) cor = "text-red-500 font-black animate-pulse";
+                container.innerHTML += `
+                    <div class="flex justify-between items-center bg-gray-950 p-2 rounded-xl border border-gray-800 text-xs">
+                        <span class="font-bold text-gray-300 truncate">${p.nome}</span>
+                        <span class="font-mono ${cor}">${p.stock} un</span>
+                    </div>`;
+            });
+        }
+
+        function popularSelectRestock() {
+            const s = document.getElementById('restock-prod-id');
+            if(!s) return; s.innerHTML = "";
+            produtos.forEach(p => s.innerHTML += `<option value="${p.id}">${p.nome} (Stock: ${p.stock})</option>`);
+            sugerirCustoAtual();
+        }
+
+        function sugerirCustoAtual() {
+            const id = parseInt(document.getElementById('restock-prod-id').value);
+            const p = produtos.find(x => x.id === id);
+            if (p) document.getElementById('restock-custo-un').value = p.custo;
+        }
+
+        function executarRestock() {
+            const id = parseInt(document.getElementById('restock-prod-id').value);
+            const qty = parseInt(document.getElementById('restock-quantidade').value);
+            const cst = parseFloat(document.getElementById('restock-custo-un').value);
+            if (isNaN(qty) || qty <= 0 || isNaN(cst)) return alert("Dados inválidos");
+
+            const p = produtos.find(x => x.id === id);
+            if (p) {
+                p.stock += qty; p.custo = cst;
+                salvarDadosFirebase('produtos', produtos);
+                document.getElementById('restock-quantidade').value = "";
+                alert("Inventário incrementado!");
+            }
+        }
+
+        function atualizarTabelaMensal() {
+            const b = document.getElementById('tabela-historico-mensal');
+            b.innerHTML = historicoMensal.length === 0 ? `<tr><td colspan="5" class="p-4 text-center text-gray-500">Sem histórico.</td></tr>` : "";
+            historicoMensal.forEach(h => {
+                b.innerHTML += `
+                    <tr class="border-b border-gray-900 hover:bg-gray-900/20">
+                        <td class="p-3 font-bold text-gray-300">${h.periodo}</td>
+                        <td class="p-3 text-amber-400">${h.faturacao.toFixed(2)} MT</td>
+                        <td class="p-3 text-red-400/80">${h.custo.toFixed(2)} MT</td>
+                        <td class="p-3 text-red-400">${h.despesas.toFixed(2)} MT</td>
+                        <td class="p-3 ${h.lucro >= 0 ? 'text-emerald-400 font-bold' : 'text-red-500 font-bold'}">${h.lucro.toFixed(2)} MT</td>
+                    </tr>`;
+            });
+        }
+
+        function fecharMesDefinitivo() {
+            if (historicoMensal.length === 0 || !confirm("Consolidar dados totais?")) return;
+            let f = historicoMensal.reduce((s,c)=>s+c.faturacao,0);
+            let c = historicoMensal.reduce((s,c)=>s+c.custo,0);
+            let d = historicoMensal.reduce((s,c)=>s+c.despesas,0);
+            let l = historicoMensal.reduce((s,c)=>s+c.lucro,0);
+            historicoMensal = [{ periodo: `TOTAL CONSOLIDADO ACUMULADO`, faturacao: f, custo: c, despesas: d, lucro: l }];
+            salvarDadosFirebase('historico_mes', historicoMensal);
+        }
+
+        function atualizarConfigProdutos() {
+            const container = document.getElementById('form-config-produtos');
+            if(!container) return; container.innerHTML = "";
+            produtos.forEach(p => {
+                container.innerHTML += `
+                    <div class="bg-gray-950 p-2 rounded-xl border border-gray-800 grid grid-cols-1 sm:grid-cols-4 gap-2 items-center text-xs">
+                        <div class="font-bold text-gray-200 truncate">${p.nome}</div>
+                        <input type="number" onchange="altProd(${p.id}, 'custo', this.value)" value="${p.custo}" class="bg-gray-900 border border-gray-800 rounded px-2 py-1 text-red-400 font-mono">
+                        <input type="number" onchange="altProd(${p.id}, 'preco', this.value)" value="${p.preco}" class="bg-gray-900 border border-gray-800 rounded px-2 py-1 text-emerald-400 font-mono">
+                        <div class="flex items-center gap-2">
+                            <input type="number" onchange="altProd(${p.id}, 'stock', this.value)" value="${p.stock}" class="w-full bg-gray-900 border border-gray-800 rounded px-2 py-1 text-gray-300 font-mono">
+                            <button onclick="delProd(${p.id})" class="bg-red-950 hover:bg-red-900 text-red-400 p-1 rounded"><span class="material-icons text-sm block">delete</span></button>
+                        </div>
+                    </div>`;
+            });
+        }
+
+        function altProd(id, prop, val) {
+            const p = produtos.find(x => x.id === id);
+            if (p && !isNaN(parseFloat(val))) { p[prop] = parseFloat(val); salvarDadosFirebase('produtos', produtos); }
+        }
+
+        function delProd(id) {
+            if (confirm("Remover artigo?")) { produtos = produtos.filter(x => x.id !== id); salvarDadosFirebase('produtos', produtos); }
+        }
+
+        function adicionarNovoProduto() {
+            const n = document.getElementById('novo-prod-nome').value.trim();
+            const c = parseFloat(document.getElementById('novo-prod-custo').value);
+            const p = parseFloat(document.getElementById('novo-prod-preco').value);
+            const s = parseInt(document.getElementById('novo-prod-stock').value) || 0;
+            if(!n || isNaN(c) || isNaN(p)) return alert("Campos obrigatórios em falta!");
+            produtos.push({ id: Date.now(), nome: n, custo: c, preco: p, stock: s });
+            salvarDadosFirebase('produtos', produtos);
+        }
+
+        function adicionarUsuario() {
+            const u = document.getElementById('novo-user-nome').value.trim();
+            const p = document.getElementById('novo-user-pass').value;
+            if(!u || !p) return alert("Credenciais vazias!");
+            usuarios.push({ username: u, pass: p });
+            salvarDadosFirebase('usuarios', usuarios);
+            alert("Operador criado!");
+        }
+
+        function inicializarSistema() {
+            if (usuarioAtivo) {
+                document.getElementById('tela-login').classList.add('hidden');
+                document.getElementById('sistema-conteudo').classList.remove('hidden');
+                document.getElementById('nome-usuario-ativo').innerText = usuarioAtivo.nome.toUpperCase();
+                document.getElementById('txt-permissao').innerText = usuarioAtivo.permissao === 'admin' ? "Administrador" : "Operador de Caixa";
+                aplicarRestricoesPermissao();
+                mudarAba('home');
+            } else {
+                document.getElementById('tela-login').classList.remove('hidden');
+                document.getElementById('sistema-conteudo').classList.add('hidden');
+            }
+        }
+
+        window.onload = () => { carregarEEscutarFirebase(); inicializarSistema(); };
+    </script>
+</body>
+</html>
