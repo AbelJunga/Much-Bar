@@ -3,16 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Much Bar - Gestão Profissional Pro v3.5</title>
+    <title>Much Bar - Gestão Avançada Pro v3.6</title>
     
+    <!-- Tailwind CSS para o Design -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Ícones -->
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 
+    <!-- SCRIPTS DO FIREBASE (Versão Compat/v9) -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 </head>
 <body class="h-full flex flex-col font-sans select-none antialiased selection:bg-amber-500/30 selection:text-amber-200">
 
+    <!-- ==========================================================================
+         TELA DE LOGIN
+         ========================================================================== -->
     <div id="tela-login" class="flex-1 flex flex-col justify-center items-center p-4 bg-gradient-to-b from-gray-950 via-gray-900 to-gray-950">
         <div class="w-full max-w-sm bg-gray-900 border border-gray-800 p-6 rounded-2xl shadow-2xl">
             <div class="text-center mb-6">
@@ -21,6 +27,7 @@
                 <p class="text-xs text-gray-500">Sistema de Gestão & Controlo de Caixas</p>
             </div>
 
+            <!-- Login Operador -->
             <div class="space-y-3 mb-6">
                 <h2 class="text-xs font-bold text-gray-400 uppercase tracking-wider">Acesso Operador</h2>
                 <input type="text" id="login-user-func" placeholder="Utilizador" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-amber-500 text-gray-200">
@@ -34,6 +41,7 @@
                 <div class="flex-grow border-t border-gray-800"></div>
             </div>
 
+            <!-- Login Admin -->
             <div class="space-y-3">
                 <h2 class="text-xs font-bold text-gray-400 uppercase tracking-wider">Painel de Controlo (Dono)</h2>
                 <input type="password" id="login-pin-admin" placeholder="PIN Administrativo" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-xs text-center font-mono tracking-widest text-amber-500 focus:outline-none focus:border-amber-500">
@@ -42,11 +50,15 @@
         </div>
     </div>
 
+    <!-- ==========================================================================
+         CONTEÚDO PRINCIPAL DO SISTEMA
+         ========================================================================== -->
     <div id="sistema-conteudo" class="hidden flex-1 flex flex-col overflow-hidden">
+        <!-- Topbar -->
         <header class="bg-gray-950 border-b border-gray-900 px-4 py-3 flex justify-between items-center shrink-0">
             <div class="flex items-center gap-2">
                 <span class="material-icons text-amber-500 text-sm">local_bar</span>
-                <span class="text-xs font-black tracking-tight text-gray-200">MUCH BAR <span class="text-[10px] font-normal text-gray-600">v3.5 Cloud</span></span>
+                <span class="text-xs font-black tracking-tight text-gray-200">MUCH BAR <span class="text-[10px] font-normal text-gray-600">v3.6 Cloud</span></span>
             </div>
             <div class="flex items-center gap-4">
                 <div class="text-right">
@@ -59,6 +71,7 @@
             </div>
         </header>
 
+        <!-- Menu de Navegação Global -->
         <nav class="bg-gray-950/80 border-b border-gray-900 p-2 flex gap-1 overflow-x-auto shrink-0 scrollbar-none">
             <button id="btn-aba-home" onclick="mudarAba('home')" class="px-3 py-1.5 rounded-lg text-xs font-bold transition shrink-0 flex items-center gap-1.5">
                 <span class="material-icons text-xs">grid_view</span> Salas & Mesas
@@ -73,37 +86,46 @@
                 <span class="material-icons text-xs">analytics</span> Histórico Mensal
             </button>
             <button id="btn-aba-produtos" onclick="mudarAba('produtos')" class="px-3 py-1.5 rounded-lg text-xs font-bold transition shrink-0 flex items-center gap-1.5 text-gray-400 adm-only">
-                <span class="material-icons text-xs">settings</span> Fichas Técnicas
+                <span class="material-icons text-xs">settings</span> Painel Admin
             </button>
         </nav>
 
+        <!-- CONTEÚDO DINÂMICO DAS ABAS -->
         <main class="flex-1 overflow-y-auto bg-gray-900/40 p-4">
 
+            <!-- ABA 1: HOME (SALAS & MESAS) -->
             <div id="aba-home" class="grid grid-cols-1 lg:grid-cols-3 gap-4 h-full hidden">
+                <!-- Painel Esquerdo: Mesas Ativas -->
                 <div class="bg-gray-900/60 border border-gray-800 rounded-2xl p-4 flex flex-col h-fit lg:h-full overflow-hidden">
                     <div class="flex justify-between items-center mb-3 shrink-0">
                         <h2 class="text-xs font-black text-gray-400 uppercase tracking-wider flex items-center gap-1.5">
                             <span class="material-icons text-xs text-amber-500">table_restaurant</span> Controlo de Mesas
                         </h2>
                     </div>
+                    <!-- Criar Nova Mesa -->
                     <div class="flex gap-2 mb-4 shrink-0">
                         <input type="text" id="novo-nome-mesa" placeholder="Ex: Mesa 12 ou Balcão Abel" class="flex-1 bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-amber-500 text-gray-200">
                         <button onclick="criarNovaMesa()" class="bg-amber-600 hover:bg-amber-500 text-gray-950 font-black px-3 rounded-xl text-xs transition flex items-center justify-center">
                             <span class="material-icons text-sm">add</span>
                         </button>
                     </div>
+                    <!-- Lista de Mesas Rolável -->
                     <div id="lista-mesas" class="flex-1 overflow-y-auto space-y-2 pr-1 min-h-[150px]">
-                        </div>
+                        <!-- Injetado dinamicamente -->
+                    </div>
                 </div>
 
+                <!-- Painel Central: Comanda Selecionada (COM BOTÕES + E -) -->
                 <div class="bg-gray-900/60 border border-gray-800 rounded-2xl p-4 flex flex-col h-fit lg:h-full overflow-hidden">
                     <div class="flex justify-between items-center pb-2 border-b border-gray-800/60 mb-3 shrink-0">
                         <span class="text-[10px] text-gray-500 uppercase font-bold tracking-wider">Mesa Selecionada</span>
                         <span id="mesa-selecionada-titulo" class="text-xs font-black text-amber-400">Nenhum</span>
                     </div>
+                    <!-- Itens da comanda -->
                     <div id="itens-comanda" class="flex-1 overflow-y-auto space-y-2 pr-1 min-h-[150px]">
                         <p class="text-xs text-gray-600 text-center py-4">Nenhum produto consumido.</p>
                     </div>
+                    <!-- Total e Fecho -->
                     <div class="pt-4 border-t border-gray-800 mt-3 shrink-0 space-y-3">
                         <div class="flex justify-between items-baseline">
                             <span class="text-xs font-bold text-gray-400">Total a Pagar:</span>
@@ -115,21 +137,28 @@
                     </div>
                 </div>
 
+                <!-- Painel Direito: Lançamento Rápido & Resumo Stock -->
                 <div class="space-y-4 h-fit lg:h-full flex flex-col overflow-hidden">
+                    <!-- Vitrine de Produtos -->
                     <div id="menu-produtos" class="bg-gray-900/60 border border-gray-800 rounded-2xl p-4 flex-1 flex flex-col overflow-hidden hidden">
                         <h2 class="text-xs font-black text-gray-400 uppercase tracking-wider mb-3 shrink-0">Toque para Adicionar</h2>
                         <div id="botoes-produtos" class="grid grid-cols-2 gap-2 overflow-y-auto pr-1 flex-1">
-                            </div>
+                            <!-- Injetado dinamicamente -->
+                        </div>
                     </div>
+                    <!-- Estado Crítico do Stock -->
                     <div class="bg-gray-900/60 border border-gray-800 rounded-2xl p-4 shrink-0 max-h-[220px] flex flex-col overflow-hidden">
                         <h2 class="text-xs font-black text-gray-400 uppercase tracking-wider mb-2 shrink-0">Estado Real de Stock</h2>
                         <div id="lista-stock-resumido" class="overflow-y-auto space-y-1.5 pr-1 flex-1">
-                            </div>
+                            <!-- Injetado dinamicamente -->
+                        </div>
                     </div>
                 </div>
             </div>
 
+            <!-- ABA 2: VENDAS DIÁRIAS (TURNO ATUAL) -->
             <div id="aba-vendas-diarias" class="space-y-4 hidden">
+                <!-- RELATÓRIO DO ADMINISTRADOR -->
                 <div class="bg-gradient-to-r from-gray-900 to-gray-950 border-l-4 border-amber-500 p-4 rounded-2xl shadow-md adm-only">
                     <h3 class="text-xs font-black text-amber-400 uppercase tracking-wider flex items-center gap-2 mb-3">
                         <span class="material-icons text-sm">analytics</span> Relatório do Turno Corrente (Em Aberto)
@@ -154,9 +183,11 @@
                     </div>
                     <p class="text-[10px] font-black text-gray-400 uppercase tracking-wider mb-1.5">Artigos Consumidos no Turno:</p>
                     <div id="rel-turno-lista-produtos" class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
-                        </div>
+                        <!-- Gerado por JS -->
+                    </div>
                 </div>
 
+                <!-- Indicadores de Caixa -->
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div class="bg-gray-900 border border-gray-800 p-4 rounded-2xl">
                         <p class="text-[10px] text-gray-500 uppercase font-black tracking-wider">Faturação Bruta Registada</p>
@@ -173,12 +204,15 @@
                 </div>
 
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                    <!-- Cronologia de Transações (GERENCIAMENTO REALTIME DE CONTAS FECHADAS) -->
                     <div class="bg-gray-900 border border-gray-800 p-4 rounded-2xl lg:col-span-2">
                         <h3 class="text-xs font-black text-gray-400 uppercase tracking-wider mb-3">Histórico de Saídas do Turno</h3>
                         <div id="lista-vendas-dia" class="space-y-2 max-h-[350px] overflow-y-auto pr-1">
-                            </div>
+                            <!-- Injetado dinamicamente -->
+                        </div>
                     </div>
 
+                    <!-- Gestão de Despesas -->
                     <div class="space-y-4">
                         <div class="bg-gray-900 border border-gray-800 p-4 rounded-2xl space-y-3">
                             <h3 class="text-xs font-black text-gray-400 uppercase tracking-wider">Registar Despesa / Saída</h3>
@@ -186,9 +220,11 @@
                             <input type="number" id="despesa-valor" placeholder="Valor (MT)" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-amber-500 text-gray-200">
                             <button onclick="adicionarDespesa()" class="w-full bg-red-900/40 hover:bg-red-900/60 border border-red-800 text-red-200 font-bold py-2 px-4 rounded-xl text-xs transition">Gravar Gasto</button>
                             <div id="lista-despesas-turno" class="text-xs space-y-1.5 pt-2 max-h-[120px] overflow-y-auto">
-                                </div>
+                                <!-- Dinâmico -->
+                            </div>
                         </div>
 
+                        <!-- Botão de Fecho de Turno -->
                         <div class="bg-gray-900 border border-gray-800 p-4 rounded-2xl text-center adm-only">
                             <p class="text-[11px] text-gray-500 mb-2">Concluir o turno arquiva os dados no histórico de longo prazo.</p>
                             <button onclick="fecharTurnoGeral()" class="w-full bg-amber-600 hover:bg-amber-500 text-gray-950 font-black py-2.5 px-4 rounded-xl text-xs transition shadow-lg shadow-amber-600/10">CONCLUIR E FECHAR TURNO</button>
@@ -197,6 +233,7 @@
                 </div>
             </div>
 
+            <!-- ABA 3: ENTRADA DE STOCK -->
             <div id="aba-restock" class="max-w-md mx-auto bg-gray-900 border border-gray-800 p-6 rounded-2xl space-y-4 hidden">
                 <div class="text-center pb-2 border-b border-gray-800">
                     <h2 class="text-sm font-black text-gray-200 uppercase tracking-wide">Dar Entrada de Mercadoria</h2>
@@ -205,7 +242,8 @@
                 <div class="space-y-1.5">
                     <label class="text-[10px] uppercase font-bold text-gray-400">Selecione o Artigo</label>
                     <select id="restock-prod-id" onchange="sugerirCustoAtual()" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2.5 text-xs text-gray-200 focus:outline-none focus:border-amber-500">
-                        </select>
+                        <!-- Opções por JS -->
+                    </select>
                 </div>
                 <div class="grid grid-cols-2 gap-3">
                     <div class="space-y-1.5">
@@ -220,6 +258,7 @@
                 <button onclick="executarRestock()" class="w-full bg-amber-600 hover:bg-amber-500 text-gray-950 font-black py-2.5 px-4 rounded-xl text-xs transition">Confirmar Entrada em Nuvem</button>
             </div>
 
+            <!-- ABA 4: HISTÓRICO MENSAL -->
             <div id="aba-financeiro-mensal" class="space-y-4 hidden adm-only">
                 <div class="bg-gray-900 border border-gray-800 p-4 rounded-2xl flex justify-between items-center">
                     <div>
@@ -241,13 +280,16 @@
                                 </tr>
                             </thead>
                             <tbody id="tabela-historico-mensal">
-                                </tbody>
+                                <!-- JS -->
+                            </tbody>
                         </table>
                     </div>
                 </div>
             </div>
 
+            <!-- ABA 5: PAINEL ADMIN (GESTÃO DE PRODUTOS E OPERADORES) -->
             <div id="aba-produtos" class="grid grid-cols-1 lg:grid-cols-3 gap-4 hidden adm-only">
+                <!-- Cadastro de Produtos -->
                 <div class="bg-gray-900 border border-gray-800 p-4 rounded-2xl h-fit space-y-3">
                     <h3 class="text-xs font-black text-gray-400 uppercase tracking-wider border-b border-gray-800 pb-2">Novo Artigo de Venda</h3>
                     <div class="space-y-1"><label class="text-[10px] text-gray-500 uppercase font-bold">Nome do Artigo</label><input type="text" id="novo-prod-nome" placeholder="Ex: Cerveja Preta" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-amber-500 text-gray-200"></div>
@@ -259,20 +301,29 @@
                     <button onclick="adicionarNovoProduto()" class="w-full bg-amber-600 hover:bg-amber-500 text-gray-950 font-black py-2 px-4 rounded-xl text-xs transition pt-2">Inserir Produto</button>
                 </div>
 
-                <div class="bg-gray-900 border border-gray-800 p-4 rounded-2xl lg:col-span-2 space-y-3 flex flex-col max-h-[500px]">
+                <!-- Lista de Artigos Lançados -->
+                <div class="bg-gray-900 border border-gray-800 p-4 rounded-2xl lg:col-span-2 space-y-3 flex flex-col max-h-[550px]">
                     <h3 class="text-xs font-black text-gray-400 uppercase tracking-wider border-b border-gray-800 pb-2">Configuração Rápida de Valores</h3>
                     <div class="grid grid-cols-1 sm:grid-cols-4 gap-2 px-3 text-[10px] uppercase font-bold text-gray-500 border-b border-gray-950 pb-1">
                         <div>Artigo</div><div>Custo (MT)</div><div>Venda (MT)</div><div>Stock Físico</div>
                     </div>
                     <div id="form-config-produtos" class="space-y-2 overflow-y-auto flex-1 pr-1">
-                        </div>
+                        <!-- JS -->
+                    </div>
 
+                    <!-- SECCÃO NOVA: CONFIGURAÇÃO E LISTAGEM DE OPERADORES -->
                     <div class="border-t border-gray-800 pt-4 mt-2">
-                        <h3 class="text-xs font-black text-gray-400 uppercase tracking-wider mb-3">Controlo de Operadores de Caixa</h3>
-                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                        <h3 class="text-xs font-black text-gray-400 uppercase tracking-wider mb-2">Controlo de Operadores de Caixa</h3>
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-3">
                             <input type="text" id="novo-user-nome" placeholder="Username do Caixa" class="bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-xs text-gray-200">
                             <input type="password" id="novo-user-pass" placeholder="Password de Entrada" class="bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-xs text-gray-200">
-                            <button onclick="adicionarUsuario()" class="bg-gray-800 hover:bg-gray-700 text-gray-200 font-bold py-2 px-4 rounded-xl text-xs transition">Criar Operador</button>
+                            <button onclick="adicionarUsuario()" class="bg-amber-600 hover:bg-amber-500 text-gray-950 font-black py-2 px-4 rounded-xl text-xs transition">Criador Operador</button>
+                        </div>
+                        
+                        <!-- Lista Dinâmica de Caixas Ativos -->
+                        <p class="text-[10px] text-gray-500 uppercase font-black tracking-wider mb-2">Lista de Operadores no Sistema:</p>
+                        <div id="lista-operadores-sistema" class="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-[120px] overflow-y-auto pr-1">
+                            <!-- Injetado via JS -->
                         </div>
                     </div>
                 </div>
@@ -281,9 +332,12 @@
         </main>
     </div>
 
+    <!-- ==========================================================================
+         LÓGICA JAVASCRIPT DO SISTEMA
+         ========================================================================== -->
     <script>
         // ==========================================================================
-        // CONFIGURAÇÃO E INICIALIZAÇÃO DO FIREBASE
+        // CONFIGURAÇÃO DO FIREBASE
         // ==========================================================================
         const firebaseConfig = {
             apiKey: "AIzaSyCI8EDvSqMGjrJ6GNdqDyeCsYUwymPXPw4",
@@ -299,11 +353,8 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // ==========================================================================
         // ESTADO GLOBAL
-        // ==========================================================================
         const PIN_ADMIN_PADRAO = "1234";
-
         let produtos = [];
         let usuarios = [];
         let mesas = [];
@@ -314,27 +365,14 @@
         let usuarioAtivo = JSON.parse(sessionStorage.getItem('mb_sessao')) || null;
         let mesaSelecionadaId = null;
 
-        const salvarDadosFirebase = (caminho, dados) => {
-            db.ref(caminho).set(dados);
-        };
+        const salvarDadosFirebase = (caminho, dados) => { db.ref(caminho).set(dados); };
 
         // ==========================================================================
-        // ESCUTA REALTIME EM TEMPO REAL
+        // LEITURA EM TEMPO REAL (REALTIME)
         // ==========================================================================
         function carregarEEscutarFirebase() {
             db.ref('produtos').on('value', (snapshot) => {
-                const dados = snapshot.val();
-                if (!dados) {
-                    produtos = [
-                        { id: 1, nome: "Cerveja Laurentina 2M", custo: 50, preco: 80, stock: 120 },
-                        { id: 2, nome: "Txilar", custo: 40, preco: 70, stock: 96 },
-                        { id: 3, nome: "Whisky Jameson (Dose)", custo: 120, preco: 250, stock: 30 },
-                        { id: 4, nome: "Água Mineral 500ml", custo: 15, preco: 35, stock: 50 }
-                    ];
-                    salvarDadosFirebase('produtos', produtos);
-                } else {
-                    produtos = dados;
-                }
+                produtos = snapshot.val() || [];
                 if (usuarioAtivo) {
                     renderizarBotoesProdutos();
                     atualizarVisaoStock();
@@ -345,6 +383,7 @@
 
             db.ref('usuarios').on('value', (snapshot) => {
                 usuarios = snapshot.val() || [{ username: "barman1", pass: "4321" }];
+                if (usuarioAtivo) atualizarListaOperadores();
             });
 
             db.ref('mesas').on('value', (snapshot) => {
@@ -387,7 +426,7 @@
         }
 
         // ==========================================================================
-        // LOGIN / LOGOUT
+        // SESSÃO / ACESSO
         // ==========================================================================
         function tentarLoginAdmin() {
             const pin = document.getElementById('login-pin-admin').value;
@@ -396,9 +435,7 @@
                 sessionStorage.setItem('mb_sessao', JSON.stringify(usuarioAtivo));
                 document.getElementById('login-pin-admin').value = "";
                 inicializarSistema();
-            } else {
-                alert("PIN Administrativo Incorreto!");
-            }
+            } else { alert("PIN Administrativo Incorreto!"); }
         }
 
         function tentarLoginFuncionario() {
@@ -409,9 +446,7 @@
                 usuarioAtivo = { nome: val.username, permissao: "funcionario" };
                 sessionStorage.setItem('mb_sessao', JSON.stringify(usuarioAtivo));
                 inicializarSistema();
-            } else {
-                alert("Credenciais incorretas!");
-            }
+            } else { alert("Credenciais incorretas!"); }
         }
 
         function fazerLogout() {
@@ -442,7 +477,51 @@
         }
 
         // ==========================================================================
-        // GESTÃO DE MESAS ATIVAS
+        // GESTÃO DE OPERADORES (REQUISITO 1)
+        // ==========================================================================
+        function adicionarUsuario() {
+            const u = document.getElementById('novo-user-nome').value.trim();
+            const p = document.getElementById('novo-user-pass').value;
+            if(!u || !p) return alert("Preencha todos os campos do operador!");
+            
+            if(usuarios.some(user => user.username.toLowerCase() === u.toLowerCase())) {
+                return alert("Este nome de operador já existe no sistema!");
+            }
+
+            usuarios.push({ username: u, pass: p });
+            db.ref('usuarios').set(usuarios).then(() => {
+                document.getElementById('novo-user-nome').value = "";
+                document.getElementById('novo-user-pass').value = "";
+                alert("Operador de caixa criado com sucesso!");
+            });
+        }
+
+        function eliminarUsuario(username) {
+            if(!confirm(`Tem a certeza que deseja remover o operador "${username}"? Ele perderá acesso ao caixa.`)) return;
+            usuarios = usuarios.filter(u => u.username !== username);
+            db.ref('usuarios').set(usuarios);
+        }
+
+        function atualizarListaOperadores() {
+            const container = document.getElementById('lista-operadores-sistema');
+            if(!container) return;
+            container.innerHTML = "";
+            usuarios.forEach(u => {
+                container.innerHTML += `
+                    <div class="bg-gray-950 p-2 border border-gray-850 rounded-xl flex justify-between items-center text-xs">
+                        <div>
+                            <p class="font-bold text-gray-200">${u.username}</p>
+                            <p class="text-[10px] text-gray-500">Pass: ${u.pass}</p>
+                        </div>
+                        <button onclick="eliminarUsuario('${u.username}')" class="text-red-400 hover:text-red-500 p-1 rounded transition">
+                            <span class="material-icons text-sm">person_remove</span>
+                        </button>
+                    </div>`;
+            });
+        }
+
+        // ==========================================================================
+        // SALA & COMANDAS ACTIVE
         // ==========================================================================
         function criarNovaMesa() {
             const inp = document.getElementById('novo-nome-mesa');
@@ -475,9 +554,6 @@
             atualizarItensComanda(m);
         }
 
-        // ==========================================================================
-        // MAGIA DO CONTROLADOR: AUMENTAR / DIMINUIR QUANTIDADE NA MESA
-        // ==========================================================================
         function atualizarItensComanda(mesa) {
             const container = document.getElementById('itens-comanda');
             const itens = mesa.itens || [];
@@ -528,7 +604,6 @@
                 return;
             }
 
-            // Aplicar alteração diretamente no stock provisório e na comanda
             item.qtd += alteracao;
             produtoOriginal.stock -= alteracao;
 
@@ -536,10 +611,7 @@
                 mesa.itens = mesa.itens.filter(i => i.id !== prodId);
             }
 
-            db.ref().update({
-                mesas: mesas,
-                produtos: produtos
-            });
+            db.ref().update({ mesas: mesas, produtos: produtos });
         }
 
         function adicionarItemMesa(prodId) {
@@ -551,9 +623,7 @@
             if (!mesa.itens) mesa.itens = [];
 
             const exist = mesa.itens.find(i => i.id === prodId);
-            if (exist) {
-                exist.qtd++;
-            } else {
+            if (exist) { exist.qtd++; } else {
                 mesa.itens.push({ id: prod.id, nome: prod.nome, preco: prod.preco, custo: prod.custo, qtd: 1 });
             }
             prod.stock--;
@@ -578,9 +648,6 @@
             });
         }
 
-        // ==========================================================================
-        // FECHO DE CONTA COM AGREGADOR DE HISTÓRICO DE TURNO
-        // ==========================================================================
         function fecharMesaAtual() {
             if (!mesaSelecionadaId) return;
             const idx = mesas.findIndex(m => m.id === mesaSelecionadaId);
@@ -588,11 +655,9 @@
             if (!m || (m.itens || []).length === 0) return;
 
             if (!confirm(`Deseja fechar a conta da ${m.nome}?`)) return;
-
             const horaFecho = new Date().toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' });
             
-            // Registar os itens faturados permanentemente no Turno
-            const itensVenda = (m.itens || []).map(i => ({
+            const itensVenda = m.itens.map(i => ({
                 id: i.id,
                 nome: i.nome,
                 qtd: i.qtd,
@@ -602,7 +667,7 @@
 
             vendasCronologicas.push({
                 id: "venda_" + Date.now(),
-                mesa: m.nome,
+                mesa: m.nome.replace(" (Reaberta)", ""),
                 hora: horaFecho,
                 produtos: itensVenda,
                 total: itensVenda.reduce((s, c) => s + c.faturadoTotal, 0),
@@ -610,65 +675,75 @@
             });
 
             mesas.splice(idx, 1);
-
-            db.ref().update({
-                mesas: mesas,
-                vendas_dia: vendasCronologicas
-            }).then(() => {
+            db.ref().update({ mesas: mesas, vendas_dia: vendasCronologicas }).then(() => {
                 fecharVisualizacaoMesa();
-                alert("Conta faturada e guardada com sucesso!");
+                alert("Conta faturada com sucesso!");
             });
         }
 
         // ==========================================================================
-        // RETORNO E EDIÇÃO DE CONTAS FECHADAS (EXCLUSIVO ADMIN)
+        // REABRIR E APAGAR CONTAS EM TEMPO REAL NO CLOUD (REQUISITO 2 - CORREÇÃO)
         // ==========================================================================
         function reabrirMesaFechada(idVenda) {
-            if (!confirm("Pretende REABRIR esta conta? Ela sairá do histórico e voltará ativa para o Salão.")) return;
+            if (!confirm("Pretende REABRIR esta conta? Ela sairá do histórico do turno e voltará ativa para o Salão.")) return;
             
-            const vIdx = vendasCronologicas.findIndex(v => v.id === idVenda);
-            const venda = vendasCronologicas[vIdx];
-            
-            // Reconverte o formato de vendas para comanda ativa
-            const itensReabertos = venda.produtos.map(p => {
-                const prodOrig = produtos.find(x => x.id === p.id);
-                return {
-                    id: p.id,
-                    nome: p.nome,
-                    qtd: p.qtd,
-                    preco: p.faturadoTotal / p.qtd,
-                    custo: prodOrig ? prodOrig.custo : p.custoTotal / p.qtd
-                };
-            });
+            db.ref('vendas_dia').once('value', snapshot => {
+                let listagem = snapshot.val() || [];
+                const venda = listagem.find(v => v.id === idVenda);
+                if (!venda) return alert("Erro: Venda não localizada!");
 
-            mesas.push({
-                id: Date.now(),
-                nome: venda.mesa + " (Reaberta)",
-                itens: itensReabertos
-            });
+                // Reconverte produtos do histórico para a comanda ativa
+                const itensReabertos = venda.produtos.map(p => {
+                    const prodGeral = produtos.find(x => x.id === p.id);
+                    return {
+                        id: p.id,
+                        nome: p.nome,
+                        qtd: p.qtd,
+                        preco: p.faturadoTotal / p.qtd,
+                        custo: prodGeral ? prodGeral.custo : p.custoTotal / p.qtd
+                    };
+                });
 
-            vendasCronologicas.splice(vIdx, 1);
-            db.ref().update({ mesas: mesas, vendas_dia: vendasCronologicas });
+                mesas.push({
+                    id: Date.now(),
+                    nome: venda.mesa + " (Reaberta)",
+                    itens: itensReabertos
+                });
+
+                const novaListaVendas = listagem.filter(v => v.id !== idVenda);
+
+                db.ref().update({
+                    mesas: mesas,
+                    vendas_dia: novaListaVendas
+                }).then(() => alert("Conta restaurada com sucesso!"));
+            });
         }
 
         function apagarMesaFechadaDefinitivo(idVenda) {
-            if (!confirm("⚠️ ALERTA CRÍTICO: Deseja ELIMINAR esta venda? O stock dos produtos será restabelecido.")) return;
+            if (!confirm("⚠️ ALERTA CRÍTICO: Deseja ELIMINAR esta venda para sempre? O stock saído será devolvido ao inventário.")) return;
             
-            const vIdx = vendasCronologicas.findIndex(v => v.id === idVenda);
-            const venda = vendasCronologicas[vIdx];
+            db.ref('vendas_dia').once('value', snapshot => {
+                let listagem = snapshot.val() || [];
+                const venda = listagem.find(v => v.id === idVenda);
+                if (!venda) return alert("Erro: Venda não localizada!");
 
-            // Devolve as quantidades ao stock geral
-            venda.produtos.forEach(p => {
-                const prodOrig = produtos.find(x => x.id === p.id);
-                if (prodOrig) prodOrig.stock += p.qtd;
+                // Devolve as quantidades compradas de volta para o stock principal
+                venda.produtos.forEach(p => {
+                    const prodGeral = produtos.find(x => x.id === p.id);
+                    if (prodGeral) prodGeral.stock += p.qtd;
+                });
+
+                const novaListaVendas = listagem.filter(v => v.id !== idVenda);
+
+                db.ref().update({
+                    produtos: produtos,
+                    vendas_dia: novaListaVendas
+                }).then(() => alert("Venda eliminada e inventário atualizado!"));
             });
-
-            vendasCronologicas.splice(vIdx, 1);
-            db.ref().update({ produtos: produtos, vendas_dia: vendasCronologicas });
         }
 
         // ==========================================================================
-        // GESTÃO DE TURNOS & MONITORIZAÇÃO DINÂMICA
+        // FECHO DE TURNO & INDICADORES
         // ==========================================================================
         function atualizarPainelVendas() {
             let totalFaturado = vendasCronologicas.reduce((acc, cur) => acc + cur.total, 0);
@@ -680,7 +755,6 @@
             document.getElementById('hoje-despesas').innerText = `${totalDespesas.toFixed(2)} MT`;
             document.getElementById('hoje-lucro').innerText = `${lucroLiquido.toFixed(2)} MT`;
 
-            // Atualizar Relatório Avançado do Admin (1. O que foi lançado antes do fecho)
             document.getElementById('rel-turno-faturado').innerText = `${totalFaturado.toFixed(2)} MT`;
             document.getElementById('rel-turno-custo').innerText = `${totalCusto.toFixed(2)} MT`;
             document.getElementById('rel-turno-lucro').innerText = `${(totalFaturado - totalCusto).toFixed(2)} MT`;
@@ -688,9 +762,7 @@
 
             let resumoProdutos = {};
             vendasCronologicas.forEach(v => {
-                v.produtos.forEach(p => {
-                    resumoProdutos[p.nome] = (resumoProdutos[p.nome] || 0) + p.qtd;
-                });
+                v.produtos.forEach(p => { resumoProdutos[p.nome] = (resumoProdutos[p.nome] || 0) + p.qtd; });
             });
 
             const divProdReport = document.getElementById('rel-turno-lista-produtos');
@@ -703,7 +775,6 @@
                     </div>`;
             });
 
-            // Listar Histórico de Contas Correntes com Botões Administrativos Reabrir/Apagar
             const containerCronologico = document.getElementById('lista-vendas-dia');
             containerCronologico.innerHTML = vendasCronologicas.length === 0 ? `<p class="text-xs text-gray-600 text-center py-4">Nenhum movimento.</p>` : "";
             
@@ -714,8 +785,8 @@
                 if (isAdmin) {
                     botoesAcao = `
                         <div class="flex items-center gap-1 shrink-0">
-                            <button onclick="reabrirMesaFechada('${v.id}')" class="px-2 py-1 bg-amber-950 border border-amber-800 rounded text-[10px] font-bold text-amber-400 hover:bg-amber-900/40">✏️ Reabrir</button>
-                            <button onclick="apagarMesaFechadaDefinitivo('${v.id}')" class="px-2 py-1 bg-red-950 border border-red-800 rounded text-[10px] font-bold text-red-400 hover:bg-red-900/40">🗑️ Apagar</button>
+                            <button onclick="reabrirMesaFechada('${v.id}')" class="px-2 py-1 bg-amber-950 border border-amber-800 rounded text-[10px] font-bold text-amber-400 hover:bg-amber-900/40 transition">✏️ Reabrir</button>
+                            <button onclick="apagarMesaFechadaDefinitivo('${v.id}')" class="px-2 py-1 bg-red-950 border border-red-800 rounded text-[10px] font-bold text-red-400 hover:bg-red-900/40 transition">🗑️ Apagar</button>
                         </div>`;
                 }
 
@@ -733,7 +804,6 @@
                     </div>`;
             });
 
-            // Atualizar Bloco de Despesas Simples
             const containerDespesas = document.getElementById('lista-despesas-turno');
             containerDespesas.innerHTML = despesasTurno.length === 0 ? `<p class="text-gray-600 italic">Sem gastos.</p>` : "";
             despesasTurno.forEach(d => {
@@ -756,7 +826,7 @@
         }
 
         function fecharTurnoGeral() {
-            if (vendasCronologicas.length === 0 && despesasTurno.length === 0) return alert("Sem dados!");
+            if (vendasCronologicas.length === 0 && despesasTurno.length === 0) return alert("Sem dados para fechar o turno!");
             if (!confirm("Finalizar turno?")) return;
 
             let totalFaturado = vendasCronologicas.reduce((acc, cur) => acc + cur.total, 0);
@@ -776,11 +846,11 @@
                 despesas: [],
                 vendas_dia: [],
                 historico_mes: historicoMensal
-            }).then(() => alert("Turno encerrado arquivado com sucesso!"));
+            }).then(() => alert("Turno arquivado com sucesso!"));
         }
 
         // ==========================================================================
-        // COMPONENTES AUXILIARES DE PRODUTOS E CONFIGURAÇÃO
+        // OUTROS SUPORTES (STOCK, PRODUTOS, CONSOLIDAÇÃO)
         // ==========================================================================
         function atualizarVisaoStock() {
             const container = document.getElementById('lista-stock-resumido');
@@ -827,7 +897,7 @@
 
         function atualizarTabelaMensal() {
             const b = document.getElementById('tabela-historico-mensal');
-            b.innerHTML = historicoMensal.length === 0 ? `<tr><td colspan="5" class="p-4 text-center text-gray-500">Sem histórico.</td></tr>` : "";
+            b.innerHTML = historicoMensal.length === 0 ? `<tr><td colspan="5" class="p-4 text-center text-gray-500">Sem histórico acumulado.</td></tr>` : "";
             historicoMensal.forEach(h => {
                 b.innerHTML += `
                     <tr class="border-b border-gray-900 hover:bg-gray-900/20">
@@ -841,7 +911,7 @@
         }
 
         function fecharMesDefinitivo() {
-            if (historicoMensal.length === 0 || !confirm("Consolidar dados totais?")) return;
+            if (historicoMensal.length === 0 || !confirm("Consolidar dados arquivados do mês?")) return;
             let f = historicoMensal.reduce((s,c)=>s+c.faturacao,0);
             let c = historicoMensal.reduce((s,c)=>s+c.custo,0);
             let d = historicoMensal.reduce((s,c)=>s+c.despesas,0);
@@ -873,7 +943,7 @@
         }
 
         function delProd(id) {
-            if (confirm("Remover artigo?")) { produtos = produtos.filter(x => x.id !== id); salvarDadosFirebase('produtos', produtos); }
+            if (confirm("Remover artigo definitivamente?")) { produtos = produtos.filter(x => x.id !== id); salvarDadosFirebase('produtos', produtos); }
         }
 
         function adicionarNovoProduto() {
@@ -884,15 +954,9 @@
             if(!n || isNaN(c) || isNaN(p)) return alert("Campos obrigatórios em falta!");
             produtos.push({ id: Date.now(), nome: n, custo: c, preco: p, stock: s });
             salvarDadosFirebase('produtos', produtos);
-        }
-
-        function adicionarUsuario() {
-            const u = document.getElementById('novo-user-nome').value.trim();
-            const p = document.getElementById('novo-user-pass').value;
-            if(!u || !p) return alert("Credenciais vazias!");
-            usuarios.push({ username: u, pass: p });
-            salvarDadosFirebase('usuarios', usuarios);
-            alert("Operador criado!");
+            document.getElementById('novo-prod-nome').value = "";
+            document.getElementById('novo-prod-custo').value = "";
+            document.getElementById('novo-prod-preco').value = "";
         }
 
         function inicializarSistema() {
@@ -902,6 +966,7 @@
                 document.getElementById('nome-usuario-ativo').innerText = usuarioAtivo.nome.toUpperCase();
                 document.getElementById('txt-permissao').innerText = usuarioAtivo.permissao === 'admin' ? "Administrador" : "Operador de Caixa";
                 aplicarRestricoesPermissao();
+                atualizarListaOperadores();
                 mudarAba('home');
             } else {
                 document.getElementById('tela-login').classList.remove('hidden');
