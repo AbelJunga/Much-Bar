@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Much Bar - Sistema de Gestão</title>
+    <title>Much Bar - Sistema de Gestão Avançado</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 </head>
@@ -14,12 +14,12 @@
             <h1 class="text-3xl font-black text-white mb-2 text-center tracking-tight">
                 <span class="material-icons text-amber-500 text-3xl align-middle">local_bar</span> MUCH<span class="text-amber-500">BAR</span>
             </h1>
-            <p class="text-gray-400 text-xs text-center mb-6">Controlo de Acesso e Turnos</p>
+            <p class="text-gray-400 text-xs text-center mb-6">Gestão Financeira e Stock</p>
             
             <div class="space-y-3">
                 <p class="text-[10px] text-amber-500 font-bold uppercase tracking-wider">Acesso Admin (Abel)</p>
                 <input type="password" id="login-pin-admin" placeholder="Introduza o seu PIN" class="w-full bg-gray-950 border border-gray-700 rounded-lg p-3 text-center text-xl tracking-widest text-amber-400 focus:outline-none focus:border-amber-500">
-                <button onclick="tentarLoginAdmin()" class="w-full bg-amber-600 hover:bg-amber-500 text-gray-900 font-black py-3 rounded-lg transition text-sm cursor-pointer">Entrar como Dono</button>
+                <button onclick="tentarLoginAdmin()" class="w-full bg-amber-600 hover:bg-amber-500 text-gray-950 font-black py-3 rounded-xl transition text-sm cursor-pointer">Entrar como Dono</button>
             </div>
 
             <div class="my-6 border-t border-gray-800 flex items-center justify-center"><span class="bg-gray-900 px-3 text-xs text-gray-600 uppercase">Ou</span></div>
@@ -56,7 +56,10 @@
                         <span class="material-icons text-base">home</span> Home (Mesas)
                     </button>
                     <button onclick="mudarAba('vendas-diarias')" id="btn-aba-vendas-diarias" class="w-full px-4 py-3 rounded-xl text-left font-bold text-sm flex items-center gap-3 transition text-gray-400 hover:bg-gray-800 hover:text-gray-100 cursor-pointer">
-                        <span class="material-icons text-base">analytics</span> Vendas Diárias
+                        <span class="material-icons text-base">analytics</span> Vendas e Fluxo
+                    </button>
+                    <button onclick="mudarAba('financeiro-mensal')" id="btn-aba-financeiro-mensal" class="w-full px-4 py-3 rounded-xl text-left font-bold text-sm flex items-center gap-3 transition text-gray-400 hover:bg-gray-800 hover:text-gray-100 adm-only cursor-pointer">
+                        <span class="material-icons text-base">payments</span> Relatório Mensal
                     </button>
                     <button onclick="mudarAba('produtos')" id="btn-aba-produtos" class="w-full px-4 py-3 rounded-xl text-left font-bold text-sm flex items-center gap-3 transition text-gray-400 hover:bg-gray-800 hover:text-gray-100 adm-only cursor-pointer">
                         <span class="material-icons text-base">inventory</span> Config. Produtos
@@ -112,63 +115,111 @@
             </div>
 
             <div id="aba-vendas-diarias" class="hidden space-y-6">
-                <div id="card-financeiro-admin" class="adm-only bg-gray-900 p-6 rounded-xl border border-gray-800 shadow-xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                    <div>
-                        <p class="text-xs text-gray-400 uppercase font-bold tracking-wider mb-1">Faturação Total do Caixa</p>
-                        <p class="text-3xl font-black text-emerald-400" id="faturacao-total">0,00 MT</p>
+                <div id="card-financeiro-admin" class="adm-only grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div class="bg-gray-900 p-4 rounded-xl border border-gray-800 shadow-sm">
+                        <p class="text-[10px] text-gray-400 font-bold uppercase">Faturação Bruta</p>
+                        <p class="text-xl font-black text-amber-400" id="hoje-faturacao">0,00 MT</p>
                     </div>
-                    <button onclick="fecharTurnoGeral()" class="bg-red-950/40 hover:bg-red-900 border border-red-800 text-red-200 font-bold py-3 px-6 rounded-xl transition flex items-center justify-center gap-2 text-sm cursor-pointer">
-                        <span class="material-icons text-sm">lock_clock</span> Encerrar Turno (Zerar Tudo)
-                    </button>
+                    <div class="bg-gray-900 p-4 rounded-xl border border-gray-800 shadow-sm">
+                        <p class="text-[10px] text-gray-400 font-bold uppercase">Despesas / Perdas</p>
+                        <p class="text-xl font-black text-red-400" id="hoje-despesas">0,00 MT</p>
+                    </div>
+                    <div class="bg-gray-900 p-4 rounded-xl border border-gray-800 shadow-sm">
+                        <p class="text-[10px] text-gray-400 font-bold uppercase">Lucro Líquido Estimado</p>
+                        <p class="text-xl font-black text-emerald-400" id="hoje-lucro">0,00 MT</p>
+                    </div>
                 </div>
 
-                <div class="bg-gray-900 p-6 rounded-xl border border-gray-800 shadow-xl">
-                    <h3 class="text-base font-bold mb-3 flex items-center gap-2 text-amber-400">
-                        <span class="material-icons text-base">bar_chart</span> Quantidades Totais Vendidas (Hoje)
-                    </h3>
-                    <p class="text-xs text-gray-500 mb-4">Contagem acumulada de saídas de stock em tempo real durante este turno.</p>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3" id="lista-quantidades-vendidas"></div>
-                </div>
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div class="adm-only bg-gray-900 p-5 rounded-xl border border-gray-800 shadow-xl h-fit">
+                        <h3 class="text-sm font-bold mb-3 flex items-center gap-2 text-red-400"><span class="material-icons text-sm">money_off</span> Registar Despesa / Perda</h3>
+                        <div class="space-y-2">
+                            <input type="text" id="despesa-desc" placeholder="Descrição (Ex: Saco de Gelo, Quebra)" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-2 text-xs focus:outline-none focus:border-red-500">
+                            <input type="number" id="despesa-valor" placeholder="Valor (MT)" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-2 text-xs focus:outline-none focus:border-red-500">
+                            <button onclick="adicionarDespesa()" class="w-full bg-red-900/60 hover:bg-red-800 border border-red-700 font-bold p-2 rounded-xl text-xs transition cursor-pointer">Adicionar Saída</button>
+                        </div>
+                        
+                        <div class="mt-4 pt-4 border-t border-gray-800">
+                            <p class="text-[10px] uppercase font-bold text-gray-400 mb-2">Despesas do Turno:</p>
+                            <div id="lista-despesas-turno" class="space-y-1 max-h-32 overflow-y-auto text-[11px]"></div>
+                        </div>
 
+                        <div class="mt-4 pt-4 border-t border-gray-800">
+                            <button onclick="fecharTurnoGeral()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-gray-950 font-black py-2.5 rounded-xl transition text-xs flex items-center justify-center gap-1 cursor-pointer">
+                                <span class="material-icons text-xs">save</span> Fechar Turno e Salvar Dia
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="lg:col-span-2 bg-gray-900 p-5 rounded-xl border border-gray-800 shadow-xl">
+                        <h3 class="text-sm font-bold mb-3 flex items-center gap-2 text-amber-500"><span class="material-icons text-sm">bar_chart</span> Totais Vendidos (Turno Atual)</h3>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-4" id="lista-quantidades-vendidas"></div>
+                        
+                        <h3 class="text-sm font-bold mb-2 pt-2 border-t border-gray-800 flex items-center gap-2 text-gray-300"><span class="material-icons text-sm">history</span> Histórico Cronológico</h3>
+                        <div class="overflow-y-auto max-h-48 border border-gray-950 rounded-xl bg-gray-950/40" id="lista-vendas-dia"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="aba-financeiro-mensal" class="hidden space-y-6">
                 <div class="bg-gray-900 p-6 rounded-xl border border-gray-800 shadow-xl">
-                    <h3 class="text-base font-bold mb-3 flex items-center gap-2 text-gray-200">
-                        <span class="material-icons text-amber-500 text-base">history</span> Histórico Cronológico de Saídas
-                    </h3>
-                    <div class="overflow-y-auto max-h-64 border border-gray-950 rounded-xl bg-gray-950/40" id="lista-vendas-dia"></div>
+                    <h3 class="text-base font-bold mb-1 flex items-center gap-2 text-gray-100"><span class="material-icons text-amber-500">calendar_month</span> Relatório Mensal e Diário Arquivado</h3>
+                    <p class="text-xs text-gray-500 mb-4">Abaixo encontra o registo fechado de cada dia de operação para acompanhamento de lucros reais acumulados.</p>
+                    
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs border-collapse">
+                            <thead>
+                                <tr class="border-b border-gray-800 text-gray-400 font-bold uppercase tracking-wider">
+                                    <th class="p-3">Data / Turno</th>
+                                    <th class="p-3">Faturação Bruta</th>
+                                    <th class="p-3">Custo de Stock</th>
+                                    <th class="p-3">Despesas/Perdas</th>
+                                    <th class="p-3">Lucro Líquido</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabela-historico-mensal" class="divide-y divide-gray-900">
+                                </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
 
             <div id="aba-produtos" class="hidden space-y-6">
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     <div class="bg-gray-900 p-6 rounded-xl border border-gray-800 shadow-xl h-fit">
-                        <h3 class="text-base font-bold mb-4 flex items-center gap-2 text-gray-200"><span class="material-icons text-green-500 text-base">add_box</span> Novo Produto</h3>
+                        <h3 class="text-base font-bold mb-4 flex items-center gap-2 text-gray-200"><span class="material-icons text-green-500">add_box</span> Novo Produto</h3>
                         <div class="space-y-3">
-                            <input type="text" id="novo-prod-nome" placeholder="Nome (Ex: Gin Gordon's)" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-2.5 text-sm text-gray-200 focus:outline-none focus:border-amber-500">
-                            <div class="grid grid-cols-2 gap-2">
-                                <input type="number" id="novo-prod-preco" placeholder="Preço (MT)" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-2.5 text-sm text-gray-200 focus:outline-none focus:border-amber-500">
-                                <input type="number" id="novo-prod-stock" placeholder="Stock Físico" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-2.5 text-sm text-gray-200 focus:outline-none focus:border-amber-500">
+                            <input type="text" id="novo-prod-nome" placeholder="Nome do Produto" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-2.5 text-sm text-gray-200 focus:outline-none focus:border-amber-500">
+                            <div>
+                                <label class="text-[10px] text-gray-500 block font-bold mb-1 uppercase">Preços Financeiros (MT)</label>
+                                <div class="grid grid-cols-2 gap-2">
+                                    <input type="number" id="novo-prod-custo" placeholder="Preço Compra" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-2.5 text-sm text-red-400 focus:outline-none focus:border-amber-500">
+                                    <input type="number" id="novo-prod-preco" placeholder="Preço Venda" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-2.5 text-sm text-emerald-400 focus:outline-none focus:border-amber-500">
+                                </div>
                             </div>
-                            <button onclick="adicionarNovoProduto()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-gray-900 font-bold p-2.5 rounded-xl text-sm transition cursor-pointer">Salvar no Inventário</button>
+                            <input type="number" id="novo-prod-stock" placeholder="Stock Inicial" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-2.5 text-sm text-gray-200 focus:outline-none focus:border-amber-500">
+                            <button onclick="adicionarNovoProduto()" class="w-full bg-amber-600 hover:bg-amber-500 text-gray-950 font-black p-2.5 rounded-xl text-sm transition cursor-pointer">Salvar no Sistema</button>
                         </div>
                     </div>
 
                     <div class="bg-gray-900 p-6 rounded-xl border border-gray-800 shadow-xl lg:col-span-2">
-                        <h3 class="text-base font-bold mb-4 flex items-center gap-2 text-gray-200"><span class="material-icons text-amber-500 text-base">edit_note</span> Editar Dados do Inventário</h3>
-                        <div class="space-y-3 max-h-[320px] overflow-y-auto pr-1" id="form-config-produtos"></div>
+                        <h3 class="text-base font-bold mb-2 text-gray-200"><span class="material-icons text-amber-500">edit_note</span> Inventário Completo</h3>
+                        <p class="text-xs text-gray-500 mb-4">Insira o valor de compra (custo) para calcular a margem de lucro exata das vendas.</p>
+                        <div class="space-y-3 max-h-[400px] overflow-y-auto pr-1" id="form-config-produtos"></div>
                     </div>
                 </div>
 
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 pt-2">
                     <div class="bg-gray-900 p-6 rounded-xl border border-gray-800 shadow-xl">
-                        <h3 class="text-base font-bold mb-4 flex items-center gap-2 text-gray-200"><span class="material-icons text-amber-500 text-base">person_add</span> Registar Funcionário</h3>
+                        <h3 class="text-base font-bold mb-4 flex items-center gap-2 text-gray-200"><span class="material-icons text-amber-500">person_add</span> Criar Operador</h3>
                         <div class="space-y-3">
                             <input type="text" id="novo-user-nome" placeholder="Username (Ex: nunes)" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-2.5 text-sm text-gray-200 focus:outline-none focus:border-amber-500">
                             <input type="password" id="novo-user-pass" placeholder="Password (Senha)" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-2.5 text-sm text-gray-200 focus:outline-none focus:border-amber-500">
-                            <button onclick="adicionarUsuario()" class="w-full bg-amber-600 hover:bg-amber-500 text-gray-900 font-bold p-2.5 rounded-xl text-sm transition cursor-pointer">Criar Conta</button>
+                            <button onclick="adicionarUsuario()" class="w-full bg-gray-800 hover:bg-gray-700 text-gray-100 font-bold p-2.5 rounded-xl text-sm transition cursor-pointer">Criar Acesso</button>
                         </div>
                     </div>
                     <div class="bg-gray-900 p-6 rounded-xl border border-gray-800 shadow-xl lg:col-span-2">
-                        <h3 class="text-base font-bold mb-4 flex items-center gap-2 text-gray-200"><span class="material-icons text-amber-500 text-base">group</span> Credenciais Ativas</h3>
+                        <h3 class="text-base font-bold mb-4 flex items-center gap-2 text-gray-200"><span class="material-icons text-amber-500">group</span> Credenciais Activas</h3>
                         <div class="space-y-2" id="lista-usuarios-cadastrados"></div>
                     </div>
                 </div>
@@ -178,40 +229,51 @@
     </div>
 
     <script>
+        // Configuração de Fábrica com campos de Custo (Compra) incluídos
         const produtosPadrao = {
-            1: { nome: "Cerveja 2M", preco: 100, stock: 48 },
-            2: { nome: "Cerveja Laurentina Preta", preco: 120, stock: 24 },
-            3: { nome: "Shot de Gin (Dose)", preco: 150, stock: 15 },
-            4: { nome: "Porção de Batata Frita", preco: 250, stock: 30 }
+            1: { nome: "Cerveja 2M", custo: 75, preco: 100, stock: 48 },
+            2: { nome: "Cerveja Laurentina Preta", custo: 85, preco: 120, stock: 24 },
+            3: { nome: "Shot de Gin (Dose)", custo: 60, preco: 150, stock: 15 },
+            4: { nome: "Porção de Batata Frita", custo: 110, preco: 250, stock: 30 }
         };
 
         const usuariosPadrao = [ { user: "nunes", pass: "1234" } ];
 
-        let db_produtos, db_funcionarios, db_faturacao, db_mesas, db_historico_vendas;
+        let db_produtos, db_funcionarios, db_mesas, db_historico_vendas;
+        let db_faturacao_turno, db_custo_turno, db_despesas_turno, db_arquivos_mensais;
         let usuarioActual = null; let mesaActiva = null;
 
         function carregarDados() {
             try {
-                db_produtos = JSON.parse(localStorage.getItem('mb_sys_produtos')) || produtosPadrao;
-                db_funcionarios = JSON.parse(localStorage.getItem('mb_sys_funcs')) || usuariosPadrao;
-                db_faturacao = parseFloat(localStorage.getItem('mb_sys_faturacao')) || 0;
-                db_historico_vendas = JSON.parse(localStorage.getItem('mb_sys_historico')) || [];
-                db_mesas = JSON.parse(localStorage.getItem('mb_sys_mesas')) || { 
+                db_produtos = JSON.parse(localStorage.getItem('mb_v3_produtos')) || produtosPadrao;
+                db_funcionarios = JSON.parse(localStorage.getItem('mb_v3_funcs')) || usuariosPadrao;
+                db_historico_vendas = JSON.parse(localStorage.getItem('mb_v3_historico')) || [];
+                db_despesas_turno = JSON.parse(localStorage.getItem('mb_v3_despesas_t')) || [];
+                
+                db_faturacao_turno = parseFloat(localStorage.getItem('mb_v3_fat_t')) || 0;
+                db_custo_turno = parseFloat(localStorage.getItem('mb_v3_custo_t')) || 0;
+                db_arquivos_mensais = JSON.parse(localStorage.getItem('mb_v3_arquivos')) || [];
+
+                db_mesas = JSON.parse(localStorage.getItem('mb_v3_mesas')) || { 
                     1: { status: "Livre", itens: [] }, 2: { status: "Livre", itens: [] }, 
                     3: { status: "Livre", itens: [] }, 4: { status: "Livre", itens: [] } 
                 };
             } catch (e) {
-                db_produtos = produtosPadrao; db_funcionarios = usuariosPadrao; db_faturacao = 0; db_historico_vendas = [];
+                db_produtos = produtosPadrao; db_funcionarios = usuariosPadrao; db_historico_vendas = []; db_despesas_turno = [];
+                db_faturacao_turno = 0; db_custo_turno = 0; db_arquivos_mensais = [];
                 db_mesas = { 1: { status: "Livre", itens: [] }, 2: { status: "Livre", itens: [] }, 3: { status: "Livre", itens: [] }, 4: { status: "Livre", itens: [] } };
             }
         }
 
         function guardarDados() {
-            localStorage.setItem('mb_sys_produtos', JSON.stringify(db_produtos));
-            localStorage.setItem('mb_sys_funcs', JSON.stringify(db_funcionarios));
-            localStorage.setItem('mb_sys_faturacao', db_faturacao.toString());
-            localStorage.setItem('mb_sys_mesas', JSON.stringify(db_mesas));
-            localStorage.setItem('mb_sys_historico', JSON.stringify(db_historico_vendas));
+            localStorage.setItem('mb_v3_produtos', JSON.stringify(db_produtos));
+            localStorage.setItem('mb_v3_funcs', JSON.stringify(db_funcionarios));
+            localStorage.setItem('mb_v3_historico', JSON.stringify(db_historico_vendas));
+            localStorage.setItem('mb_v3_despesas_t', JSON.stringify(db_despesas_turno));
+            localStorage.setItem('mb_v3_fat_t', db_faturacao_turno.toString());
+            localStorage.setItem('mb_v3_custo_t', db_custo_turno.toString());
+            localStorage.setItem('mb_v3_arquivos', JSON.stringify(db_arquivos_mensais));
+            localStorage.setItem('mb_v3_mesas', JSON.stringify(db_mesas));
         }
 
         function tentarLoginAdmin() {
@@ -255,25 +317,28 @@
         function inicializarPaineis() {
             renderizarMesas(); renderizarStockResumido(); renderizarPainelVenda();
             renderizarConfigProdutos(); renderizarListaUsuarios(); renderizarHistoricoVendas();
+            renderizarDespesasTurno(); renderizarTabelaMensal();
+            calcularIndicadoresTurno();
         }
 
         function mudarAba(aba) {
-            if (aba === 'produtos' && usuarioActual.cargo !== "Administrador") return;
+            if ((aba === 'produtos' || aba === 'financeiro-mensal') && usuarioActual.cargo !== "Administrador") return;
 
             document.getElementById('aba-home').classList.add('hidden');
             document.getElementById('aba-produtos').classList.add('hidden');
             document.getElementById('aba-vendas-diarias').classList.add('hidden');
+            document.getElementById('aba-financeiro-mensal').classList.add('hidden');
 
             document.getElementById('btn-aba-home').className = "w-full px-4 py-3 rounded-xl text-left font-bold text-sm flex items-center gap-3 transition text-gray-400 hover:bg-gray-800 hover:text-gray-100 cursor-pointer";
             document.getElementById('btn-aba-vendas-diarias').className = "w-full px-4 py-3 rounded-xl text-left font-bold text-sm flex items-center gap-3 transition text-gray-400 hover:bg-gray-800 hover:text-gray-100 cursor-pointer";
-            if(document.getElementById('btn-aba-produtos')) {
-                document.getElementById('btn-aba-produtos').className = "w-full px-4 py-3 rounded-xl text-left font-bold text-sm flex items-center gap-3 transition text-gray-400 hover:bg-gray-800 hover:text-gray-100 adm-only cursor-pointer";
-            }
+            if(document.getElementById('btn-aba-produtos')) document.getElementById('btn-aba-produtos').className = "w-full px-4 py-3 rounded-xl text-left font-bold text-sm flex items-center gap-3 transition text-gray-400 hover:bg-gray-800 hover:text-gray-100 cursor-pointer";
+            if(document.getElementById('btn-aba-financeiro-mensal')) document.getElementById('btn-aba-financeiro-mensal').className = "w-full px-4 py-3 rounded-xl text-left font-bold text-sm flex items-center gap-3 transition text-gray-400 hover:bg-gray-800 hover:text-gray-100 cursor-pointer";
 
             document.getElementById(`aba-${aba}`).classList.remove('hidden');
             document.getElementById(`btn-aba-${aba}`).className = "w-full px-4 py-3 rounded-xl text-left font-bold text-sm flex items-center gap-3 transition bg-amber-500 text-gray-950 cursor-pointer";
         }
 
+        // CONTROLADORES DE FLUXO (MESAS/LANÇAMENTOS)
         function renderizarMesas() {
             const container = document.getElementById('lista-mesas'); container.innerHTML = '';
             Object.keys(db_mesas).forEach(id => {
@@ -291,18 +356,14 @@
                 let cor = prod.stock <= 5 ? "text-red-400 font-bold animate-pulse" : "text-emerald-400";
                 container.innerHTML += `<div class="flex justify-between items-center bg-gray-950 p-3 rounded-xl border border-gray-900 text-xs"><span class="text-gray-300">${prod.nome}</span><span class="${cor}">${prod.stock} un</span></div>`;
             });
-            document.getElementById('faturacao-total').innerText = `${db_faturacao.toFixed(2)} MT`;
         }
 
         function selecionarMesa(id) { mesaActiva = id; renderizarMesas(); renderizarPainelVenda(); }
 
         function renderizarPainelVenda() {
-            const titulo = document.getElementById('mesa-selecionada-titulo');
-            const containerItens = document.getElementById('itens-comanda');
-            const menuProdutos = document.getElementById('menu-produtos');
-            const botoesProdutos = document.getElementById('botoes-produtos');
-            const btnFechar = document.getElementById('btn-fechar-conta');
-            const totalTexto = document.getElementById('total-comanda');
+            const titulo = document.getElementById('mesa-selecionada-titulo'); const containerItens = document.getElementById('itens-comanda');
+            const menuProdutos = document.getElementById('menu-produtos'); const botoesProdutos = document.getElementById('botoes-produtos');
+            const btnFechar = document.getElementById('btn-fechar-conta'); const totalTexto = document.getElementById('total-comanda');
 
             if (!mesaActiva) {
                 titulo.innerText = "Nenhuma"; containerItens.innerHTML = `<p class="text-gray-600 text-xs italic text-center py-10">Escolha uma mesa ao lado para operar.</p>`;
@@ -331,39 +392,79 @@
         function adicionarItem(pId) {
             if (!mesaActiva) return;
             db_mesas[mesaActiva].status = "Ocupada";
-            db_mesas[mesaActiva].itens.push({ id: pId, nome: db_produtos[pId].nome, preco: db_produtos[pId].preco });
+            db_mesas[mesaActiva].itens.push({ id: pId, nome: db_produtos[pId].nome, preco: db_produtos[pId].preco, custo: db_produtos[pId].custo || 0 });
             guardarDados(); renderizarPainelVenda(); renderizarMesas();
         }
 
         function fecharMesaAtual() {
-            const mesa = db_mesas[mesaActiva]; let totalMesa = 0;
+            const mesa = db_mesas[mesaActiva]; let totalMesa = 0; let custoMesa = 0;
             const hora = new Date().toLocaleTimeString('pt-PT', {hour: '2-digit', minute:'2-digit'});
 
             mesa.itens.forEach(item => {
                 if(db_produtos[item.id] && db_produtos[item.id].stock > 0) {
-                    db_produtos[item.id].stock -= 1; totalMesa += item.preco;
+                    db_produtos[item.id].stock -= 1; 
+                    totalMesa += item.preco;
+                    custoMesa += (db_produtos[item.id].custo || 0);
                     db_historico_vendas.unshift({ hora: hora, vendedor: usuarioActual.nome, produto: item.nome, valor: item.preco });
                 }
             });
 
-            db_faturacao += totalMesa; mesa.status = "Livre"; mesa.itens = [];
-            guardarDados(); alert(`Conta fechada!\nTotal faturado: ${totalMesa.toFixed(2)} MT.`);
+            db_faturacao_turno += totalMesa;
+            db_custo_turno += custoMesa;
+            mesa.status = "Livre"; mesa.itens = [];
+            guardarDados(); alert(`Conta fechada! Subtotal: ${totalMesa.toFixed(2)} MT.`);
             mesaActiva = null; inicializarPaineis();
+        }
+
+        // CÁLCULO FINANCEIRO REAL-TIME E DESPESAS
+        function calcularIndicadoresTurno() {
+            let totalDespesas = 0;
+            db_despesas_turno.forEach(d => totalDespesas += d.valor);
+
+            // Lucro = Faturação Bruta - Custo de Stock - Despesas Diretas
+            let lucroEstimado = db_faturacao_turno - db_custo_turno - totalDespesas;
+
+            document.getElementById('hoje-faturacao').innerText = `${db_faturacao_turno.toFixed(2)} MT`;
+            document.getElementById('hoje-despesas').innerText = `${totalDespesas.toFixed(2)} MT`;
+            document.getElementById('hoje-lucro').innerText = `${lucroEstimado.toFixed(2)} MT`;
+        }
+
+        function adicionarDespesa() {
+            const desc = document.getElementById('despesa-desc').value.trim();
+            const valor = parseFloat(document.getElementById('despesa-valor').value);
+
+            if(!desc || isNaN(valor) || valor <= 0) { alert("Introduza a descrição e o valor da despesa."); return; }
+
+            db_despesas_turno.push({ descricao: desc, valor: valor });
+            document.getElementById('despesa-desc').value = '';
+            document.getElementById('despesa-valor').value = '';
+
+            guardarDados(); inicializarPaineis();
+        }
+
+        function renderizarDespesasTurno() {
+            const container = document.getElementById('lista-despesas-turno');
+            if(db_despesas_turno.length === 0) { container.innerHTML = `<span class="text-gray-600 italic">Nenhuma despesa lançada neste turno.</span>`; return; }
+            container.innerHTML = db_despesas_turno.map((d, index) => `
+                <div class="flex justify-between bg-gray-950 p-1.5 rounded border border-gray-900 text-red-400">
+                    <span>• ${d.descricao}</span>
+                    <span class="font-bold">-${d.valor.toFixed(2)} MT</span>
+                </div>
+            `).join('');
         }
 
         function renderizarHistoricoVendas() {
             const containerHist = document.getElementById('lista-vendas-dia');
             const containerQuantidades = document.getElementById('lista-quantidades-vendidas');
 
-            // 1. Renderizar Cronologia das Saídas
             if(db_historico_vendas.length === 0) {
-                containerHist.innerHTML = `<p class="text-gray-500 text-xs italic text-center py-8">Nenhuma venda efetuada hoje.</p>`;
-                containerQuantidades.innerHTML = `<p class="text-gray-500 text-xs italic text-center py-4 col-span-full">Aguardando vendas.</p>`;
+                containerHist.innerHTML = `<p class="text-gray-500 text-xs italic text-center py-6">Nenhuma venda efetuada hoje.</p>`;
+                containerQuantidades.innerHTML = `<p class="text-gray-500 text-xs italic text-center py-3 col-span-full">Sem fluxo.</p>`;
                 return;
             }
             
             containerHist.innerHTML = db_historico_vendas.map(v => `
-                <div class="flex justify-between items-center p-3 border-b border-gray-950 text-xs hover:bg-gray-950/20">
+                <div class="flex justify-between items-center p-2.5 border-b border-gray-950 text-xs hover:bg-gray-950/20">
                     <div class="flex gap-4">
                         <span class="text-gray-500 font-mono">${v.hora}</span>
                         <span class="text-gray-400 font-bold uppercase text-[9px] bg-gray-800 px-1.5 py-0.5 rounded">${v.vendedor}</span>
@@ -373,32 +474,78 @@
                 </div>
             `).join('');
 
-            // 2. Contar e Calcular Quantidades Acumuladas em Tempo Real
             const contagem = {};
-            db_historico_vendas.forEach(v => {
-                contagem[v.produto] = (contagem[v.produto] || 0) + 1;
-            });
-
+            db_historico_vendas.forEach(v => { contagem[v.produto] = (contagem[v.produto] || 0) + 1; });
             containerQuantidades.innerHTML = '';
             Object.keys(contagem).forEach(nomeProd => {
-                containerQuantidades.innerHTML += `
-                    <div class="bg-gray-950 border border-gray-850 p-3 rounded-xl flex justify-between items-center text-xs">
-                        <span class="text-gray-300 font-medium">${nomeProd}</span>
-                        <span class="bg-amber-500/10 border border-amber-500/20 text-amber-400 font-black px-2 py-1 rounded-lg">${contagem[nomeProd]} saídas</span>
-                    </div>
-                `;
+                containerQuantidades.innerHTML += `<div class="bg-gray-950 border border-gray-850 p-2.5 rounded-xl flex justify-between items-center text-xs"><span class="text-gray-300">${nomeProd}</span><span class="bg-amber-500/10 border border-amber-500/20 text-amber-400 font-black px-2 py-0.5 rounded">${contagem[nomeProd]} un</span></div>`;
             });
         }
 
+        // FECHO DE TURNO E ARQUIVAMENTO DIÁRIO/MENSAL PERPÉTUO
+        function fecharTurnoGeral() {
+            let totalDespesas = 0;
+            db_despesas_turno.forEach(d => totalDespesas += d.valor);
+            let lucroFinal = db_faturacao_turno - db_custo_turno - totalDespesas;
+
+            if(confirm(`Deseja encerrar este turno?\n\nFaturação: ${db_faturacao_turno.toFixed(2)} MT\nLucro Real: ${lucroFinal.toFixed(2)} MT\n\nEstes valores serão salvos no relatório permanente mensal de forma definitiva.`)) {
+                const dataHoje = new Date().toLocaleDateString('pt-PT', {day: '2-digit', month: '2-digit', year: 'numeric'});
+                const horaFecho = new Date().toLocaleTimeString('pt-PT', {hour: '2-digit', minute:'2-digit'});
+
+                // Insere no topo da tabela histórica
+                db_arquivos_mensais.unshift({
+                    data: `${dataHoje} às ${horaFecho}`,
+                    faturacao: db_faturacao_turno,
+                    custo: db_custo_turno,
+                    despesas: totalDespesas,
+                    lucro: lucroFinal
+                });
+
+                // Limpa variáveis do turno corrente
+                db_faturacao_turno = 0;
+                db_custo_turno = 0;
+                db_despesas_turno = [];
+                db_historico_vendas = [];
+                
+                Object.keys(db_mesas).forEach(id => { db_mesas[id].status = "Livre"; db_mesas[id].itens = []; });
+
+                guardarDados(); inicializarPaineis();
+                alert("Turno arquivado com sucesso e estatísticas financeiras limpas para a próxima abertura!");
+                fazerLogout();
+            }
+        }
+
+        function renderizarTabelaMensal() {
+            const tbody = document.getElementById('tabela-historico-mensal');
+            if(db_arquivos_mensais.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-gray-600 italic">Nenhum turno ou dia arquivado até ao momento.</td></tr>`;
+                return;
+            }
+            tbody.innerHTML = db_arquivos_mensais.map(reg => `
+                <tr class="hover:bg-gray-900/40 border-b border-gray-900/60 font-mono">
+                    <td class="p-3 text-gray-300 font-sans font-medium">${reg.data}</td>
+                    <td class="p-3 text-amber-400 font-bold">${reg.faturacao.toFixed(2)} MT</td>
+                    <td class="p-3 text-gray-400">${reg.custo.toFixed(2)} MT</td>
+                    <td class="p-3 text-red-400">-${reg.despesas.toFixed(2)} MT</td>
+                    <td class="p-3 ${reg.lucro >= 0 ? 'text-emerald-400 font-black' : 'text-red-500 font-black'}">${reg.lucro.toFixed(2)} MT</td>
+                </tr>
+            `).join('');
+        }
+
+        // ADIÇÃO E EDICÃO DE PRODUTOS COM CUSTO
         function adicionarNovoProduto() {
             const nome = document.getElementById('novo-prod-nome').value.trim();
+            const custo = parseFloat(document.getElementById('novo-prod-custo').value);
             const preco = parseFloat(document.getElementById('novo-prod-preco').value);
             const stock = parseInt(document.getElementById('novo-prod-stock').value);
 
-            if(!nome || isNaN(preco) || isNaN(stock)) { alert("Preencha corretamente."); return; }
+            if(!nome || isNaN(custo) || isNaN(preco) || isNaN(stock)) { alert("Preencha todos os campos do inventário."); return; }
 
-            const novoId = Date.now(); db_produtos[novoId] = { nome: nome, preco: preco, stock: stock };
+            const novoId = Date.now(); 
+            db_produtos[novoId] = { nome: nome, custo: custo, preco: preco, stock: stock };
+            
             document.getElementById('novo-prod-nome').value = '';
+            document.getElementById('novo-prod-custo').value = '';
             document.getElementById('novo-prod-preco').value = '';
             document.getElementById('novo-prod-stock').value = '';
 
@@ -411,18 +558,22 @@
                 const prod = db_produtos[id];
                 container.innerHTML += `
                     <div class="bg-gray-950 p-3 rounded-xl border border-gray-800 flex flex-col md:flex-row gap-3 items-center justify-between">
-                        <div class="w-full md:w-2/5">
-                            <label class="text-[9px] text-gray-500 block uppercase font-bold mb-0.5">Nome do Produto</label>
+                        <div class="w-full md:w-1/3">
+                            <label class="text-[9px] text-gray-500 block uppercase font-bold mb-0.5">Nome</label>
                             <input type="text" value="${prod.nome}" onchange="alterarPropriedadeProduto(${id}, 'nome', this.value)" class="w-full bg-gray-900 border border-gray-800 rounded-xl p-1.5 text-xs text-white focus:border-amber-500">
                         </div>
-                        <div class="flex gap-2 w-full md:w-3/5">
-                            <div class="w-1/2">
-                                <label class="text-[9px] text-gray-500 block uppercase font-bold mb-0.5">Preço (MT)</label>
-                                <input type="number" value="${prod.preco}" onchange="alterarPropriedadeProduto(${id}, 'preco', this.value)" class="w-full bg-gray-900 border border-gray-800 rounded-xl p-1.5 text-xs text-amber-400 font-bold">
+                        <div class="grid grid-cols-3 gap-2 w-full md:w-2/3">
+                            <div>
+                                <label class="text-[9px] text-red-400 block uppercase font-bold mb-0.5">Preço Compra</label>
+                                <input type="number" value="${prod.custo || 0}" onchange="alterarPropriedadeProduto(${id}, 'custo', this.value)" class="w-full bg-gray-900 border border-gray-800 rounded-xl p-1.5 text-xs text-red-400 font-bold">
                             </div>
-                            <div class="w-1/2">
+                            <div>
+                                <label class="text-[9px] text-emerald-400 block uppercase font-bold mb-0.5">Preço Venda</label>
+                                <input type="number" value="${prod.preco}" onchange="alterarPropriedadeProduto(${id}, 'preco', this.value)" class="w-full bg-gray-900 border border-gray-800 rounded-xl p-1.5 text-xs text-emerald-400 font-bold">
+                            </div>
+                            <div>
                                 <label class="text-[9px] text-gray-500 block uppercase font-bold mb-0.5">Stock Físico</label>
-                                <input type="number" value="${prod.stock}" onchange="alterarPropriedadeProduto(${id}, 'stock', this.value)" class="w-full bg-gray-900 border border-gray-800 rounded-xl p-1.5 text-xs text-emerald-400 font-bold">
+                                <input type="number" value="${prod.stock}" onchange="alterarPropriedadeProduto(${id}, 'stock', this.value)" class="w-full bg-gray-900 border border-gray-800 rounded-xl p-1.5 text-xs text-gray-200">
                             </div>
                         </div>
                     </div>
@@ -433,20 +584,20 @@
         function alterarPropriedadeProduto(id, campo, valor) {
             if(campo === 'nome') db_produtos[id][campo] = valor.trim();
             else db_produtos[id][campo] = parseFloat(valor) || 0;
-            guardarDados(); renderizarStockResumido(); renderizarPainelVenda();
+            guardarDados(); renderizarStockResumido(); renderizarPainelVenda(); calcularIndicadoresTurno();
         }
 
         function renderizarListaUsuarios() {
             const container = document.getElementById('lista-usuarios-cadastrados');
             container.innerHTML = `
-                <div class="flex justify-between items-center bg-gray-950 p-3 rounded-xl border border-gray-850 text-xs">
+                <div class="flex justify-between items-center bg-gray-950 p-2.5 rounded-xl border border-gray-850 text-xs">
                     <span class="font-medium text-amber-400">👤 Abel (Dono) - Master</span>
-                    <span class="text-[9px] px-2 py-0.5 bg-amber-500/10 text-amber-400 rounded border border-amber-500/20 uppercase font-bold">ADMIN</span>
+                    <span class="text-[9px] px-2 py-0.5 bg-amber-500/10 text-amber-400 rounded border border-amber-500/20 font-bold">ADMIN</span>
                 </div>
             `;
             db_funcionarios.forEach((f, index) => {
                 container.innerHTML += `
-                    <div class="flex justify-between items-center bg-gray-950 p-3 rounded-xl border border-gray-850 text-xs">
+                    <div class="flex justify-between items-center bg-gray-950 p-2.5 rounded-xl border border-gray-850 text-xs">
                         <div class="flex flex-col">
                             <span class="font-medium text-gray-200">👤 ${f.user}</span>
                             <span class="text-[9px] text-gray-500 font-mono">Senha: ${f.pass}</span>
@@ -460,26 +611,18 @@
         function adicionarUsuario() {
             const nome = document.getElementById('novo-user-nome').value.trim().toLowerCase();
             const pass = document.getElementById('novo-user-pass').value.trim();
-            if (!nome || !pass) return;
-            if (nome === "abel") return;
+            if (!nome || !pass || nome === "abel") return;
             db_funcionarios.push({ user: nome, pass: pass });
             document.getElementById('novo-user-nome').value = '';
             document.getElementById('novo-user-pass').value = '';
-            guardarDados(); inicializarPaineis(); alert("Conta criada!");
+            guardarDados(); inicializarPaineis(); alert("Acesso Criado!");
         }
 
         function removerUsuario(index) {
-            if(confirm("Remover funcionário?")) { db_funcionarios.splice(index, 1); guardarDados(); inicializarPaineis(); }
+            if(confirm("Remover este operador?")) { db_funcionarios.splice(index, 1); guardarDados(); inicializarPaineis(); }
         }
 
-        function fecharTurnoGeral() {
-            if(confirm("Fechar turno e zerar estatísticas?")) {
-                db_faturacao = 0; db_historico_vendas = [];
-                Object.keys(db_mesas).forEach(id => { db_mesas[id].status = "Livre"; db_mesas[id].itens = []; });
-                guardarDados(); inicializarPaineis(); alert("Caixa limpo!"); fazerLogout();
-            }
-        }
-
+        // Execução ao iniciar
         carregarDados();
     </script>
 </body>
