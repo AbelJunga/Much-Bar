@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Much Bar - Gestão Profissional e Inteligente</title>
+    <title>Much Bar - Gestão Profissional Pro</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 </head>
@@ -86,7 +86,7 @@
                             <span class="flex items-center gap-2"><span class="material-icons text-amber-500 text-base">table_bar</span> Controlo de Contas</span>
                         </h2>
                         <div class="flex gap-2 mb-4 bg-gray-950 p-2 rounded-xl border border-gray-800">
-                            <input type="text" id="novo-nome-mesa" placeholder="Nome/Nº da Mesa ou Cliente" class="flex-1 bg-gray-900 border border-gray-750 text-xs p-2 rounded-lg text-gray-200 focus:outline-none focus:border-amber-500">
+                            <input type="text" id="novo-nome-mesa" placeholder="Nome/Nº da Mesa (Ex: Mesa 5)" class="flex-1 bg-gray-900 border border-gray-750 text-xs p-2 rounded-lg text-gray-200 focus:outline-none focus:border-amber-500">
                             <button onclick="criarNovaMesa()" class="bg-amber-600 hover:bg-amber-500 text-gray-950 font-black px-3 rounded-lg text-xs transition cursor-pointer">Abrir</button>
                         </div>
                         <div class="grid grid-cols-1 gap-2 max-h-80 overflow-y-auto pr-1" id="lista-mesas"></div>
@@ -170,7 +170,7 @@
             <div id="aba-restock" class="hidden space-y-6">
                 <div class="bg-gray-900 p-6 rounded-xl border border-gray-800 shadow-xl max-w-xl mx-auto">
                     <h3 class="text-base font-bold mb-2 flex items-center gap-2 text-amber-400"><span class="material-icons">add_business</span> Entrada de Mercadoria / Restock</h3>
-                    <p class="text-xs text-gray-400 mb-6">Registe a entrada de novos produtos e insira o preço de compra atualizado do fornecedor para garantir que o cálculo do lucro real se mantém exato.</p>
+                    <p class="text-xs text-gray-400 mb-6">Registe a entrada de novos produtos e insira o preço de compra atualizado do fornecedor para garantir o lucro real exacto.</p>
                     
                     <div class="space-y-4">
                         <div>
@@ -180,11 +180,11 @@
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
                                 <label class="text-[11px] text-gray-400 block font-bold mb-1 uppercase">Qtd. Adicionada (Unidades)</label>
-                                <input type="number" id="restock-quantidade" placeholder="Ex: 24, 48" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-sm text-gray-200 focus:outline-none focus:border-amber-500">
+                                <input type="number" id="restock-quantidade" placeholder="Ex: 24" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-sm text-gray-200 focus:outline-none focus:border-amber-500">
                             </div>
                             <div>
                                 <label class="text-[11px] text-red-400 block font-bold mb-1 uppercase">Novo Preço de Compra (Custo Unitário)</label>
-                                <input type="number" id="restock-custo-un" placeholder="Valor por garrafa (MT)" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-sm text-red-400 font-bold focus:outline-none focus:border-red-500">
+                                <input type="number" id="restock-custo-un" placeholder="Valor por unidade (MT)" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-sm text-red-400 font-bold focus:outline-none focus:border-red-500">
                             </div>
                         </div>
                         <button onclick="executarRestock()" class="w-full bg-amber-500 hover:bg-amber-400 text-gray-950 font-black p-3 rounded-xl text-sm transition cursor-pointer">Dar Entrada Física e Atualizar Custos</button>
@@ -249,190 +249,9 @@
                     <div class="bg-gray-900 p-6 rounded-xl border border-gray-800 shadow-xl">
                         <h3 class="text-base font-bold mb-4 flex items-center gap-2 text-gray-200"><span class="material-icons">person_add</span> Criar Operador</h3>
                         <div class="space-y-3">
-                            <input type="text" id="novo-user-nome" placeholder="Username (Ex: nunes)" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-2.5 text-sm text-gray-200 focus:outline-none focus:border-amber-500">
-                            <input type="password" id="novo-user-pass" placeholder="Password (Senha)" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-2.5 text-sm text-gray-200 focus:outline-none focus:border-amber-500">
+                            <input type="text" id="novo-user-nome" placeholder="Username" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-2.5 text-sm text-gray-200 focus:outline-none focus:border-amber-500">
+                            <input type="password" id="novo-user-pass" placeholder="Password" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-2.5 text-sm text-gray-200 focus:outline-none focus:border-amber-500">
                             <button onclick="adicionarUsuario()" class="w-full bg-gray-800 hover:bg-gray-700 text-gray-100 font-bold p-2.5 rounded-xl text-sm transition cursor-pointer">Criar Acesso</button>
                         </div>
                     </div>
-                    <div class="bg-gray-900 p-6 rounded-xl border border-gray-800 shadow-xl lg:col-span-2">
-                        <h3 class="text-base font-bold mb-4 flex items-center gap-2 text-gray-200"><span class="material-icons">group</span> Credenciais Ativas</h3>
-                        <div class="space-y-2" id="lista-usuarios-cadastrados"></div>
-                    </div>
-                </div>
-            </div>
-
-        </main>
-    </div>
-
-    <script>
-        const produtosPadrao = {
-            1: { nome: "Cerveja 2M", custo: 75, preco: 100, stock: 48 },
-            2: { nome: "Cerveja Laurentina Preta", custo: 85, preco: 120, stock: 24 },
-            3: { nome: "Shot de Gin (Dose)", custo: 60, preco: 150, stock: 15 },
-            4: { nome: "Porção de Batata Frita", custo: 110, preco: 250, stock: 30 }
-        };
-
-        const usuariosPadrao = [ { user: "nunes", pass: "1234" } ];
-
-        let db_produtos, db_funcionarios, db_mesas, db_historico_vendas;
-        let db_faturacao_turno, db_custo_turno, db_despesas_turno, db_arquivos_mensais;
-        let usuarioActual = null; let mesaActiva = null;
-
-        function carregarDados() {
-            try {
-                db_produtos = JSON.parse(localStorage.getItem('mb_v5_produtos')) || produtosPadrao;
-                db_funcionarios = JSON.parse(localStorage.getItem('mb_v5_funcs')) || usuariosPadrao;
-                db_historico_vendas = JSON.parse(localStorage.getItem('mb_v5_historico')) || [];
-                db_despesas_turno = JSON.parse(localStorage.getItem('mb_v5_despesas_t')) || [];
-                db_faturacao_turno = parseFloat(localStorage.getItem('mb_v5_fat_t')) || 0;
-                db_custo_turno = parseFloat(localStorage.getItem('mb_v5_custo_t')) || 0;
-                db_arquivos_mensais = JSON.parse(localStorage.getItem('mb_v5_arquivos')) || [];
-                db_mesas = JSON.parse(localStorage.getItem('mb_v5_mesas')) || {};
-            } catch (e) {
-                db_produtos = produtosPadrao; db_funcionarios = usuariosPadrao; db_historico_vendas = []; db_despesas_turno = [];
-                db_faturacao_turno = 0; db_custo_turno = 0; db_arquivos_mensais = []; db_mesas = {};
-            }
-        }
-
-        function guardarDados() {
-            localStorage.setItem('mb_v5_produtos', JSON.stringify(db_produtos));
-            localStorage.setItem('mb_v5_funcs', JSON.stringify(db_funcionarios));
-            localStorage.setItem('mb_v5_historico', JSON.stringify(db_historico_vendas));
-            localStorage.setItem('mb_v5_despesas_t', JSON.stringify(db_despesas_turno));
-            localStorage.setItem('mb_v5_fat_t', db_faturacao_turno.toString());
-            localStorage.setItem('mb_v5_custo_t', db_custo_turno.toString());
-            localStorage.setItem('mb_v5_arquivos', JSON.stringify(db_arquivos_mensais));
-            localStorage.setItem('mb_v5_mesas', JSON.stringify(db_mesas));
-        }
-
-        function tentarLoginAdmin() {
-            if(document.getElementById('login-pin-admin').value === "1111") {
-                efetivarLogin("Abel (Dono)", "Administrador");
-                document.getElementById('login-pin-admin').value = "";
-            } else { alert("PIN Incorreto!"); }
-        }
-
-        function tentarLoginFuncionario() {
-            const u = document.getElementById('login-user-func').value.trim().toLowerCase();
-            const p = document.getElementById('login-pass-func').value;
-            const enc = db_funcionarios.find(f => f.user.toLowerCase() === u && f.pass === p);
-            if(enc) {
-                efetivarLogin(enc.user, "Operador");
-                document.getElementById('login-user-func').value = "";
-                document.getElementById('login-pass-func').value = "";
-            } else { alert("Credenciais incorretas!"); }
-        }
-
-        function efetivarLogin(nome, cargo) {
-            usuarioActual = { nome: nome, cargo: cargo };
-            document.getElementById('tela-login').classList.add('hidden');
-            document.getElementById('sistema-conteudo').classList.remove('hidden');
-            document.getElementById('nome-usuario-ativo').innerText = nome;
-            document.getElementById('txt-permissao').innerText = cargo;
-
-            document.querySelectorAll('.adm-only').forEach(el => {
-                if (cargo === "Administrador") el.classList.remove('hidden');
-                else el.classList.add('hidden');
-            });
-            mudarAba('home'); inicializarPaineis();
-        }
-
-        function fazerLogout() {
-            usuarioActual = null; mesaActiva = null;
-            document.getElementById('sistema-conteudo').classList.add('hidden');
-            document.getElementById('tela-login').classList.remove('hidden');
-        }
-
-        function inicializarPaineis() {
-            renderizarMesas(); renderizarStockResumido(); renderizarPainelVenda();
-            renderizarConfigProdutos(); renderizarListaUsuarios(); renderizarHistoricoVendas();
-            renderizarDespesasTurno(); renderizarTabelaMensal(); atualizarSelectRestock();
-            sugerirCustoAtual(); calcularIndicadoresTurno();
-        }
-
-        function mudarAba(aba) {
-            if ((aba === 'produtos' || aba === 'financeiro-mensal') && usuarioActual.cargo !== "Administrador") return;
-
-            document.getElementById('aba-home').classList.add('hidden');
-            document.getElementById('aba-produtos').classList.add('hidden');
-            document.getElementById('aba-vendas-diarias').classList.add('hidden');
-            document.getElementById('aba-financeiro-mensal').classList.add('hidden');
-            document.getElementById('aba-restock').classList.add('hidden');
-
-            document.getElementById('btn-aba-home').className = "w-full px-4 py-3 rounded-xl text-left font-bold text-sm flex items-center gap-3 transition text-gray-400 hover:bg-gray-800 hover:text-gray-100 cursor-pointer";
-            document.getElementById('btn-aba-vendas-diarias').className = "w-full px-4 py-3 rounded-xl text-left font-bold text-sm flex items-center gap-3 transition text-gray-400 hover:bg-gray-800 hover:text-gray-100 cursor-pointer";
-            document.getElementById('btn-aba-restock').className = "w-full px-4 py-3 rounded-xl text-left font-bold text-sm flex items-center gap-3 transition text-gray-400 hover:bg-gray-800 hover:text-gray-100 cursor-pointer";
-            if(document.getElementById('btn-aba-produtos')) document.getElementById('btn-aba-produtos').className = "w-full px-4 py-3 rounded-xl text-left font-bold text-sm flex items-center gap-3 transition text-gray-400 hover:bg-gray-800 hover:text-gray-100 cursor-pointer";
-            if(document.getElementById('btn-aba-financeiro-mensal')) document.getElementById('btn-aba-financeiro-mensal').className = "w-full px-4 py-3 rounded-xl text-left font-bold text-sm flex items-center gap-3 transition text-gray-400 hover:bg-gray-800 hover:text-gray-100 cursor-pointer";
-
-            document.getElementById(`aba-${aba}`).classList.remove('hidden');
-            document.getElementById(`btn-aba-${aba}`).className = "w-full px-4 py-3 rounded-xl text-left font-bold text-sm flex items-center gap-3 transition bg-amber-500 text-gray-950 cursor-pointer";
-        }
-
-        // CONTROLADOR DE MESAS DINÂMICAS
-        function criarNovaMesa() {
-            const nomeInput = document.getElementById('novo-nome-mesa');
-            const nome = nomeInput.value.trim();
-            if(!nome) { alert("Introduza um nome identificador para a conta."); return; }
-
-            const idMesa = "m_" + Date.now();
-            db_mesas[idMesa] = { nome: nome, status: "Aberta", itens: [] };
-            nomeInput.value = '';
-            guardarDados(); renderizarMesas();
-        }
-
-        function removerMesaVazia(idMesa) {
-            if(db_mesas[idMesa] && db_mesas[idMesa].itens.length === 0) {
-                delete db_mesas[idMesa];
-                if(mesaActiva === idMesa) mesaActiva = null;
-                guardarDados(); renderizarMesas(); renderizarPainelVenda();
-            }
-        }
-
-        function renderizarMesas() {
-            const container = document.getElementById('lista-mesas'); container.innerHTML = '';
-            const chaves = Object.keys(db_mesas);
-            
-            if(chaves.length === 0) {
-                container.innerHTML = `<p class="text-gray-500 text-xs italic text-center py-6">Nenhuma conta aberta de momento.</p>`;
-                return;
-            }
-
-            chaves.forEach(id => {
-                const mesa = db_mesas[id]; const isActiva = mesaActiva === id;
-                let cor = "bg-gray-950 text-gray-300 border-gray-850";
-                if(isActiva) cor = "bg-amber-500 text-gray-950 border-amber-400 font-bold shadow-md";
-
-                container.innerHTML += `
-                    <div class="flex items-center gap-1 w-full">
-                        <button onclick="selecionarMesa('${id}')" class="flex-1 p-3 rounded-xl border text-left transition ${cor} cursor-pointer truncate">
-                            <div class="text-xs uppercase font-black">${mesa.nome}</div>
-                            <div class="text-[10px] ${isActiva ? 'text-gray-900' : 'text-amber-500'} mt-0.5">${mesa.itens.length} itens pedidos</div>
-                        </button>
-                        ${mesa.itens.length === 0 ? `<button onclick="removerMesaVazia('${id}')" class="text-gray-600 hover:text-red-400 p-2"><span class="material-icons text-xs">close</span></button>` : ''}
-                    </div>
-                `;
-            });
-        }
-
-        function selecionarMesa(id) { mesaActiva = id; renderizarMesas(); renderizarPainelVenda(); }
-
-        function renderizarPainelVenda() {
-            const titulo = document.getElementById('mesa-selecionada-titulo'); const containerItens = document.getElementById('itens-comanda');
-            const menuProdutos = document.getElementById('menu-produtos'); const botoesProdutos = document.getElementById('botoes-produtos');
-            const btnFechar = document.getElementById('btn-fechar-conta'); const totalTexto = document.getElementById('total-comanda');
-
-            if (!mesaActiva || !db_mesas[mesaActiva]) {
-                titulo.innerText = "Nenhum"; containerItens.innerHTML = `<p class="text-gray-600 text-xs italic text-center py-8">Escolha ou abra uma conta à esquerda.</p>`;
-                menuProdutos.classList.add('hidden'); btnFechar.disabled = true; return;
-            }
-
-            const mesa = db_mesas[mesaActiva];
-            titulo.innerText = mesa.nome; menuProdutos.classList.remove('hidden');
-            
-            if (mesa.itens.length === 0) {
-                containerItens.innerHTML = `<p class="text-gray-600 text-xs italic text-center py-8">Aguardando pedidos...</p>`;
-                totalTexto.innerText = "0,00 MT"; btnFechar.disabled = true;
-            } else {
-                containerItens.innerHTML = ''; let total = 0;
-                mesa.itens.forEach(item => { total += item.preco; containerItens.innerHTML += `<div class="flex justify-between bg-gray-950 p-2 rounded border border-gray-900 text-xs"><span>${item.nome}</span><span class="font-bold text-amber-4
+                    <div class="bg-gray
