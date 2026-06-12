@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Much Bar - Mobile PRO v4.1</title>
+    <title>Much Bar - Mobile PRO v4.2</title>
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -62,7 +62,6 @@
             <div class="flex items-center gap-2">
                 <span class="material-icons text-amber-500 text-sm">local_bar</span>
                 <span class="text-xs font-black tracking-tight text-gray-200">MUCH BAR</span>
-                <!-- MODIFICAÇÃO: Botão de Stock Rápido para o Caixa/Todos -->
                 <button onclick="abrirModalStock()" class="ml-2 bg-gray-900 border border-gray-800 hover:border-amber-500/50 text-[10px] font-bold px-2 py-1 rounded flex items-center gap-1 text-amber-400">
                     <span class="material-icons text-xs">inventory_2</span> Ver Stock
                 </button>
@@ -212,7 +211,6 @@
                     </div>
 
                     <div class="bg-gray-900 border border-gray-800 p-4 rounded-2xl text-center adm-geral">
-                        <!-- MODIFICAÇÃO: Texto ajustado visto que o download automático foi removido -->
                         <button onclick="fecharTurnoGeral()" class="w-full bg-amber-600 hover:bg-amber-500 text-gray-950 font-black py-3 px-4 rounded-xl text-xs transition tracking-wider shadow-lg">CONCLUIR & ARQUIVAR TURNO</button>
                     </div>
                 </div>
@@ -220,7 +218,7 @@
 
             <!-- ABA 3: ENTRADA DE STOCK -->
             <div id="aba-restock" class="max-w-md mx-auto bg-gray-900 border border-gray-800 p-5 rounded-2xl space-y-4 hidden adm-geral">
-                <div class="text-center pb-2 border-b border-gray-800"><h2 class="text-sm font-black text-gray-200 uppercase tracking-wide">Dar Entrada de Mercadoria</h2></div>
+                <div class="text-center pb-2 border-b border-gray-800><h2 class="text-sm font-black text-gray-200 uppercase tracking-wide">Dar Entrada de Mercadoria</h2></div>
                 <div class="space-y-1.5">
                     <label class="text-[10px] uppercase font-bold text-gray-400">Selecione o Artigo</label>
                     <select id="restock-prod-id" onchange="sugerirCustoAtual()" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-3 text-sm text-gray-200 focus:outline-none"></select>
@@ -240,11 +238,41 @@
 
             <!-- ABA 4: HISTÓRICO MENSAL -->
             <div id="aba-financeiro-mensal" class="space-y-4 hidden adm-geral">
-                <div class="bg-gray-900 border border-gray-800 p-4 rounded-2xl flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center">
-                    <div><h3 class="text-xs font-black text-gray-400 uppercase tracking-wider">Histórico de Fechos Arquivados</h3></div>
-                    <button onclick="fecharMesDefinitivo()" class="bg-red-950 hover:bg-red-900 border border-red-800 text-red-400 px-3 py-2 rounded-xl text-xs font-bold transition w-full sm:w-auto master-only">CONSOLIDAR MÊS ATUAL</button>
+                <!-- MODIFICAÇÃO: Seção de Indicadores Acumulados do Mês Corrente -->
+                <div class="bg-gray-900 border border-gray-800 p-4 rounded-2xl space-y-3">
+                    <div class="flex flex-col gap-2 sm:flex-row sm:justify-between sm:items-center border-b border-gray-800 pb-2">
+                        <div>
+                            <h3 class="text-xs font-black text-amber-400 uppercase tracking-wider">Mês Corrente Ativo</h3>
+                            <p class="text-[10px] text-gray-500">Resumo de todos os fechos de turno guardados neste mês</p>
+                        </div>
+                        <button onclick="fecharMesDefinitivo()" class="bg-red-950 hover:bg-red-900 border border-red-800 text-red-400 px-3 py-2 rounded-xl text-xs font-bold transition w-full sm:w-auto master-only flex items-center justify-center gap-1">
+                            <span class="material-icons text-xs">lock</span> CONSOLIDAR & ARQUIVAR MÊS
+                        </button>
+                    </div>
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs pt-1">
+                        <div class="bg-gray-950 p-2.5 border border-gray-850 rounded-xl">
+                            <p class="text-[9px] uppercase text-gray-500 font-bold">Faturação Acum.</p>
+                            <p id="acumulado-mes-faturado" class="font-mono font-black text-emerald-400 text-sm">0,00 MT</p>
+                        </div>
+                        <div class="bg-gray-950 p-2.5 border border-gray-850 rounded-xl master-only">
+                            <p class="text-[9px] uppercase text-gray-500 font-bold">Custo Stock Acum.</p>
+                            <p id="acumulado-mes-custo" class="font-mono font-black text-red-400 text-sm">0,00 MT</p>
+                        </div>
+                        <div class="bg-gray-950 p-2.5 border border-gray-850 rounded-xl">
+                            <p class="text-[9px] uppercase text-gray-500 font-bold">Despesas Acum.</p>
+                            <p id="acumulado-mes-despesas" class="font-mono font-black text-amber-500 text-sm">0,00 MT</p>
+                        </div>
+                        <div class="bg-gray-950 p-2.5 border border-gray-850 rounded-xl master-only">
+                            <p class="text-[9px] uppercase text-gray-500 font-bold">Lucro Líquido Acum.</p>
+                            <p id="acumulado-mes-lucro" class="font-mono font-black text-blue-400 text-sm">0,00 MT</p>
+                        </div>
+                    </div>
                 </div>
-                <div id="cards-historico-mensal" class="space-y-2"></div>
+
+                <div class="space-y-2">
+                    <h3 class="text-xs font-black text-gray-400 uppercase tracking-wider pl-1">Arquivo Histórico (Turnos & Meses Fechados)</h3>
+                    <div id="cards-historico-mensal" class="space-y-2"></div>
+                </div>
             </div>
 
             <!-- ABA 5: PAINEL ADMIN -->
@@ -301,9 +329,7 @@
                     <span class="material-icons text-base block">close</span>
                 </button>
             </div>
-            <div id="lista-stock-caixa" class="p-4 overflow-y-auto space-y-2 flex-1 text-xs">
-                <!-- Injetado dinamicamente via JS -->
-            </div>
+            <div id="lista-stock-caixa" class="p-4 overflow-y-auto space-y-2 flex-1 text-xs"></div>
         </div>
     </div>
 
@@ -383,7 +409,6 @@
             });
         }
 
-        // FUNÇÕES DO MODAL DE STOCK PARA O CAIXA
         function abrirModalStock() {
             document.getElementById('modal-stock-caixa').classList.remove('hidden');
             atualizarModalStockCaixa();
@@ -846,7 +871,6 @@
             desc.value = ""; val.value = "";
         }
 
-        // MODIFICAÇÃO: Fecho de turno APENAS ARQUIVA, não faz download automático do PDF
         function fecharTurnoGeral() {
             if (vendasCronologicas.length === 0 && despesasTurno.length === 0) return alert("Sem movimentos para fechar turno!");
             if (!confirm("Finalizar e arquivar turno corrente na secção mensal?")) return;
@@ -863,10 +887,11 @@
 
             historicoMensal.push({
                 id: "fecho_" + Date.now(),
+                tipo: "turno",
                 periodo: new Date().toLocaleDateString('pt-PT') + " " + new Date().toLocaleTimeString('pt-PT', {hour:'2-digit', minute:'2-digit'}),
                 faturacao: totalFaturado, custo: totalCusto, despesas: totalDespesas,
                 lucro: lucroCalculado,
-                bebidasRanking: resumoBebedas // Guardado para gerar o PDF a partir da lista mais tarde
+                bebidasRanking: resumoBebedas
             });
 
             db.ref().update({ 
@@ -879,28 +904,47 @@
             });
         }
 
-        // MODIFICAÇÃO: Inserido botão para descarregar o PDF individual de cada fecho
+        // MODIFICAÇÃO: Atualiza a tabela mensal calculando também os acumulados do mês ativo corrente
         function atualizarTabelaMensal() {
+            // 1. Filtrar do histórico apenas o que são fechos de turnos deste mês corrente (para exibir o painel superior acumulado)
+            const apenasTurnosDesteMes = historicoMensal.filter(h => h.tipo !== "mensal-consolidado");
+            
+            let fMes = apenasTurnosDesteMes.reduce((s, c) => s + c.faturacao, 0);
+            let cMes = apenasTurnosDesteMes.reduce((s, c) => s + c.custo, 0);
+            let dMes = apenasTurnosDesteMes.reduce((s, c) => s + c.despesas, 0);
+            let lMes = apenasTurnosDesteMes.reduce((s, c) => s + c.lucro, 0);
+
+            document.getElementById('acumulado-mes-faturado').innerText = `${fMes.toFixed(2)} MT`;
+            document.getElementById('acumulado-mes-custo').innerText = `${cMes.toFixed(2)} MT`;
+            document.getElementById('acumulado-mes-despesas').innerText = `${dMes.toFixed(2)} MT`;
+            document.getElementById('acumulado-mes-lucro').innerText = `${lMes.toFixed(2)} MT`;
+
+            // 2. Renderizar a lista de histórico (Misturando turnos e consolidados mensais anteriores)
             const container = document.getElementById('cards-historico-mensal');
             if(!container) return;
-            container.innerHTML = historicoMensal.length === 0 ? `<p class="text-xs text-center text-gray-500 py-4">Sem fechos arquivados.</p>` : "";
+            container.innerHTML = historicoMensal.length === 0 ? `<p class="text-xs text-center text-gray-500 py-4">Sem registos arquivados.</p>` : "";
             
             const perm = usuarioAtivo ? usuarioAtivo.permissao : 'funcionario';
 
             [...historicoMensal].reverse().forEach(h => {
+                const esConsolidado = h.tipo === "mensal-consolidado";
+                
+                // Estilização diferenciada para o Bloco Mensal Macro
+                const cardBg = esConsolidado ? 'bg-amber-950/20 border-amber-600/60' : 'bg-gray-900 border-gray-800';
+                const tagIcon = esConsolidado ? '📊 [FECHO MENSAL]' : '📅';
+
                 const blocoLucro = perm === 'master' ? `<span class="${h.lucro >= 0 ? 'text-emerald-400':'text-red-400'}">${h.lucro.toFixed(2)} MT</span>` : `<span>---</span>`;
                 const detalheCustoLucro = perm === 'master' ? `<span>Custo Stock: <b class="text-gray-200 font-mono">${h.custo.toFixed(0)} MT</b></span>` : '';
                 
-                // Botão para acionar o PDF sob demanda
                 const btnPdf = `
                     <button onclick="emitirPdfHistorico('${h.id || ''}')" class="px-2 py-1 bg-blue-600 hover:bg-blue-500 text-gray-950 font-bold rounded text-[10px] flex items-center gap-0.5">
                         <span class="material-icons text-[11px]">download</span> PDF
                     </button>`;
 
                 container.innerHTML += `
-                    <div class="bg-gray-900 border border-gray-800 p-3 rounded-xl text-xs space-y-2">
+                    <div class="${cardBg} p-3 rounded-xl text-xs space-y-2">
                         <div class="flex justify-between items-center font-black text-gray-200 border-b border-gray-800/60 pb-1.5">
-                            <span class="text-gray-300">📅 ${h.periodo}</span>
+                            <span class="${esConsolidado ? 'text-amber-400' : 'text-gray-300'}">${tagIcon} ${h.periodo}</span>
                             <div class="flex items-center gap-3">
                                 ${blocoLucro}
                                 ${btnPdf}
@@ -913,28 +957,62 @@
                         </div>
                     </div>`;
             });
+            aplicarRestricoesPermissao();
         }
 
-        // Recupera o fecho clicado e executa a renderização do PDF
         function emitirPdfHistorico(fechoId) {
-            const h = historicoMensal.find(x => x.id === fechoId || x.periodo === fechoId);
+            const h = historicoMensal.find(x => x.id === fechoId);
             if(!h) return alert("Erro ao carregar dados do fecho!");
-            exportarRelatorioPDF(`TURNO ARQUIVADO (${h.periodo})`, h.faturacao, h.despesas, h.custo, h.lucro, h.bebidasRanking || {});
+            
+            const prefixoTitulo = h.tipo === "mensal-consolidado" ? "CONSOLIDADO FINANCEIRO MENSAL" : "TURNO ARQUIVADO";
+            exportarRelatorioPDF(`${prefixoTitulo} (${h.periodo})`, h.faturacao, h.despesas, h.custo, h.lucro, h.bebidasRanking || {});
         }
 
+        // MODIFICAÇÃO: Fecho do Mês Completo estruturado de forma igual ao fecho de turno
         function fecharMesDefinitivo() {
             if(usuarioAtivo.permissao !== 'master') return alert("Apenas o nível Master (Dono) pode consolidar o mês definitivo!");
-            if (historicoMensal.length === 0 || !confirm("Consolidar totais acumulados do mês e gerar PDF macro?")) return;
             
-            let f = historicoMensal.reduce((s,c)=>s+c.faturacao,0);
-            let c = historicoMensal.reduce((s,c)=>s+c.custo,0);
-            let d = historicoMensal.reduce((s,c)=>s+c.despesas,0);
-            let l = historicoMensal.reduce((s,c)=>s+c.lucro,0);
+            // Filtra turnos correntes ativos para consolidação
+            const turnosParaConsolidar = historicoMensal.filter(h => h.tipo !== "mensal-consolidado");
+            if (turnosParaConsolidar.length === 0) return alert("Não existem turnos arquivados no mês ativo para consolidar!");
+            
+            const nomeMesReferencia = prompt("Insira o Nome/Ano do Mês de Referência para fecho (Ex: Outubro 2026):");
+            if(!nomeMesReferencia || !nomeMesReferencia.trim()) return alert("Operação cancelada. É obrigatório definir o nome do período.");
 
-            exportarRelatorioPDF("CONSOLIDADO MENSAL MACRO", f, d, c, l, {});
+            if (!confirm(`Pretende mesmo CONCLUIR, FECHAR E ARQUIVAR o mês de ${nomeMesReferencia}?\n\nIsto compilará todos os turnos atuais num único registo mensal definitivo e limpará a lista corrente.`)) return;
+            
+            let f = turnosParaConsolidar.reduce((s, c) => s + c.faturacao, 0);
+            let c = turnosParaConsolidar.reduce((s, c) => s + c.custo, 0);
+            let d = turnosParaConsolidar.reduce((s, c) => s + c.despesas, 0);
+            let l = turnosParaConsolidar.reduce((s, c) => s + c.lucro, 0);
 
-            historicoMensal = [{ id: "consolidado", periodo: `CONSOLIDADO ACUMULADO MÊS`, faturacao: f, custo: c, despesas: d, lucro: l, bebidasRanking: {} }];
-            salvarDadosFirebase('historico_mes', historicoMensal);
+            // Consolida ranking de produtos unificados de todo o mês
+            let rankingMensalProdutos = {};
+            turnosParaConsolidar.forEach(turno => {
+                if(turno.bebidasRanking) {
+                    Object.entries(turno.bebidasRanking).forEach(([nome, qtd]) => {
+                        rankingMensalProdutos[nome] = (rankingMensalProdutos[nome] || 0) + qtd;
+                    });
+                }
+            });
+
+            // Filtra e mantém no histórico APENAS fechos mensais macros antigos, excluindo os turnos individuais que acabam de ser consolidados
+            let apenasHistoricosConsolidadosAntigos = historicoMensal.filter(h => h.tipo === "mensal-consolidated" || h.tipo === "mensal-consolidado");
+
+            // Insere o novo macro bloco consolidado
+            apenasHistoricosConsolidadosAntigos.push({
+                id: "mes_" + Date.now(),
+                tipo: "mensal-consolidado",
+                periodo: nomeMesReferencia.trim().toUpperCase(),
+                faturacao: f, custo: c, despesas: d, lucro: l,
+                bebidasRanking: rankingMensalProdutos
+            });
+
+            historicoMensal = apenasHistoricosConsolidadosAntigos;
+
+            db.ref('historico_mes').set(historicoMensal).then(() => {
+                alert(`Mês de ${nomeMesReferencia} fechado e arquivado com sucesso!`);
+            });
         }
 
         // MÓDULO DE EXPORTAÇÃO PDF AUTOMÁTICO
@@ -955,7 +1033,7 @@
 
             // Resumo Financeiro
             doc.setFont("helvetica", "bold");
-            doc.text("RESUMO FINANCEIRO", 14, 52);
+            doc.text("RESUMO FINANCEIRO CONTROLLER", 14, 52);
             doc.setFont("helvetica", "normal");
             doc.text(`(+) Faturação Total Bruta: ${faturado.toFixed(2)} MT`, 14, 62);
             doc.text(`(-) Despesas / Sangrias do Período: ${despesas.toFixed(2)} MT`, 14, 70);
@@ -970,11 +1048,11 @@
                 doc.text("[Dados de lucro ocultos para este nível de utilizador]", 14, 78);
             }
 
-            // Bebidas Mais Consumidas
+            // Artigos Mais Consumidos
             if(bebidas && Object.keys(bebidas).length > 0) {
                 doc.line(14, 96, 196, 96);
                 doc.setFont("helvetica", "bold");
-                doc.text("ARTIGOS / BEBIDAS MAIS VENDIDAS NO TURNO", 14, 106);
+                doc.text("ARTIGOS / BEBIDAS MAIS VENDIDAS NO PERÍODO", 14, 106);
                 doc.setFont("helvetica", "normal");
                 
                 let linhaY = 116;
@@ -1004,7 +1082,7 @@
             if (p) document.getElementById('restock-custo-un').value = p.custo;
         }
 
-        function ejecutarRestock() {
+        function executarRestock() {
             const selectEl = document.getElementById('restock-prod-id');
             if(!selectEl.value) return alert("Nenhum produto selecionado!");
             
