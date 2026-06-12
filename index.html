@@ -3,18 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Much Bar - Mobile PRO v4.0</title>
+    <title>Much Bar - Mobile PRO v4.1</title>
     
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Ícones -->
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 
+    <!-- SCRIPTS DO FIREBASE -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
     
+    <!-- BIBLIOTECA PDF (jsPDF) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body class="h-full flex flex-col font-sans select-none antialiased selection:bg-amber-500/30 selection:text-amber-200 overflow-x-hidden">
 
+    <!-- ==========================================================================
+         TELA DE LOGIN
+         ========================================================================== -->
     <div id="tela-login" class="min-h-full flex flex-col justify-center items-center p-4 bg-gradient-to-b from-gray-950 via-gray-900 to-gray-950">
         <div class="w-full max-w-sm bg-gray-900 border border-gray-800 p-6 rounded-2xl shadow-2xl">
             <div class="text-center mb-6">
@@ -23,6 +30,7 @@
                 <p class="text-xs text-gray-500">Sistema de Gestão & Controlo de Caixas</p>
             </div>
 
+            <!-- Login Geral -->
             <div class="space-y-3 mb-6">
                 <h2 class="text-xs font-bold text-gray-400 uppercase tracking-wider">Acesso ao Sistema</h2>
                 <input type="text" id="login-user-func" placeholder="Utilizador" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-amber-500 text-gray-200">
@@ -36,6 +44,7 @@
                 <div class="flex-grow border-t border-gray-800"></div>
             </div>
 
+            <!-- Login Admin Master (PIN) -->
             <div class="space-y-3">
                 <h2 class="text-xs font-bold text-gray-400 uppercase tracking-wider">PIN de Emergência (Dono - Master)</h2>
                 <input type="password" id="login-pin-admin" placeholder="PIN Administrativo" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-4 py-3 text-sm text-center font-mono tracking-widest text-amber-500 focus:outline-none focus:border-amber-500">
@@ -44,11 +53,19 @@
         </div>
     </div>
 
+    <!-- ==========================================================================
+         CONTEÚDO PRINCIPAL DO SISTEMA
+         ========================================================================== -->
     <div id="sistema-conteudo" class="hidden flex-1 flex flex-col overflow-hidden">
+        <!-- Topbar -->
         <header class="bg-gray-950 border-b border-gray-900 px-4 py-3 flex justify-between items-center shrink-0">
             <div class="flex items-center gap-2">
                 <span class="material-icons text-amber-500 text-sm">local_bar</span>
                 <span class="text-xs font-black tracking-tight text-gray-200">MUCH BAR</span>
+                <!-- MODIFICAÇÃO: Botão de Stock Rápido para o Caixa/Todos -->
+                <button onclick="abrirModalStock()" class="ml-2 bg-gray-900 border border-gray-800 hover:border-amber-500/50 text-[10px] font-bold px-2 py-1 rounded flex items-center gap-1 text-amber-400">
+                    <span class="material-icons text-xs">inventory_2</span> Ver Stock
+                </button>
             </div>
             <div class="flex items-center gap-3">
                 <div class="text-right">
@@ -61,6 +78,7 @@
             </div>
         </header>
 
+        <!-- Menu de Navegação Global -->
         <nav class="bg-gray-950/80 border-b border-gray-900 p-2 flex gap-1 overflow-x-auto shrink-0 scrollbar-none snap-x">
             <button id="btn-aba-home" onclick="mudarAba('home')" class="snap-center px-3 py-2 rounded-lg text-xs font-bold transition shrink-0 flex items-center gap-1.5">
                 <span class="material-icons text-xs">grid_view</span> Salas
@@ -79,8 +97,10 @@
             </button>
         </nav>
 
+        <!-- CONTEÚDO DINÂMICO DAS ABAS -->
         <main class="flex-1 overflow-y-auto bg-gray-900/40 p-3 pb-6">
 
+            <!-- ABA 1: HOME (SALAS & MESAS) -->
             <div id="aba-home" class="flex flex-col lg:grid lg:grid-cols-3 gap-4 h-full hidden">
                 <div id="bloco-lista-mesas" class="bg-gray-900/60 border border-gray-800 rounded-2xl p-4 flex flex-col h-full overflow-hidden">
                     <div class="flex justify-between items-center mb-3 shrink-0">
@@ -97,6 +117,7 @@
                     <div id="lista-mesas" class="flex-1 overflow-y-auto space-y-2 pr-1 min-h-[200px]"></div>
                 </div>
 
+                <!-- DETALHE DA COMANDA -->
                 <div id="bloco-detalhe-comanda" class="hidden lg:flex bg-gray-900/60 border border-gray-800 rounded-2xl p-4 flex-col h-[calc(100vh-180px)] lg:h-full overflow-hidden">
                     <div class="flex justify-between items-center pb-2 border-b border-gray-800/60 mb-3 shrink-0">
                         <button onclick="fecharVisualizacaoMesa()" class="lg:hidden text-amber-500 flex items-center gap-1 text-xs font-bold">
@@ -131,6 +152,7 @@
                 </div>
             </div>
 
+            <!-- ABA 2: VENDAS DIÁRIAS (TURNO) -->
             <div id="aba-vendas-diarias" class="space-y-4 hidden">
                 <div class="bg-gradient-to-r from-gray-900 to-gray-950 border-l-4 border-amber-500 p-4 rounded-2xl shadow-md adm-geral">
                     <h3 class="text-xs font-black text-amber-400 uppercase tracking-wider flex items-center gap-2 mb-3">
@@ -190,11 +212,13 @@
                     </div>
 
                     <div class="bg-gray-900 border border-gray-800 p-4 rounded-2xl text-center adm-geral">
-                        <button onclick="fecharTurnoGeral()" class="w-full bg-amber-600 hover:bg-amber-500 text-gray-950 font-black py-3 px-4 rounded-xl text-xs transition tracking-wider shadow-lg">CONCLUIR, ARQUIVAR TURNO & GERAR PDF</button>
+                        <!-- MODIFICAÇÃO: Texto ajustado visto que o download automático foi removido -->
+                        <button onclick="fecharTurnoGeral()" class="w-full bg-amber-600 hover:bg-amber-500 text-gray-950 font-black py-3 px-4 rounded-xl text-xs transition tracking-wider shadow-lg">CONCLUIR & ARQUIVAR TURNO</button>
                     </div>
                 </div>
             </div>
 
+            <!-- ABA 3: ENTRADA DE STOCK -->
             <div id="aba-restock" class="max-w-md mx-auto bg-gray-900 border border-gray-800 p-5 rounded-2xl space-y-4 hidden adm-geral">
                 <div class="text-center pb-2 border-b border-gray-800"><h2 class="text-sm font-black text-gray-200 uppercase tracking-wide">Dar Entrada de Mercadoria</h2></div>
                 <div class="space-y-1.5">
@@ -214,21 +238,22 @@
                 <button onclick="executarRestock()" class="w-full bg-amber-600 hover:bg-amber-500 text-gray-950 font-black py-3 px-4 rounded-xl text-xs transition">Confirmar Entrada de Stock</button>
             </div>
 
+            <!-- ABA 4: HISTÓRICO MENSAL -->
             <div id="aba-financeiro-mensal" class="space-y-4 hidden adm-geral">
                 <div class="bg-gray-900 border border-gray-800 p-4 rounded-2xl flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center">
                     <div><h3 class="text-xs font-black text-gray-400 uppercase tracking-wider">Histórico de Fechos Arquivados</h3></div>
-                    <button onclick="fecharMesDefinitivo()" class="bg-red-950 hover:bg-red-900 border border-red-800 text-red-400 px-3 py-2 rounded-xl text-xs font-bold transition w-full sm:w-auto master-only">CONSOLIDAR MÊS ATUAL & GERAR PDF</button>
+                    <button onclick="fecharMesDefinitivo()" class="bg-red-950 hover:bg-red-900 border border-red-800 text-red-400 px-3 py-2 rounded-xl text-xs font-bold transition w-full sm:w-auto master-only">CONSOLIDAR MÊS ATUAL</button>
                 </div>
                 <div id="cards-historico-mensal" class="space-y-2"></div>
             </div>
 
+            <!-- ABA 5: PAINEL ADMIN -->
             <div id="aba-produtos" class="flex flex-col gap-4 hidden adm-geral">
                 <div class="bg-gray-900 border border-gray-800 p-4 rounded-2xl space-y-3">
                     <h3 class="text-xs font-black text-gray-400 uppercase tracking-wider border-b border-gray-800 pb-2">Controlo & Níveis de Utilizadores</h3>
                     <div class="space-y-2">
                         <input type="text" id="novo-user-nome" placeholder="Utilizador / Username" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2.5 text-sm text-gray-200">
                         <input type="password" id="novo-user-pass" placeholder="Palavra-passe / Password" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2.5 text-sm text-gray-200">
-                        
                         <div class="space-y-1">
                             <label class="text-[10px] uppercase font-bold text-gray-500">Nível de Permissão (Poderes):</label>
                             <select id="novo-user-permissao" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2.5 text-sm text-gray-200">
@@ -237,10 +262,8 @@
                                 <option value="master">Master (Dono, controlo total financeiro e de utilizadores)</option>
                             </select>
                         </div>
-
                         <button onclick="adicionarUsuario()" class="w-full bg-amber-600 text-gray-950 font-black py-2.5 px-4 rounded-xl text-xs transition">Criar Novo Utilizador</button>
                     </div>
-                    
                     <div id="lista-operadores-sistema" class="grid grid-cols-1 gap-2 max-h-[200px] overflow-y-auto pt-2"></div>
                 </div>
 
@@ -264,6 +287,30 @@
         </main>
     </div>
 
+    <!-- ==========================================================================
+         MODAL DE STOCK RÁPIDO PARA O CAIXA
+         ========================================================================== -->
+    <div id="modal-stock-caixa" class="hidden fixed inset-0 bg-gray-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="w-full max-w-sm bg-gray-900 border border-gray-800 rounded-2xl shadow-2xl flex flex-col max-h-[80vh] overflow-hidden">
+            <div class="p-4 border-b border-gray-800 flex justify-between items-center bg-gray-950 shrink-0">
+                <div class="flex items-center gap-1.5 text-amber-400">
+                    <span class="material-icons text-sm">inventory_2</span>
+                    <h3 class="text-xs font-black uppercase tracking-wider">Quantidades em Stock</h3>
+                </div>
+                <button onclick="fecharModalStock()" class="text-gray-500 hover:text-gray-300 p-1">
+                    <span class="material-icons text-base block">close</span>
+                </button>
+            </div>
+            <div id="lista-stock-caixa" class="p-4 overflow-y-auto space-y-2 flex-1 text-xs">
+                <!-- Injetado dinamicamente via JS -->
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ==========================================================================
+         JAVASCRIPT DE SESSÃO & LOGICA
+         ========================================================================== -->
     <script>
         const firebaseConfig = {
             apiKey: "AIzaSyCI8EDvSqMGjrJ6GNdqDyeCsYUwymPXPw4",
@@ -299,6 +346,7 @@
                     renderizarBotoesProdutos();
                     atualizarConfigProdutos();
                     popularSelectRestock();
+                    atualizarModalStockCaixa();
                 }
             });
 
@@ -332,6 +380,36 @@
             db.ref('historico_mes').on('value', (snapshot) => {
                 historicoMensal = snapshot.val() || [];
                 if (usuarioAtivo) atualizarTabelaMensal();
+            });
+        }
+
+        // FUNÇÕES DO MODAL DE STOCK PARA O CAIXA
+        function abrirModalStock() {
+            document.getElementById('modal-stock-caixa').classList.remove('hidden');
+            atualizarModalStockCaixa();
+        }
+
+        function fecharModalStock() {
+            document.getElementById('modal-stock-caixa').classList.add('hidden');
+        }
+
+        function atualizarModalStockCaixa() {
+            const container = document.getElementById('lista-stock-caixa');
+            if(!container) return;
+            container.innerHTML = produtos.length === 0 ? `<p class="text-gray-500 text-center py-2">Nenhum produto cadastrado.</p>` : "";
+            
+            produtos.forEach(p => {
+                let badgeStockColor = "text-emerald-400 bg-emerald-950/40 border-emerald-900";
+                if(p.stock <= 5) badgeStockColor = "text-amber-400 bg-amber-950/40 border-amber-900";
+                if(p.stock <= 0) badgeStockColor = "text-red-400 bg-red-950/40 border-red-900";
+                
+                container.innerHTML += `
+                    <div class="flex justify-between items-center p-2.5 bg-gray-950 border border-gray-850 rounded-xl">
+                        <span class="font-bold text-gray-200 truncate pr-2">${p.nome}</span>
+                        <span class="px-2.5 py-1 font-mono font-black border rounded-lg text-xs tracking-wider ${badgeStockColor}">
+                            ${p.stock} UN
+                        </span>
+                    </div>`;
             });
         }
 
@@ -492,17 +570,12 @@
         function criarNovaMesa() {
             const inp = document.getElementById('novo-nome-mesa');
             let nomeMesa = inp.value.trim();
-            
-            // MODIFICAÇÃO: Se estiver vazio ou for "+", vira Venda Rápida automática
-            if (!nomeMesa || nomeMesa === "+") {
-                nomeMesa = "Venda Rápida";
-            }
+            if (!nomeMesa || nomeMesa === "+") { nomeMesa = "Venda Rápida"; }
             
             const novaMesa = { id: Date.now(), nome: nomeMesa, itens: [] };
             mesas.push(novaMesa);
             db.ref('mesas').set(mesas).then(() => {
                 inp.value = "";
-                // Abre automaticamente a comanda se for venda rápida
                 if(nomeMesa === "Venda Rápida") selecionarMesa(novaMesa.id);
             });
         }
@@ -720,7 +793,6 @@
 
             [...vendasCronologicas].reverse().forEach(v => {
                 let botoesAcao = "";
-                // Somente Admin ou Master podem apagar/reabrir contas fechadas
                 if (perm === 'admin' || perm === 'master') {
                     botoesAcao = `
                         <div class="flex gap-2 w-full justify-end mt-1.5 border-t border-gray-900 pt-1.5">
@@ -733,7 +805,7 @@
                     <div class="bg-gray-950 p-3 border border-gray-850 rounded-xl text-xs flex flex-col">
                         <div class="flex justify-between items-center">
                             <div class="truncate"><span class="text-gray-500 font-mono">${v.hora}</span> <span class="font-bold text-gray-200">${v.mesa}</span></div>
-                            <span class="font-mono font-black text-emerald-400">${(perm === 'admin' || perm === 'master' || perm === 'funcionario') ? v.total.toFixed(2) + ' MT' : '---'}</span>
+                            <span class="font-mono font-black text-emerald-400">${v.total.toFixed(2)} MT</span>
                         </div>
                         ${botoesAcao}
                     </div>`;
@@ -774,10 +846,10 @@
             desc.value = ""; val.value = "";
         }
 
-        // MODIFICAÇÃO: FECHAR TURNO LIMPA REALMENTE AS MESAS DO FIREBASE E GERA PDF
+        // MODIFICAÇÃO: Fecho de turno APENAS ARQUIVA, não faz download automático do PDF
         function fecharTurnoGeral() {
             if (vendasCronologicas.length === 0 && despesasTurno.length === 0) return alert("Sem movimentos para fechar turno!");
-            if (!confirm("Finalizar, arquivar turno corrente e gerar documento de atividade?")) return;
+            if (!confirm("Finalizar e arquivar turno corrente na secção mensal?")) return;
 
             let totalFaturado = vendasCronologicas.reduce((acc, cur) => acc + cur.total, 0);
             let totalCusto = vendasCronologicas.reduce((acc, cur) => acc + cur.custoTotal, 0);
@@ -790,25 +862,24 @@
             });
 
             historicoMensal.push({
+                id: "fecho_" + Date.now(),
                 periodo: new Date().toLocaleDateString('pt-PT') + " " + new Date().toLocaleTimeString('pt-PT', {hour:'2-digit', minute:'2-digit'}),
                 faturacao: totalFaturado, custo: totalCusto, despesas: totalDespesas,
-                lucro: lucroCalculado
+                lucro: lucroCalculado,
+                bebidasRanking: resumoBebedas // Guardado para gerar o PDF a partir da lista mais tarde
             });
 
-            // Gerar PDF do Turno
-            exportarRelatorioPDF("TURNO", totalFaturado, totalDespesas, totalCusto, lucroCalculado, resumoBebedas);
-
-            // CORREÇÃO: Limpa permanentemente despesas, vendas do dia E as mesas ativas para o próximo turno iniciar limpo!
             db.ref().update({ 
                 despesas: [], 
                 vendas_dia: [], 
                 mesas: [], 
                 historico_mes: historicoMensal 
             }).then(() => {
-                alert("Turno arquivado com sucesso e PDF gerado!");
+                alert("Turno arquivado com sucesso! Podes consultar e emitir o PDF na aba Mensal.");
             });
         }
 
+        // MODIFICAÇÃO: Inserido botão para descarregar o PDF individual de cada fecho
         function atualizarTabelaMensal() {
             const container = document.getElementById('cards-historico-mensal');
             if(!container) return;
@@ -820,19 +891,35 @@
                 const blocoLucro = perm === 'master' ? `<span class="${h.lucro >= 0 ? 'text-emerald-400':'text-red-400'}">${h.lucro.toFixed(2)} MT</span>` : `<span>---</span>`;
                 const detalheCustoLucro = perm === 'master' ? `<span>Custo Stock: <b class="text-gray-200 font-mono">${h.custo.toFixed(0)} MT</b></span>` : '';
                 
+                // Botão para acionar o PDF sob demanda
+                const btnPdf = `
+                    <button onclick="emitirPdfHistorico('${h.id || ''}')" class="px-2 py-1 bg-blue-600 hover:bg-blue-500 text-gray-950 font-bold rounded text-[10px] flex items-center gap-0.5">
+                        <span class="material-icons text-[11px]">download</span> PDF
+                    </button>`;
+
                 container.innerHTML += `
-                    <div class="bg-gray-900 border border-gray-800 p-3 rounded-xl text-xs space-y-1">
-                        <div class="flex justify-between font-black text-gray-200 border-b border-gray-800 pb-1 mb-1">
-                            <span>📅 Fecho: ${h.periodo}</span>
-                            ${blocoLucro}
+                    <div class="bg-gray-900 border border-gray-800 p-3 rounded-xl text-xs space-y-2">
+                        <div class="flex justify-between items-center font-black text-gray-200 border-b border-gray-800/60 pb-1.5">
+                            <span class="text-gray-300">📅 ${h.periodo}</span>
+                            <div class="flex items-center gap-3">
+                                ${blocoLucro}
+                                ${btnPdf}
+                            </div>
                         </div>
-                        <div class="flex justify-between text-gray-400 text-[11px] gap-2">
-                            <span>Faturado: <b class="text-gray-200 font-mono">${h.faturacao.toFixed(0)} MT</b></span>
+                        <div class="flex justify-between text-gray-400 text-[10px] gap-2">
+                            <span>Faturado: <b class="text-emerald-400 font-mono">${h.faturacao.toFixed(0)} MT</b></span>
                             ${detalheCustoLucro}
-                            <span>Gastos: <b class="text-gray-200 font-mono">${h.despesas.toFixed(0)} MT</b></span>
+                            <span>Gastos: <b class="text-red-400 font-mono">${h.despesas.toFixed(0)} MT</b></span>
                         </div>
                     </div>`;
             });
+        }
+
+        // Recupera o fecho clicado e executa a renderização do PDF
+        function emitirPdfHistorico(fechoId) {
+            const h = historicoMensal.find(x => x.id === fechoId || x.periodo === fechoId);
+            if(!h) return alert("Erro ao carregar dados do fecho!");
+            exportarRelatorioPDF(`TURNO ARQUIVADO (${h.periodo})`, h.faturacao, h.despesas, h.custo, h.lucro, h.bebidasRanking || {});
         }
 
         function fecharMesDefinitivo() {
@@ -846,7 +933,7 @@
 
             exportarRelatorioPDF("CONSOLIDADO MENSAL MACRO", f, d, c, l, {});
 
-            historicoMensal = [{ periodo: `CONSOLIDADO ACUMULADO MÊS`, faturacao: f, custo: c, despesas: d, lucro: l }];
+            historicoMensal = [{ id: "consolidado", periodo: `CONSOLIDADO ACUMULADO MÊS`, faturacao: f, custo: c, despesas: d, lucro: l, bebidasRanking: {} }];
             salvarDadosFirebase('historico_mes', historicoMensal);
         }
 
@@ -859,10 +946,10 @@
             doc.setFontSize(22);
             doc.text("MUCH BAR - SISTEMA DE GESTÃO", 14, 20);
             
-            doc.setFontSize(14);
+            doc.setFontSize(13);
             doc.setFont("helvetica", "normal");
             doc.text(`Relatório de Atividade: ${titulo}`, 14, 30);
-            doc.text(`Data de Emissão: ${new Date().toLocaleDateString('pt-PT')} ${new Date().toLocaleTimeString('pt-PT')}`, 14, 38);
+            doc.text(`Gerado em: ${new Date().toLocaleDateString('pt-PT')} ${new Date().toLocaleTimeString('pt-PT')}`, 14, 38);
             
             doc.line(14, 42, 196, 42);
 
@@ -873,17 +960,21 @@
             doc.text(`(+) Faturação Total Bruta: ${faturado.toFixed(2)} MT`, 14, 62);
             doc.text(`(-) Despesas / Sangrias do Período: ${despesas.toFixed(2)} MT`, 14, 70);
             
-            if(usuarioAtivo && usuarioAtivo.permissao === 'master') {
+            const perm = usuarioAtivo ? usuarioAtivo.permissao : 'funcionario';
+            if(perm === 'master') {
                 doc.text(`(-) Custo de Stock Real: ${custo.toFixed(2)} MT`, 14, 78);
                 doc.setFont("helvetica", "bold");
                 doc.text(`(=) LUCRO LÍQUIDO DO DONO: ${lucro.toFixed(2)} MT`, 14, 88);
+            } else {
+                doc.setFont("helvetica", "italic");
+                doc.text("[Dados de lucro ocultos para este nível de utilizador]", 14, 78);
             }
 
             // Bebidas Mais Consumidas
-            if(Object.keys(bebidas).length > 0) {
+            if(bebidas && Object.keys(bebidas).length > 0) {
                 doc.line(14, 96, 196, 96);
                 doc.setFont("helvetica", "bold");
-                doc.text("ARTIGOS / BEBIDAS MAIS VENDIDAS", 14, 106);
+                doc.text("ARTIGOS / BEBIDAS MAIS VENDIDAS NO TURNO", 14, 106);
                 doc.setFont("helvetica", "normal");
                 
                 let linhaY = 116;
@@ -895,7 +986,7 @@
                 });
             }
 
-            doc.save(`MuchBar_Relatorio_${titulo.replace(" ","_")}_${Date.now()}.pdf`);
+            doc.save(`MuchBar_Relatorio_${Date.now()}.pdf`);
         }
 
         function popularSelectRestock() {
@@ -913,8 +1004,7 @@
             if (p) document.getElementById('restock-custo-un').value = p.custo;
         }
 
-        // CORREÇÃO: ENTRADA DE STOCK (RESTOCK) AGORA ATUALIZA E EXUTA CORRETAMENTE
-        function executarRestock() {
+        function ejecutarRestock() {
             const selectEl = document.getElementById('restock-prod-id');
             if(!selectEl.value) return alert("Nenhum produto selecionado!");
             
