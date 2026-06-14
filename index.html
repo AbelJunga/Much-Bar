@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Much Bar - Mobile Ultimate v5.3</title>
+    <title>Much Bar - Mobile Ultimate v5.4</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
@@ -237,19 +237,19 @@
                     </div>
                     
                     <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs pt-1">
-                        <div class="bg-gray-950 p-2.5 border border-gray-850 rounded-xl">
+                        <div class="bg-gray-950 p-2.5 border border-gray-855 rounded-xl">
                             <p class="text-[9px] uppercase text-gray-500 font-bold">Faturação Acum.</p>
                             <p id="acumulado-mes-faturado" class="font-mono font-black text-emerald-400 text-sm">0,00 MT</p>
                         </div>
-                        <div class="bg-gray-950 p-2.5 border border-gray-850 rounded-xl master-only">
+                        <div class="bg-gray-950 p-2.5 border border-gray-855 rounded-xl master-only">
                             <p class="text-[9px] uppercase text-gray-500 font-bold">Custo Stock Acum.</p>
                             <p id="acumulado-mes-custo" class="font-mono font-black text-red-400 text-sm">0,00 MT</p>
                         </div>
-                        <div class="bg-gray-950 p-2.5 border border-gray-850 rounded-xl">
+                        <div class="bg-gray-950 p-2.5 border border-gray-855 rounded-xl">
                             <p class="text-[9px] uppercase text-gray-550 font-bold">Despesas Acum.</p>
                             <p id="acumulado-mes-despesas" class="font-mono font-black text-amber-500 text-sm">0,00 MT</p>
                         </div>
-                        <div class="bg-gray-950 p-2.5 border border-gray-850 rounded-xl master-only">
+                        <div class="bg-gray-950 p-2.5 border border-gray-855 rounded-xl master-only">
                             <p class="text-[9px] uppercase text-gray-500 font-bold">Lucro Líquido Acum.</p>
                             <p id="acumulado-mes-lucro" class="font-mono font-black text-blue-400 text-sm">0,00 MT</p>
                         </div>
@@ -359,47 +359,39 @@
         const salvarDadosFirebase = (caminho, dados) => { db.ref(caminho).set(dados); };
 
         // =============================================================
-        // NOVO ALGORITMO: PRIORIDADES RÍGIDAS + ORDEM NATURAL DE ID/BANCO
+        // SEQUÊNCIA FIXA E REAL DEFINIDA PELO MASTER DO MUCH BAR
         // =============================================================
+        const SEQUENCIA_MESTRE_BAR = [
+            "savana lemon", "savana dry", "bernini lata", "corona", "brutal", 
+            "heineken txoti", "lite", "mayfair", "txilar garrafa", "2m lata", 
+            "2m garrafa", "impala lata", "impala garrafa", "preta txoti", "royal", 
+            "cappy", "agua pequena", "agua grande", "energetico", "coca txoti", 
+            "coca lata", "autum", "heiniken silver", "agua tonica", "refresco garrafa", 
+            "stretton gin", "stretton rosa", "gordon", "shots gordon", "lord", 
+            "preta", "copo", "stela", "heineken garrafa"
+        ];
+
         function obterProdutosOrdenados(listaProdutos) {
             if (!listaProdutos || !Array.isArray(listaProdutos)) return [];
 
-            const obterPesoRegra = (nome) => {
-                const n = nome ? nome.toLowerCase().trim() : "";
-                
-                // 1. Savana Lemon em primeiro absoluto
-                if (n.includes("savana lemon")) return 1;
-                
-                // 2. Sequência após 2M Garrafa
-                if (n.includes("2m garrafa") || n === "2m") return 2;
-                if (n.includes("impala lata")) return 3;
-                if (n.includes("impala garrafa")) return 4;
-                if (n.includes("pretinha")) return 5;
-                
-                // 3. Sequência Mayfair e Txilar
-                if (n.includes("mayfair")) return 6;
-                if (n.includes("txilar guarrafa") || n.includes("txilar garrafa")) return 7;
-                
-                // 4. Sequência Corona e Brutal
-                if (n.includes("corona")) return 8;
-                if (n.includes("brutal")) return 9;
-                
-                // Sem regras específicas: Fica no fim sem alteração alfabética
-                return 99;
-            };
-
             return [...listaProdutos].sort((a, b) => {
-                const pesoA = obterPesoRegra(a.nome);
-                const pesoB = obterPesoRegra(b.nome);
+                const nomeA = a.nome ? a.nome.toLowerCase().trim() : "";
+                const nomeB = b.nome ? b.nome.toLowerCase().trim() : "";
 
-                if (pesoA !== pesoB) {
-                    return pesoA - pesoB;
+                // Procura a posição exata de cada item na tua lista ditada
+                let idxA = SEQUENCIA_MESTRE_BAR.findIndex(item => nomeA === item || nomeA.includes(item));
+                let idxB = SEQUENCIA_MESTRE_BAR.findIndex(item => nomeB === item || nomeB.includes(item));
+
+                // Se não estiver na lista (um item novo criado depois), vai para o fim
+                if (idxA === -1) idxA = 999;
+                if (idxB === -1) idxB = 999;
+
+                if (idxA !== idxB) {
+                    return idxA - idxB;
                 }
 
-                // Ordem Natural de Inserção: Desempata pelo ID/Timestamp gerado na criação do item
-                const idA = a.id || 0;
-                const idB = b.id || 0;
-                return idA - idB;
+                // Desempate natural por ID para itens de mesmo nome ou novos itens fora do mapeamento
+                return (a.id || 0) - (b.id || 0);
             });
         }
 
@@ -474,7 +466,7 @@
                 if(p.stock <= 0) badgeStockColor = "text-red-400 bg-red-950/40 border-red-900";
                 
                 container.innerHTML += `
-                    <div class="flex justify-between items-center p-2.5 bg-gray-950 border border-gray-850 rounded-xl">
+                    <div class="flex justify-between items-center p-2.5 bg-gray-950 border border-gray-855 rounded-xl">
                         <span class="font-bold text-gray-200 truncate pr-2">${p.nome}</span>
                         <span class="px-2.5 py-1 font-mono font-black border rounded-lg text-xs tracking-wider ${badgeStockColor}">
                             ${p.stock} UN
@@ -600,9 +592,9 @@
                             <p class="text-[10px] font-mono text-gray-500">${i.preco} MT x ${i.qtd}</p>
                         </div>
                         <div class="flex items-center gap-1 shrink-0">
-                            <button onclick="ajustarQuantidadeItem(${i.id}, -1, ${mesa.id})" class="w-8 h-8 bg-gray-900 active:bg-gray-850 rounded-lg flex items-center justify-center text-red-400 font-bold text-lg border border-gray-800">-</button>
+                            <button onclick="ajustarQuantidadeItem(${i.id}, -1, ${mesa.id})" class="w-8 h-8 bg-gray-900 active:bg-gray-855 rounded-lg flex items-center justify-center text-red-400 font-bold text-lg border border-gray-800">-</button>
                             <span class="w-8 text-center font-mono font-black text-sm text-gray-200">${i.qtd}</span>
-                            <button onclick="ajustarQuantidadeItem(${i.id}, 1, ${mesa.id})" class="w-8 h-8 bg-gray-900 active:bg-gray-850 rounded-lg flex items-center justify-center text-emerald-400 font-bold text-lg border border-gray-800">+</button>
+                            <button onclick="ajustarQuantidadeItem(${i.id}, 1, ${mesa.id})" class="w-8 h-8 bg-gray-900 active:bg-gray-855 rounded-lg flex items-center justify-center text-emerald-400 font-bold text-lg border border-gray-800">+</button>
                         </div>
                     </div>`;
             });
@@ -778,7 +770,7 @@
                 custo: custo,
                 despesas: despesas,
                 lucro: (faturado - despesas - custo),
-                operadorFecho: usuarioAtivo.name || usuarioAtivo.nome
+                operadorFecho: usuarioAtivo.nome
             };
 
             historicoMensal.push(resumoTurno);
@@ -912,7 +904,7 @@
 
             pdf.setFont("helvetica", "normal");
             pdf.text("--------------------------------------------------", 40, 60, { align: "center" });
-            pdf.text("Much Bar Mobile v5.3 - Maputo", 40, 65, { align: "center" });
+            pdf.text("Much Bar Mobile v5.4 - Maputo", 40, 65, { align: "center" });
 
             pdf.save(`MuchBar_Doc_${doc.id}.pdf`);
         }
@@ -949,16 +941,23 @@
             const container = document.getElementById('form-config-produtos');
             if(!container) return;
             container.innerHTML = "";
-            produtos.forEach((p, index) => {
+            
+            // Aqui na config também mantemos a tua ordem para ser fácil gerires
+            const produtosOrdenadosConfig = obterProdutosOrdenados(produtos);
+            
+            produtosOrdenadosConfig.forEach((p) => {
+                // Procurar o index real no array original para salvar as alterações corretamente
+                const idxOriginal = produtos.findIndex(x => x.id === p.id);
+                
                 container.innerHTML += `
                     <div class="p-3 bg-gray-950 border border-gray-855 rounded-xl space-y-2 text-xs">
                         <p class="font-black text-amber-400 uppercase tracking-wide">${p.nome}</p>
                         <div class="grid grid-cols-3 gap-1">
-                            <div><label class="text-[9px] text-gray-500 font-bold block uppercase">Custo</label><input type="number" value="${p.custo}" onchange="alterarPrecoProduto(${index}, 'custo', this.value)" class="w-full bg-gray-900 border border-gray-800 rounded p-1 font-mono text-red-400"></div>
-                            <div><label class="text-[9px] text-gray-500 font-bold block uppercase">Venda</label><input type="number" value="${p.preco}" onchange="alterarPrecoProduto(${index}, 'preco', this.value)" class="w-full bg-gray-900 border border-gray-800 rounded p-1 font-mono text-emerald-400"></div>
-                            <div><label class="text-[9px] text-gray-500 font-bold block uppercase">Stock Físico</label><input type="number" value="${p.stock}" onchange="alterarPrecoProduto(${index}, 'stock', this.value)" class="w-full bg-gray-900 border border-gray-800 rounded p-1 font-mono text-gray-200"></div>
+                            <div><label class="text-[9px] text-gray-500 font-bold block uppercase">Custo</label><input type="number" value="${p.custo}" onchange="alterarPrecoProduto(${idxOriginal}, 'custo', this.value)" class="w-full bg-gray-900 border border-gray-800 rounded p-1 font-mono text-red-400"></div>
+                            <div><label class="text-[9px] text-gray-500 font-bold block uppercase">Venda</label><input type="number" value="${p.preco}" onchange="alterarPrecoProduto(${idxOriginal}, 'preco', this.value)" class="w-full bg-gray-900 border border-gray-800 rounded p-1 font-mono text-emerald-400"></div>
+                            <div><label class="text-[9px] text-gray-500 font-bold block uppercase">Stock Físico</label><input type="number" value="${p.stock}" onchange="alterarPrecoProduto(${idxOriginal}, 'stock', this.value)" class="w-full bg-gray-900 border border-gray-800 rounded p-1 font-mono text-gray-200"></div>
                         </div>
-                        <button onclick="eliminarProdutoDefinitivo(${index})" class="text-[10px] text-red-400 hover:text-red-300 flex items-center gap-0.5 pt-1 uppercase font-bold"><span class="material-icons text-xs">delete</span> Remover Artigo</button>
+                        <button onclick="eliminarProdutoDefinitivo(${idxOriginal})" class="text-[10px] text-red-400 hover:text-red-300 flex items-center gap-0.5 pt-1 uppercase font-bold"><span class="material-icons text-xs">delete</span> Remover Artigo</button>
                     </div>`;
             });
         }
