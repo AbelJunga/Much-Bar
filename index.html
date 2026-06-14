@@ -3,25 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Much Bar - Mobile PRO v4.6</title>
+    <title>Much Bar - Mobile PRO v4.7</title>
     
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Ícones -->
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 
-    <!-- SCRIPTS DO FIREBASE -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
     
-    <!-- BIBLIOTECA PDF (jsPDF) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body class="h-full flex flex-col font-sans select-none antialiased selection:bg-amber-500/30 selection:text-amber-200 overflow-x-hidden">
 
-    <!-- ==========================================================================
-         TELA DE LOGIN
-         ========================================================================== -->
     <div id="tela-login" class="min-h-full flex flex-col justify-center items-center p-4 bg-gradient-to-b from-gray-950 via-gray-900 to-gray-950">
         <div class="w-full max-w-sm bg-gray-900 border border-gray-800 p-6 rounded-2xl shadow-2xl">
             <div class="text-center mb-6">
@@ -30,7 +23,6 @@
                 <p class="text-xs text-gray-500">Sistema de Gestão & Controlo de Caixas</p>
             </div>
 
-            <!-- Login Geral -->
             <div class="space-y-3 mb-6">
                 <h2 class="text-xs font-bold text-gray-400 uppercase tracking-wider">Acesso ao Sistema</h2>
                 <input type="text" id="login-user-func" placeholder="Utilizador" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-amber-500 text-gray-200">
@@ -44,7 +36,6 @@
                 <div class="flex-grow border-t border-gray-800"></div>
             </div>
 
-            <!-- Login Admin Master (PIN) -->
             <div class="space-y-3">
                 <h2 class="text-xs font-bold text-gray-400 uppercase tracking-wider">PIN de Emergência (Dono - Master)</h2>
                 <input type="password" id="login-pin-admin" placeholder="PIN Administrativo" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-4 py-3 text-sm text-center font-mono tracking-widest text-amber-500 focus:outline-none focus:border-amber-500">
@@ -53,11 +44,7 @@
         </div>
     </div>
 
-    <!-- ==========================================================================
-         CONTEÚDO PRINCIPAL DO SISTEMA
-         ========================================================================== -->
     <div id="sistema-conteudo" class="hidden flex-1 flex flex-col overflow-hidden">
-        <!-- Topbar -->
         <header class="bg-gray-950 border-b border-gray-900 px-4 py-3 flex justify-between items-center shrink-0">
             <div class="flex items-center gap-2">
                 <span class="material-icons text-amber-500 text-sm">local_bar</span>
@@ -77,7 +64,6 @@
             </div>
         </header>
 
-        <!-- Menu de Navegação Global -->
         <nav class="bg-gray-950/80 border-b border-gray-900 p-2 flex gap-1 overflow-x-auto shrink-0 scrollbar-none snap-x">
             <button id="btn-aba-home" onclick="mudarAba('home')" class="snap-center px-3 py-2 rounded-lg text-xs font-bold transition shrink-0 flex items-center gap-1.5">
                 <span class="material-icons text-xs">grid_view</span> Salas
@@ -96,10 +82,8 @@
             </button>
         </nav>
 
-        <!-- CONTEÚDO DINÂMICO DAS ABAS -->
         <main class="flex-1 overflow-y-auto bg-gray-900/40 p-3 pb-6">
 
-            <!-- ABA 1: HOME (SALAS & MESAS) -->
             <div id="aba-home" class="flex flex-col lg:grid lg:grid-cols-3 gap-4 h-full hidden">
                 <div id="bloco-lista-mesas" class="bg-gray-900/60 border border-gray-800 rounded-2xl p-4 flex flex-col h-full overflow-hidden">
                     <div class="flex justify-between items-center mb-3 shrink-0">
@@ -116,7 +100,6 @@
                     <div id="lista-mesas" class="flex-1 overflow-y-auto space-y-2 pr-1 min-h-[200px]"></div>
                 </div>
 
-                <!-- DETALHE DA COMANDA -->
                 <div id="bloco-detalhe-comanda" class="hidden lg:flex bg-gray-900/60 border border-gray-800 rounded-2xl p-4 flex-col h-[calc(100vh-180px)] lg:h-full overflow-hidden">
                     <div class="flex justify-between items-center pb-2 border-b border-gray-800/60 mb-3 shrink-0">
                         <button onclick="fecharVisualizacaoMesa()" class="lg:hidden text-amber-500 flex items-center gap-1 text-xs font-bold">
@@ -151,7 +134,6 @@
                 </div>
             </div>
 
-            <!-- ABA 2: VENDAS DIÁRIAS (TURNO) -->
             <div id="aba-vendas-diarias" class="space-y-4 hidden">
                 <div class="bg-gradient-to-r from-gray-900 to-gray-950 border-l-4 border-amber-500 p-4 rounded-2xl shadow-md adm-geral">
                     <h3 class="text-xs font-black text-amber-400 uppercase tracking-wider flex items-center gap-2 mb-3">
@@ -196,8 +178,8 @@
 
                 <div class="flex flex-col gap-4">
                     <div class="bg-gray-900 border border-gray-800 p-4 rounded-2xl">
-                        <h3 class="text-xs font-black text-gray-400 uppercase tracking-wider mb-3">Histórico de Saídas Realizadas</h3>
-                        <div id="lista-vendas-dia" class="space-y-2 max-h-[300px] overflow-y-auto pr-1"></div>
+                        <h3 class="text-xs font-black text-gray-400 uppercase tracking-wider mb-3">Histórico de Saídas Realizadas (Clique p/ ver artigos)</h3>
+                        <div id="lista-vendas-dia" class="space-y-2 max-h-[350px] overflow-y-auto pr-1"></div>
                     </div>
 
                     <div class="bg-gray-900 border border-gray-800 p-4 rounded-2xl space-y-3 adm-geral">
@@ -216,7 +198,6 @@
                 </div>
             </div>
 
-            <!-- ABA 3: ENTRADA DE STOCK -->
             <div id="aba-restock" class="max-w-md mx-auto bg-gray-900 border border-gray-800 p-5 rounded-2xl space-y-4 hidden adm-geral">
                 <div class="text-center pb-2 border-b border-gray-800"><h2 class="text-sm font-black text-gray-200 uppercase tracking-wide">Dar Entrada de Mercadoria</h2></div>
                 <div class="space-y-1.5">
@@ -236,9 +217,7 @@
                 <button onclick="executarRestock()" class="w-full bg-amber-600 hover:bg-amber-500 text-gray-950 font-black py-3 px-4 rounded-xl text-xs transition">Confirmar Entrada de Stock</button>
             </div>
 
-            <!-- ABA 4: HISTÓRICO MENSAL -->
             <div id="aba-financeiro-mensal" class="space-y-4 hidden adm-geral">
-                <!-- Seção de Indicadores Acumulados do Mês Corrente -->
                 <div class="bg-gray-900 border border-gray-800 p-4 rounded-2xl space-y-3">
                     <div class="flex flex-col gap-2 sm:flex-row sm:justify-between sm:items-center border-b border-gray-800 pb-2">
                         <div>
@@ -263,7 +242,7 @@
                             <p id="acumulado-mes-custo" class="font-mono font-black text-red-400 text-sm">0,00 MT</p>
                         </div>
                         <div class="bg-gray-950 p-2.5 border border-gray-850 rounded-xl">
-                            <p class="text-[9px] uppercase text-gray-500 font-bold">Despesas Acum.</p>
+                            <p class="text-[9px] uppercase text-gray-550 font-bold">Despesas Acum.</p>
                             <p id="acumulado-mes-despesas" class="font-mono font-black text-amber-500 text-sm">0,00 MT</p>
                         </div>
                         <div class="bg-gray-950 p-2.5 border border-gray-850 rounded-xl master-only">
@@ -279,10 +258,8 @@
                 </div>
             </div>
 
-            <!-- ABA 5: PAINEL ADMIN -->
             <div id="aba-produtos" class="flex flex-col gap-4 hidden adm-geral">
                 
-                <!-- SEÇÃO EXCLUSIVA MASTER: RESTAURO DO SISTEMA -->
                 <div class="bg-red-950/20 border border-red-900/60 p-4 rounded-2xl space-y-3 master-only">
                     <h3 class="text-xs font-black text-red-400 uppercase tracking-wider flex items-center gap-1.5 pb-2 border-b border-red-900/30">
                         <span class="material-icons text-xs">restart_alt</span> Zona Crítica: Restauro de Testes (Limpeza)
@@ -334,9 +311,6 @@
         </main>
     </div>
 
-    <!-- ==========================================================================
-         MODAL DE STOCK RÁPIDO PARA O CAIXA
-         ========================================================================== -->
     <div id="modal-stock-caixa" class="hidden fixed inset-0 bg-gray-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
         <div class="w-full max-w-sm bg-gray-900 border border-gray-800 rounded-2xl shadow-2xl flex flex-col max-h-[80vh] overflow-hidden">
             <div class="p-4 border-b border-gray-800 flex justify-between items-center bg-gray-950 shrink-0">
@@ -353,9 +327,6 @@
     </div>
 
 
-    <!-- ==========================================================================
-         JAVASCRIPT DE SESSÃO & LOGICA
-         ========================================================================== -->
     <script>
         // CONFIGURAÇÃO GERAL E CHAVE PIN MASTER RESTRITA
         const PIN_ADMIN_PADRAO = "5369"; 
@@ -490,8 +461,8 @@
             if((mesa.itens || []).length > 0) {
                 if(!confirm("A mesa tem produtos lançados. Deseja mesmo eliminar e retornar o stock?")) return;
                 mesa.itens.forEach(p => {
-                    const prodGeral = produtos.find(x => x.id === p.id);
-                    if (prodGeral) prodGeral.stock += p.qtd;
+                    const original = produtos.find(x => x.id === p.id);
+                    if(original) original.stock += p.qtd;
                 });
             }
             mesas = mesas.filter(m => m.id !== mesaSelecionadaId);
@@ -500,60 +471,66 @@
             });
         }
 
-        function tentarLoginAdminMaster() {
-            const pin = document.getElementById('login-pin-admin').value;
-            if (pin === PIN_ADMIN_PADRAO) {
-                usuarioAtivo = { nome: "Admin Dono (Master)", permissao: "master" };
-                sessionStorage.setItem('mb_sessao', JSON.stringify(usuarioAtivo));
-                document.getElementById('login-pin-admin').value = "";
-                inicializarSistema();
-            } else { alert("PIN Administrativo Incorreto!"); }
-        }
+        function alterarQuantidadeItem(prodId, alteracao, mesaId) {
+            const mesa = mesas.find(m => m.id === mesaId);
+            const produtoOriginal = produtos.find(p => p.id === prodId);
+            if (!mesa || !produtoOriginal) return;
 
-        function tentarLoginFuncionario() {
-            const user = document.getElementById('login-user-func').value.trim();
-            const pass = document.getElementById('login-pass-func').value;
+            if (!mesa.itens) mesa.itens = [];
+            const item = mesa.itens.find(i => i.id === prodId);
             
-            const val = usuarios.find(u => u.username.toLowerCase() === user.toLowerCase() && u.pass === pass);
-            if (val) {
-                usuarioAtivo = { nome: val.username, permissao: val.permissao || "funcionario" };
-                sessionStorage.setItem('mb_sessao', JSON.stringify(usuarioAtivo));
-                inicializarSistema();
-            } else { alert("Utilizador ou password incorretos!"); }
-        }
+            if (!item && alteracao < 0) return;
+            if (alteracao > 0 && produtoOriginal.stock <= 0) return alert("Falta de Stock Geral!");
 
-        function fazerLogout() {
-            usuarioAtivo = null;
-            sessionStorage.removeItem('mb_sessao');
-            fecharVisualizacaoMesa();
-            inicializarSistema();
-        }
-
-        function mudarAba(abaId) {
-            const abas = ['home', 'vendas-diarias', 'restock', 'financeiro-mensal', 'produtos'];
-            abas.forEach(id => {
-                const element = document.getElementById(`aba-${id}`);
-                const btn = document.getElementById(`btn-aba-${id}`);
-                if(element) element.classList.add('hidden');
-                if(btn) {
-                    btn.classList.remove('bg-amber-600', 'text-gray-950', 'bg-gray-800', 'text-gray-100');
-                    btn.classList.add('text-gray-400');
-                }
-            });
-            const targetAba = document.getElementById(`aba-${abaId}`);
-            if(targetAba) targetAba.classList.remove('hidden');
-            const btn = document.getElementById(`btn-aba-${abaId}`);
-            if (abaId === 'home' && btn) {
-                btn.classList.add('bg-amber-600', 'text-gray-950');
-                fecharVisualizacaoMesa();
-            } else if(btn) {
-                btn.classList.add('bg-gray-800', 'text-gray-100');
+            if (item) {
+                item.qtd += alteracao;
+                produtoOriginal.stock -= alteracao;
+                if (item.qtd <= 0) mesa.itens = mesa.itens.filter(i => i.id !== prodId);
             }
+            db.ref().update({ mesas: mesas, produtos: produtos });
+        }
+
+        function adicionarItemMesa(prodId) {
+            if (!mesaSelecionadaId) return;
+            const mesa = mesas.find(m => m.id === mesaSelecionadaId);
+            const prod = produtos.find(p => p.id === prodId);
+            
+            if (prod.stock <= 0) return alert("Artigo esgotado!");
+
+            if (!mesa.itens) mesa.itens = [];
+            const exist = mesa.itens.find(i => i.id === prodId);
+            if (exist) {
+                exist.qtd++;
+            } else {
+                mesa.itens.push({ id: prod.id, nome: prod.nome, preco: prod.preco, custo: prod.custo, qtd: 1 });
+            }
+            prod.stock--;
+            db.ref().update({ mesas: mesas, produtos: produtos });
+        }
+
+        function renderizarBotoesProdutos() {
+            const container = document.getElementById('botoes-produtos');
+            if(!container) return;
+            container.innerHTML = "";
+            
+            produtos.forEach(p => {
+                const esgotado = p.stock <= 0;
+                const cls = esgotado ? "bg-gray-950 border-gray-900 text-gray-600 opacity-40" : "bg-gray-950 border-gray-800 text-amber-400 active:bg-amber-500/10";
+                container.innerHTML += `
+                    <button onclick="adicionarItemMesa(${p.id})" ${esgotado ? 'disabled':''} class="p-3 border rounded-xl text-left flex flex-col justify-between transition h-20 ${cls}">
+                        <span class="text-xs font-black text-gray-200 block truncate w-full">${p.nome}</span>
+                        <div class="flex justify-between items-baseline w-full">
+                            <span class="text-[10px] font-mono text-emerald-400 font-bold">${p.preco.toFixed(2)}</span>
+                            <span class="text-[9px] font-mono ${p.stock <= 5 ? 'text-red-400':'text-gray-500'} font-bold">${p.stock} UN</span>
+                        </div>
+                    </button>`;
+            });
         }
 
         function aplicarRestricoesPermissao() {
-            const perm = usuarioAtivo ? usuarioAtivo.permissao : 'funcionario';
-            
+            if (!usuarioAtivo) return;
+            const perm = usuarioAtivo.permissao;
+
             document.querySelectorAll('.adm-geral').forEach(el => {
                 if (perm === 'admin' || perm === 'master') el.classList.remove('hidden');
                 else el.classList.add('hidden');
@@ -571,20 +548,17 @@
             }
         }
 
-        // DUPLA TRAVA DE SEGURANÇA PARA O RESTAURO DO SISTEMA (PIN + PALAVRA CHAVE)
         function restaurarSistemaApenasMovimentos() {
             if (!usuarioAtivo || usuarioAtivo.permissao !== 'master') {
                 return alert("Apenas o nível Master (Dono) tem autorização para restaurar o sistema!");
             }
-
-            const confirmacaoPin = prompt("🔒 TRAVA DE SEGURANÇA MÁXIMA\nPara prosseguir com a limpeza de teste do sistema, introduza o PIN Master de Confirmação:");
             
+            const confirmacaoPin = prompt("🔒 TRAVA DE SEGURANÇA MÁXIMA\nPara prosseguir com a limpeza de teste do sistema, introduza o PIN Master de Confirmação:");
             if (!confirmacaoPin || confirmacaoPin.trim() !== PIN_ADMIN_PADRAO) {
                 return alert("Operação cancelada! PIN incorreto ou não inserido.");
             }
 
             const confirmacaoPalavra = prompt("⚠️ SEGUNDA VALIDAÇÃO CRÍTICA!\nEsta ação apagará permanentemente TODAS as vendas do dia, despesas e faturamentos acumulados.\n\nO stock e preços serão preservados.\n\nPara confirmar e executar a limpeza definitiva, digite a palavra: RESTAURAR");
-            
             if (!confirmacaoPalavra || confirmacaoPalavra.trim().toUpperCase() !== "RESTAURAR") {
                 return alert("Operação cancelada! A palavra de confirmação não foi introduzida corretamente.");
             }
@@ -598,65 +572,18 @@
                 historico_mes: []
             }).then(() => {
                 fecharVisualizacaoMesa();
-                alert("🎉 Sistema restaurado com sucesso! O histórico de testes foi limpo e o stock/preços foram inteiramente preservados.");
+                alert("🎉 Base de movimentos limpa com sucesso! Stock e preços preservados.");
             }).catch(err => {
                 alert("Erro ao restaurar base de dados: " + err.message);
             });
         }
 
-        function adicionarUsuario() {
-            if(usuarioAtivo.permissao !== 'master') return alert("Apenas o nível Master pode criar utilizadores!");
-            const u = document.getElementById('novo-user-nome').value.trim();
-            const p = document.getElementById('novo-user-pass').value;
-            const perm = document.getElementById('novo-user-permissao').value;
-            
-            if(!u || !p) return alert("Preencha todos os campos do utilizador!");
-            if(usuarios.some(user => user.username.toLowerCase() === u.toLowerCase())) return alert("Este utilizador já existe!");
-
-            usuarios.push({ username: u, pass: p, permissao: perm });
-            db.ref('usuarios').set(usuarios).then(() => {
-                document.getElementById('novo-user-nome').value = "";
-                document.getElementById('novo-user-pass').value = "";
-                alert("Utilizador adicionado com sucesso!");
-            });
-        }
-
-        function eliminarUsuario(username) {
-            if(usuarioAtivo.permissao !== 'master') return alert("Apenas o nível Master pode apagar utilizadores!");
-            if(!confirm(`Remover utilizador "${username}"?`)) return;
-            usuarios = usuarios.filter(u => u.username !== username);
-            db.ref('usuarios').set(usuarios);
-        }
-
-        function atualizarListaOperadores() {
-            const container = document.getElementById('lista-operadores-sistema');
-            if(!container) return; container.innerHTML = "";
-            usuarios.forEach(u => {
-                let badgeColor = 'bg-blue-900/30 text-blue-400 border-blue-900';
-                let labelPerm = 'Caixa';
-                if(u.permissao === 'master') { badgeColor = 'bg-red-900/40 text-red-400 border-red-800'; labelPerm = 'Master'; }
-                else if(u.permissao === 'admin') { badgeColor = 'bg-amber-900/40 text-amber-400 border-amber-800'; labelPerm = 'Admin'; }
-                
-                container.innerHTML += `
-                    <div class="bg-gray-950 p-3 border border-gray-850 rounded-xl flex justify-between items-center text-xs">
-                        <div>
-                            <div class="flex items-center gap-2">
-                                <p class="font-bold text-gray-200">${u.username}</p>
-                                <span class="px-1.5 py-0.5 rounded text-[9px] font-bold border ${badgeColor}">${labelPerm}</span>
-                            </div>
-                            <p class="text-[10px] text-gray-500">Pass: ${u.pass}</p>
-                        </div>
-                        <button onclick="eliminarUsuario('${u.username}')" class="text-red-400 p-1 master-only"><span class="material-icons text-sm">person_remove</span></button>
-                    </div>`;
-            });
-            aplicarRestricoesPermissao();
-        }
-
         function criarNovaMesa() {
             const inp = document.getElementById('novo-nome-mesa');
             let nomeMesa = inp.value.trim();
-            if (!nomeMesa || nomeMesa === "+") { nomeMesa = "Venda Rápida"; }
-            
+            if (!nomeMesa || nomeMesa === "+") {
+                nomeMesa = "Venda Rápida";
+            }
             const novaMesa = { id: Date.now(), nome: nomeMesa, itens: [] };
             mesas.push(novaMesa);
             db.ref('mesas').set(mesas).then(() => {
@@ -669,13 +596,19 @@
             const container = document.getElementById('lista-mesas');
             if(!container) return;
             container.innerHTML = mesas.length === 0 ? `<p class="text-xs text-gray-500 text-center py-4">Nenhuma mesa activa.</p>` : "";
+            
             mesas.forEach(m => {
                 const total = (m.itens || []).reduce((acc, cur) => acc + (cur.preco * cur.qtd), 0);
                 const activeCls = mesaSelecionadaId === m.id ? 'border-amber-500 bg-amber-950/20' : 'border-gray-800 bg-gray-950';
+                const qtdItens = (m.itens || []).reduce((acc, cur) => acc + cur.qtd, 0);
+                
                 container.innerHTML += `
-                    <div onclick="selecionarMesa(${m.id})" class="p-3.5 border rounded-xl flex justify-between items-center cursor-pointer active:scale-[0.99] transition ${activeCls}">
-                        <div><p class="text-sm font-bold text-gray-200">${m.nome}</p><p class="text-[11px] text-gray-500">${(m.itens || []).length} produtos</p></div>
-                        <span class="text-sm font-black text-amber-400">${total.toFixed(2)} MT</span>
+                    <div onclick="selecionarMesa(${m.id})" class="p-3 border rounded-xl flex justify-between items-center transition cursor-pointer ${activeCls}">
+                        <div class="truncate">
+                            <p class="text-xs font-black text-gray-200">${m.nome.toUpperCase()}</p>
+                            <p class="text-[10px] text-gray-500 font-bold">${qtdItens} un lançadas</p>
+                        </div>
+                        <span class="text-xs font-mono font-black ${total > 0 ? 'text-emerald-400' : 'text-gray-600'}">${total.toFixed(2)} MT</span>
                     </div>`;
             });
         }
@@ -683,138 +616,199 @@
         function atualizarItensComanda(mesa) {
             const container = document.getElementById('itens-comanda');
             if(!container) return;
-            const itens = mesa.itens || [];
-            if (itens.length === 0) {
+            container.innerHTML = "";
+            const items = mesa.itens || [];
+            
+            if(items.length === 0) {
+                container.innerHTML = "<p class='text-xs text-gray-600 text-center py-4'>Sem consumos lançados.</p>";
                 document.getElementById('total-comanda').innerText = "0,00 MT";
-                document.getElementById('btn-fechar-conta').disabled = true;
-                document.getElementById('btn-fechar-conta').className = "w-full bg-gray-800 text-gray-500 font-bold py-3 px-4 rounded-xl flex items-center justify-center gap-2 cursor-not-allowed text-xs";
-                container.innerHTML = `<p class="text-xs text-gray-600 text-center py-4">Nenhum produto consumido.</p>`;
+                const btn = document.getElementById('btn-fechar-conta');
+                btn.disabled = true;
+                btn.className = "w-full bg-gray-800 text-gray-500 font-bold py-3 px-4 rounded-xl flex items-center justify-center gap-2 cursor-not-allowed text-xs";
                 return;
             }
 
-            let total = 0; container.innerHTML = "";
-            itens.forEach(item => {
-                const sub = item.preco * item.qtd; total += sub;
+            items.forEach(i => {
                 container.innerHTML += `
-                    <div class="bg-gray-950/50 p-2.5 border border-gray-850 rounded-xl flex justify-between items-center text-xs">
-                        <div class="flex-1 min-w-0 pr-1">
-                            <p class="font-bold text-gray-300 truncate">${item.nome}</p>
-                            <p class="text-[10px] text-amber-500 font-mono">${item.preco.toFixed(2)} MT</p>
+                    <div class="bg-gray-950 p-2.5 border border-gray-850 rounded-xl flex items-center justify-between gap-2 text-xs">
+                        <div class="flex-1 min-w-0">
+                            <p class="font-bold text-gray-200 truncate">${i.nome}</p>
+                            <p class="text-[10px] text-gray-500 font-mono">${i.preco.toFixed(2)} x ${i.qtd} = ${(i.preco * i.qtd).toFixed(2)} MT</p>
                         </div>
-                        <div class="flex items-center gap-2.5 mx-2 shrink-0">
-                            <button onclick="ajustarQtdItemMesa(${mesa.id}, ${item.id}, -1)" class="w-7 h-7 rounded-full bg-red-950 border border-red-800 text-red-400 font-black flex items-center justify-center text-base">-</button>
-                            <span class="font-mono font-black text-gray-200 text-xs min-w-[14px] text-center">${item.qtd}</span>
-                            <button onclick="ajustarQtdItemMesa(${mesa.id}, ${item.id}, 1)" class="w-7 h-7 rounded-full bg-emerald-950 border border-emerald-800 text-emerald-400 font-black flex items-center justify-center text-base">+</button>
+                        <div class="flex items-center gap-1 shrink-0">
+                            <button onclick="alterarQuantidadeItem(${i.id}, -1, ${mesa.id})" class="w-7 h-7 bg-gray-900 border border-gray-800 hover:border-red-900 text-red-400 font-bold rounded-lg text-xs flex items-center justify-center">-</button>
+                            <span class="w-6 text-center font-mono font-black text-gray-200 text-xs">${i.qtd}</span>
+                            <button onclick="alterarQuantidadeItem(${i.id}, 1, ${mesa.id})" class="w-7 h-7 bg-gray-900 border border-gray-800 hover:border-emerald-900 text-emerald-400 font-bold rounded-lg text-xs flex items-center justify-center">+</button>
                         </div>
-                        <div class="text-right font-mono font-bold text-gray-300 min-w-[65px]">${sub.toFixed(2)} MT</div>
                     </div>`;
             });
 
+            const total = items.reduce((acc, cur) => acc + (cur.preco * cur.qtd), 0);
             document.getElementById('total-comanda').innerText = `${total.toFixed(2)} MT`;
+            
             const btn = document.getElementById('btn-fechar-conta');
             btn.disabled = false;
-            btn.className = "w-full bg-emerald-600 text-gray-950 font-black py-3 px-4 rounded-xl flex items-center justify-center gap-2 text-xs shadow-lg transition";
-        }
-
-        function ajustarQtdItemMesa(mesaId, prodId, alteracao) {
-            const mesa = mesas.find(m => m.id === mesaId);
-            const produtoOriginal = produtos.find(p => p.id === prodId);
-            if (!mesa || !produtoOriginal) return;
-
-            if (!mesa.itens) mesa.itens = [];
-            const item = mesa.itens.find(i => i.id === prodId);
-            if (!item && alteracao < 0) return;
-
-            if (alteracao > 0 && produtoOriginal.stock <= 0) return alert("Falta de Stock Geral!");
-
-            if (item) {
-                item.qtd += alteracao;
-                produtoOriginal.stock -= alteracao;
-                if (item.qtd <= 0) mesa.itens = mesa.itens.filter(i => i.id !== prodId);
-            }
-            db.ref().update({ mesas: mesas, produtos: produtos });
-        }
-
-        function adicionarItemMesa(prodId) {
-            if (!mesaSelecionadaId) return;
-            const mesa = mesas.find(m => m.id === mesaSelecionadaId);
-            const prod = produtos.find(p => p.id === prodId);
-
-            if (prod.stock <= 0) return alert("Artigo esgotado!");
-            if (!mesa.itens) mesa.itens = [];
-
-            const exist = mesa.itens.find(i => i.id === prodId);
-            if (exist) { exist.qtd++; } else {
-                mesa.itens.push({ id: prod.id, nome: prod.nome, preco: prod.preco, custo: prod.custo, qtd: 1 });
-            }
-            prod.stock--;
-            db.ref().update({ mesas: mesas, produtos: produtos });
-        }
-
-        function renderizarBotoesProdutos() {
-            const container = document.getElementById('botoes-produtos');
-            if(!container) return; container.innerHTML = "";
-            produtos.forEach(p => {
-                const esgotado = p.stock <= 0;
-                const cls = esgotado ? "bg-gray-950 border-gray-900 text-gray-600 opacity-40" : "bg-gray-950 border-gray-800 text-gray-300 active:border-amber-500";
-                container.innerHTML += `
-                    <button onclick="${esgotado ? '' : `adicionarItemMesa(${p.id})`}" class="p-2 rounded-xl text-left flex flex-col justify-between h-14 ${cls}">
-                        <span class="text-[11px] font-bold block truncate w-full">${p.nome}</span>
-                        <div class="flex justify-between items-center w-full text-[10px]">
-                            <span class="font-mono text-amber-500 font-bold">${p.preco.toFixed(0)} MT</span>
-                            <span class="text-[9px] px-1 rounded bg-gray-900/60">Stk: ${p.stock}</span>
-                        </div>
-                    </button>`;
-            });
+            btn.className = "w-full bg-emerald-600 hover:bg-emerald-500 text-gray-950 font-black py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition text-xs shadow-lg shadow-emerald-950/20";
         }
 
         function fecharMesaAtual() {
-            if (!mesaSelecionadaId) return;
-            const idx = mesas.findIndex(m => m.id === mesaSelecionadaId);
-            const m = mesas[idx];
-            if (!m || (m.itens || []).length === 0) return;
+            if(!mesaSelecionadaId) return;
+            const mesa = mesas.find(m => m.id === mesaSelecionadaId);
+            if(!mesa || !mesa.itens || mesa.itens.length === 0) return;
 
-            if (!confirm(`Fechar conta da ${m.nome}?`)) return;
-            const horaFecho = new Date().toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' });
+            if(!confirm(`Fechar a conta da sala/mesa "${mesa.nome}"?`)) return;
+
+            const t = (mesa.itens || []).reduce((acc, cur) => acc + (cur.preco * cur.qtd), 0);
+            const c = (mesa.itens || []).reduce((acc, cur) => acc + (cur.custo * cur.qtd), 0);
+            const l = t - c;
             
-            const itensVenda = m.itens.map(i => ({
-                id: i.id, nome: i.nome, qtd: i.qtd, custoTotal: i.custo * i.qtd, faturadoTotal: i.preco * i.qtd
-            }));
+            const agora = new Date();
+            const horaStr = agora.getHours().toString().padStart(2, '0') + ":" + agora.getMinutes().toString().padStart(2, '0');
 
-            vendasCronologicas.push({
-                id: "venda_" + Date.now(),
-                mesa: m.nome.replace(" (Reaberta)", ""),
-                hora: horaFecho, produtos: itensVenda,
-                total: itensVenda.reduce((s, c) => s + c.faturadoTotal, 0),
-                custoTotal: itensVenda.reduce((s, c) => s + c.custoTotal, 0)
-            });
+            const novaVenda = {
+                id: Date.now(),
+                mesa: mesa.nome,
+                hora: horaStr,
+                total: t,
+                custoTotal: c,
+                lucroTotal: l,
+                produtos: mesa.itens.map(x => ({ id: x.id, nome: x.nome, qtd: x.qtd, faturadoTotal: x.preco * x.qtd, custoTotal: x.custo * x.qtd }))
+            };
 
-            mesas.splice(idx, 1);
-            db.ref().update({ mesas: mesas, vendas_dia: vendasCronologicas }).then(() => {
+            vendasCronologicas.push(novaVenda);
+            mesas = mesas.filter(m => m.id !== mesaSelecionadaId);
+
+            db.ref().update({
+                mesas: mesas,
+                vendas_dia: vendasCronologicas
+            }).then(() => {
+                alert(`Conta fechada! Valor: ${t.toFixed(2)} MT`);
                 fecharVisualizacaoMesa();
             });
         }
 
+        function atualizarPainelVendas() {
+            let faturamentoDia = vendasCronologicas.reduce((acc, cur) => acc + cur.total, 0);
+            let despesasDia = despesasTurno.reduce((acc, cur) => acc + cur.valor, 0);
+            let custoStockDia = vendasCronologicas.reduce((acc, cur) => acc + (cur.custoTotal || 0), 0);
+            let lucroLiquidoDia = faturamentoDia - despesasDia - custoStockDia;
+
+            document.getElementById('hoje-faturacao').innerText = `${faturamentoDia.toFixed(2)} MT`;
+            document.getElementById('hoje-despesas').innerText = `${despesasDia.toFixed(2)} MT`;
+            document.getElementById('hoje-lucro').innerText = `${lucroLiquidoDia.toFixed(2)} MT`;
+
+            document.getElementById('rel-turno-faturado').innerText = `${faturamentoDia.toFixed(2)} MT`;
+            document.getElementById('rel-turno-custo').innerText = `${custoStockDia.toFixed(2)} MT`;
+            document.getElementById('rel-turno-lucro').innerText = `${(faturamentoDia - custoStockDia).toFixed(2)} MT`;
+            document.getElementById('rel-turno-contas').innerText = vendasCronologicas.length;
+
+            let resumoProds = {};
+            vendasCronologicas.forEach(v => {
+                (v.produtos || []).forEach(p => {
+                    resumoProds[p.nome] = (resumoProds[p.nome] || 0) + p.qtd;
+                });
+            });
+
+            const contRelProds = document.getElementById('rel-turno-lista-produtos');
+            contRelProds.innerHTML = Object.keys(resumoProds).length === 0 ? `<p class="text-gray-600 italic text-[10px] col-span-2">Nenhum artigo saído.</p>` : "";
+            Object.entries(resumoProds).forEach(([nome, q]) => {
+                contRelProds.innerHTML += `<div class="bg-gray-950 border border-gray-850 p-2 rounded-xl flex justify-between font-mono"><span class="text-gray-300 truncate">${nome}</span><b class="text-amber-500">${q} UN</b></div>`;
+            });
+
+            const containerCronologico = document.getElementById('lista-vendas-dia');
+            containerCronologico.innerHTML = vendasCronologicas.length === 0 ? `<p class="text-gray-600 text-center py-3 italic text-xs">Nenhuma transação fechada hoje.</p>` : "";
+            
+            const perm = usuarioAtivo ? usuarioAtivo.permissao : 'funcionario';
+            
+            [...vendasCronologicas].reverse().forEach(v => {
+                let botoesAcao = "";
+                if(perm === 'admin' || perm === 'master') {
+                    botoesAcao = `
+                        <div class="flex gap-1.5 justify-end mt-2 pt-2 border-t border-gray-900">
+                            <button onclick="event.stopPropagation(); reabrirMesaFechada('${v.id}')" class="px-2 py-0.5 bg-gray-900 border border-gray-855 hover:border-amber-500 rounded text-[10px] text-amber-500 font-bold">✏️ Reabrir</button>
+                            <button onclick="event.stopPropagation(); apagarMesaFechadaDefinitivo('${v.id}')" class="px-2 py-0.5 bg-red-950 border border-red-900 rounded text-[10px] text-red-400 font-bold">🗑️ Apagar</button>
+                        </div>`;
+                }
+
+                let listaProdutosVendidos = "";
+                (v.produtos || []).forEach(p => {
+                    listaProdutosVendidos += `
+                        <div class="flex justify-between items-center text-[11px] text-gray-400 py-0.5 font-mono">
+                            <span>• ${p.nome} x${p.qtd}</span>
+                            <span>${p.faturadoTotal.toFixed(2)} MT</span>
+                        </div>`;
+                });
+
+                containerCronologico.innerHTML += `
+                    <div onclick="document.getElementById('detalhe-venda-${v.id}').classList.toggle('hidden')" class="bg-gray-950 p-3 border border-gray-850 rounded-xl text-xs flex flex-col cursor-pointer hover:border-gray-700 transition">
+                        <div class="flex justify-between items-center">
+                            <div class="truncate">
+                                <span class="text-gray-500 font-mono">${v.hora}</span> 
+                                <span class="font-black text-gray-200">${v.mesa.toUpperCase()}</span>
+                            </div>
+                            <div class="flex items-center gap-1.5">
+                                <span class="font-mono font-black text-emerald-400">${v.total.toFixed(2)} MT</span>
+                                <span class="material-icons text-gray-600 text-xs">expand_more</span>
+                            </div>
+                        </div>
+                        
+                        <div id="detalhe-venda-${v.id}" class="hidden mt-2 pt-2 border-t border-gray-900 bg-gray-900/40 p-2 rounded-lg">
+                            <p class="text-[9px] font-bold text-gray-500 uppercase tracking-wider mb-1">Artigos Consumidos:</p>
+                            ${listaProdutosVendidos}
+                            ${botoesAcao}
+                        </div>
+                    </div>`;
+            });
+
+            const containerDespesas = document.getElementById('lista-despesas-turno');
+            containerDespesas.innerHTML = despesasTurno.length === 0 ? `<p class="text-gray-600 text-center py-1 italic text-xs">Sem despesas abertas.</p>` : "";
+            
+            despesasTurno.forEach(d => {
+                let botoesDespesaAdmin = "";
+                if(perm === 'admin' || perm === 'master') {
+                    botoesDespesaAdmin = `
+                        <div class="flex gap-1">
+                            <button onclick="editarDespesaGeral(${d.id})" class="text-amber-500 bg-gray-900 hover:bg-gray-850 p-1 rounded border border-gray-800 flex items-center"><span class="material-icons text-xs">edit</span></button>
+                            <button onclick="apagarDespesaGeral(${d.id})" class="text-red-400 bg-gray-900 hover:bg-gray-850 p-1 rounded border border-gray-800 flex items-center"><span class="material-icons text-xs">delete</span></button>
+                        </div>`;
+                }
+                
+                containerDespesas.innerHTML += `
+                    <div class="bg-gray-950 p-2 border border-gray-850 rounded-xl flex justify-between items-center font-mono text-[11px]">
+                        <div class="truncate pr-2"><span class="text-gray-300 font-sans">${d.descricao}</span></div>
+                        <div class="flex items-center gap-2 shrink-0">
+                            <span class="text-red-400 font-bold">${d.valor.toFixed(2)} MT</span>
+                            ${botoesDespesaAdmin}
+                        </div>
+                    </div>`;
+            });
+        }
+
         function reabrirMesaFechada(idVenda) {
-            if (!confirm("Pretende REABRIR esta conta?")) return;
+            if (!confirm("Pretende reabrir esta mesa? Ela voltará para o painel de mesas activas.")) return;
             const venda = vendasCronologicas.find(v => v.id === idVenda);
             if (!venda) return;
 
             const itensReabertos = venda.produtos.map(p => {
                 const prodGeral = produtos.find(x => x.id === p.id);
                 return {
-                    id: p.id, nome: p.nome, qtd: p.qtd,
+                    id: p.id,
+                    nome: p.nome,
+                    qtd: p.qtd,
                     preco: p.faturadoTotal / p.qtd,
                     custo: prodGeral ? prodGeral.custo : p.custoTotal / p.qtd
                 };
             });
 
             mesas.push({ id: Date.now(), nome: venda.mesa + " (Reaberta)", itens: itensReabertos });
-            db.ref().update({ mesas: mesas, vendas_dia: vendasCronologicas.filter(v => v.id !== idVenda) });
+            db.ref().update({
+                mesas: mesas,
+                vendas_dia: vendasCronologicas.filter(v => v.id !== idVenda)
+            });
         }
 
         function apagarMesaFechadaDefinitivo(idVenda) {
-            if (!confirm("Eliminar esta venda permanentemente? O stock retornará.")) return;
+            if (!confirm("Eliminar esta venda permanentemente? O stock correspondente retornará ao inventário.")) return;
             const venda = vendasCronologicas.find(v => v.id === idVenda);
             if (!venda) return;
 
@@ -823,19 +817,36 @@
                 if (prodGeral) prodGeral.stock += p.qtd;
             });
 
-            db.ref().update({ produtos: produtos, vendas_dia: vendasCronologicas.filter(v => v.id !== idVenda) });
+            db.ref().update({
+                produtos: produtos,
+                vendas_dia: vendasCronologicas.filter(v => v.id !== idVenda)
+            });
+        }
+
+        function adicionarDespesa() {
+            const descInp = document.getElementById('desdespesa-desc');
+            const valInp = document.getElementById('despesa-valor');
+            const desc = descInp.value.trim();
+            const val = parseFloat(valInp.value);
+
+            if(!desc || isNaN(val) || val <= 0) return alert("Insira uma descrição válida e o valor correto da despesa!");
+
+            const novaDesp = { id: Date.now(), descricao: desc, valor: val };
+            despesasTurno.push(novaDesp);
+            
+            db.ref('despesas').set(despesasTurno).then(() => {
+                descInp.value = "";
+                valInp.value = "";
+            });
         }
 
         function editarDespesaGeral(idDespesa) {
             const despesa = despesasTurno.find(d => d.id === idDespesa);
             if(!despesa) return;
-
             const novoValor = prompt(`Editar valor para a despesa "${despesa.descricao}":`, despesa.valor);
-            if(novoValor === null) return; 
-            
+            if(novoValor === null) return;
             const valorFormatado = parseFloat(novoValor);
             if(isNaN(valorFormatado) || valorFormatado <= 0) return alert("Valor inválido!");
-
             despesa.valor = valorFormatado;
             salvarDadosFirebase('despesas', despesasTurno);
         }
@@ -846,126 +857,52 @@
             salvarDadosFirebase('despesas', despesasTurno);
         }
 
-        function atualizarPainelVendas() {
-            let totalFaturado = vendasCronologicas.reduce((acc, cur) => acc + cur.total, 0);
-            let totalCusto = vendasCronologicas.reduce((acc, cur) => acc + cur.custoTotal, 0);
-            let totalDespesas = despesasTurno.reduce((acc, cur) => acc + cur.valor, 0);
-
-            document.getElementById('hoje-faturacao').innerText = `${totalFaturado.toFixed(2)} MT`;
-            document.getElementById('hoje-despesas').innerText = `${totalDespesas.toFixed(2)} MT`;
-            document.getElementById('hoje-lucro').innerText = `${(totalFaturado - totalCusto - totalDespesas).toFixed(2)} MT`;
-
-            document.getElementById('rel-turno-faturado').innerText = `${totalFaturado.toFixed(2)} MT`;
-            document.getElementById('rel-turno-custo').innerText = `${totalCusto.toFixed(2)} MT`;
-            document.getElementById('rel-turno-lucro').innerText = `${(totalFaturado - totalCusto).toFixed(2)} MT`;
-            document.getElementById('rel-turno-contas').innerText = vendasCronologicas.length;
-
-            let resumoProdutos = {};
-            vendasCronologicas.forEach(v => {
-                v.produtos.forEach(p => { resumoProdutos[p.nome] = (resumoProdutos[p.nome] || 0) + p.qtd; });
-            });
-
-            const divProdReport = document.getElementById('rel-turno-lista-produtos');
-            divProdReport.innerHTML = Object.keys(resumoProdutos).length === 0 ? `<p class="text-gray-500">Sem saídas.</p>` : "";
-            Object.entries(resumoProdutos).forEach(([nome, qtd]) => {
-                divProdReport.innerHTML += `<div class="bg-gray-950 p-2 border border-gray-800 rounded-xl flex justify-between"><span>${nome}</span><span class="text-amber-500 font-bold">${qtd} un</span></div>`;
-            });
-
-            const containerCronologico = document.getElementById('lista-vendas-dia');
-            containerCronologico.innerHTML = vendasCronologicas.length === 0 ? `<p class="text-xs text-gray-600 text-center py-2">Nenhum registo de venda.</p>` : "";
-            
-            const perm = usuarioAtivo ? usuarioAtivo.permissao : 'funcionario';
-
-            [...vendasCronologicas].reverse().forEach(v => {
-                let botoesAcao = "";
-                if (perm === 'admin' || perm === 'master') {
-                    botoesAcao = `
-                        <div class="flex gap-2 w-full justify-end mt-1.5 border-t border-gray-900 pt-1.5">
-                            <button onclick="reabrirMesaFechada('${v.id}')" class="px-2.5 py-1 bg-amber-950 border border-amber-900 rounded text-[10px] text-amber-400 font-bold flex items-center gap-0.5">✏️ Reabrir</button>
-                            <button onclick="apagarMesaFechadaDefinitivo('${v.id}')" class="px-2.5 py-1 bg-red-950 border border-red-900 rounded text-[10px] text-red-400 font-bold flex items-center gap-0.5">🗑️ Apagar</button>
-                        </div>`;
-                }
-
-                containerCronologico.innerHTML += `
-                    <div class="bg-gray-950 p-3 border border-gray-850 rounded-xl text-xs flex flex-col">
-                        <div class="flex justify-between items-center">
-                            <div class="truncate"><span class="text-gray-500 font-mono">${v.hora}</span> <span class="font-bold text-gray-200">${v.mesa}</span></div>
-                            <span class="font-mono font-black text-emerald-400">${v.total.toFixed(2)} MT</span>
-                        </div>
-                        ${botoesAcao}
-                    </div>`;
-            });
-
-            const containerDespesas = document.getElementById('lista-despesas-turno');
-            containerDespesas.innerHTML = despesasTurno.length === 0 ? `<p class="text-gray-600 text-center py-1 italic">Sem despesas abertas.</p>` : "";
-            despesasTurno.forEach(d => {
-                let botoesDespesaAdmin = "";
-                if(perm === 'admin' || perm === 'master') {
-                    botoesDespesaAdmin = `
-                        <div class="flex gap-1">
-                            <button onclick="editarDespesaGeral(${d.id})" class="text-amber-500 bg-gray-900 hover:bg-gray-850 p-1 rounded border border-gray-800 flex items-center"><span class="material-icons text-xs">edit</span></button>
-                            <button onclick="apagarDespesaGeral(${d.id})" class="text-red-400 bg-gray-900 hover:bg-gray-850 p-1 rounded border border-gray-800 flex items-center"><span class="material-icons text-xs">clear</span></button>
-                        </div>`;
-                }
-
-                containerDespesas.innerHTML += `
-                    <div class="flex justify-between items-center p-2 bg-gray-950 rounded-xl border border-gray-900">
-                        <div class="flex flex-col">
-                            <span class="font-bold text-gray-300">${d.descricao}</span>
-                            <span class="text-red-400 font-mono text-[11px]">${d.valor.toFixed(2)} MT</span>
-                        </div>
-                        ${botoesDespesaAdmin}
-                    </div>`;
-            });
-
-            aplicarRestricoesPermissao();
-        }
-
-        function adicionarDespesa() {
-            const desc = document.getElementById('desdespesa-desc');
-            const val = document.getElementById('despesa-valor');
-            const v = parseFloat(val.value);
-            if (!desc.value.trim() || isNaN(v) || v <= 0) return;
-            despesasTurno.push({ id: Date.now(), descricao: desc.value.trim(), valor: v });
-            salvarDadosFirebase('despesas', despesasTurno);
-            desc.value = ""; val.value = "";
-        }
-
         function fecharTurnoGeral() {
-            if (vendasCronologicas.length === 0 && despesasTurno.length === 0) return alert("Sem movimentos para fechar turno!");
-            if (!confirm("Finalizar e arquivar turno corrente na secção mensal?")) return;
+            if(vendasCronologicas.length === 0 && despesasTurno.length === 0) {
+                return alert("Não existem movimentos de vendas ou gastos registados para fechar o turno.");
+            }
+            if(!confirm("Tem a certeza de que deseja encerrar e ARQUIVAR o turno actual? Os totais acumulados irão para o Histórico.")) return;
 
-            let totalFaturado = vendasCronologicas.reduce((acc, cur) => acc + cur.total, 0);
-            let totalCusto = vendasCronologicas.reduce((acc, cur) => acc + cur.custoTotal, 0);
-            let totalDespesas = despesasTurno.reduce((acc, cur) => acc + cur.valor, 0);
-            let lucroCalculado = totalFaturado - totalCusto - totalDespesas;
+            let faturamentoTurno = vendasCronologicas.reduce((s, c) => s + c.total, 0);
+            let despesasTurnoTotal = despesasTurno.reduce((s, c) => s + c.valor, 0);
+            let custoStockTurno = vendasCronologicas.reduce((s, c) => s + (c.custoTotal || 0), 0);
+            let lucroTurno = faturamentoTurno - despesasTurnoTotal - custoStockTurno;
 
-            let resumoBebedas = {};
+            let rankingBebidas = {};
             vendasCronologicas.forEach(v => {
-                v.produtos.forEach(p => { resumoBebedas[p.nome] = (resumoBebedas[p.nome] || 0) + p.qtd; });
+                (v.produtos || []).forEach(p => {
+                    rankingBebidas[p.nome] = (rankingBebidas[p.nome] || 0) + p.qtd;
+                });
             });
 
-            historicoMensal.push({
-                id: "fecho_" + Date.now(),
-                tipo: "turno",
-                periodo: new Date().toLocaleDateString('pt-PT') + " " + new Date().toLocaleTimeString('pt-PT', {hour:'2-digit', minute:'2-digit'}),
-                faturacao: totalFaturado, custo: totalCusto, despesas: totalDespesas,
-                lucro: lucroCalculado,
-                bebidasRanking: resumoBebedas
-            });
+            const agora = new Date();
+            const dataStr = agora.getDate().toString().padStart(2,'0') + "/" + (agora.getMonth()+1).toString().padStart(2,'0') + "/" + agora.getFullYear() + " " + agora.getHours().toString().padStart(2,'0') + ":" + agora.getMinutes().toString().padStart(2,'0');
 
-            db.ref().update({ 
-                despesas: [], 
-                vendas_dia: [], 
-                mesas: [], 
-                historico_mes: historicoMensal 
+            const novoRegistroHistorico = {
+                id: "turno_" + Date.now(),
+                tipo: "turno-fechado",
+                periodo: dataStr,
+                faturacao: faturamentoTurno,
+                custo: custoStockTurno,
+                despesas: despesasTurnoTotal,
+                lucro: lucroTurno,
+                bebidasRanking: rankingBebidas
+            };
+
+            historicoMensal.push(novoRegistroHistorico);
+
+            db.ref().update({
+                vendas_dia: [],
+                despesas: [],
+                historico_mes: historicoMensal
             }).then(() => {
-                alert("Turno arquivado com sucesso! Podes consultar e emitir o PDF na aba Mensal.");
+                alert("🎉 Turno arquivado com sucesso no histórico!");
+                fecharVisualizacaoMesa();
             });
         }
 
         function atualizarTabelaMensal() {
-            const apenasTurnosDesteMes = historicoMensal.filter(h => h.tipo !== "mensal-consolidado");
+            let apenasTurnosDesteMes = historicoMensal.filter(h => h.tipo === "turno-fechado");
             
             let fMes = apenasTurnosDesteMes.reduce((s, c) => s + c.faturacao, 0);
             let cMes = apenasTurnosDesteMes.reduce((s, c) => s + c.custo, 0);
@@ -983,58 +920,51 @@
             
             const perm = usuarioAtivo ? usuarioAtivo.permissao : 'funcionario';
 
-            // REVISÃO DE SEGURANÇA NA RENDERIZAÇÃO: Evita que o Master perca os cards de vista
             [...historicoMensal].reverse().forEach(h => {
                 const esConsolidado = h.tipo === "mensal-consolidado";
                 const cardBg = esConsolidado ? 'border-2 border-amber-500/80 bg-amber-950/20 shadow-lg shadow-amber-500/5' : 'bg-gray-900 border-gray-800';
                 const tagIcon = esConsolidado ? '📊 [FECHO MENSAL BRUTO]' : '📅 Período Turno:';
-
-                const blocoLucro = (perm === 'master') ? `<span class="${h.lucro >= 0 ? 'text-emerald-400':'text-red-400'}">${h.lucro.toFixed(2)} MT</span>` : `<span>---</span>`;
-                const detalheCustoLucro = (perm === 'master') ? `<span>Custo Stock: <b class="text-gray-200 font-mono">${h.custo.toFixed(0)} MT</b></span>` : '';
                 
-                const btnPdf = `
-                    <button onclick="emitirPdfHistorico('${h.id || ''}')" class="px-2 py-1 bg-blue-600 hover:bg-blue-500 text-gray-950 font-bold rounded text-[10px] flex items-center gap-0.5">
-                        <span class="material-icons text-[11px]">download</span> PDF
-                    </button>`;
+                const blocoLucro = (perm === 'master') ? `
+                    <div class="flex justify-between items-baseline pt-1 text-[11px] border-t border-gray-800/50 mt-1">
+                        <span class="text-gray-500">Lucro Líquido:</span>
+                        <span class="${h.lucro >= 0 ? 'text-emerald-400':'text-red-400'} font-black font-mono">${h.lucro.toFixed(2)} MT</span>
+                    </div>` : "";
 
                 container.innerHTML += `
-                    <div class="${cardBg} p-3 rounded-xl text-xs space-y-2">
-                        <div class="flex justify-between items-center font-black text-gray-200 border-b border-gray-800/60 pb-1.5">
-                            <span class="${esConsolidado ? 'text-amber-400 font-black tracking-wide' : 'text-gray-300'}">${tagIcon} ${h.periodo}</span>
-                            <div class="flex items-center gap-3">
-                                ${blocoLucro}
-                                ${btnPdf}
-                            </div>
+                    <div class="p-3 border rounded-xl flex flex-col transition ${cardBg}">
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="text-[9px] font-black tracking-wider uppercase ${esConsolidado ? 'text-amber-400' : 'text-gray-400'}">${tagIcon}</span>
+                            <span class="text-[10px] font-mono font-bold text-gray-400">${h.periodo}</span>
                         </div>
-                        <div class="flex justify-between text-gray-400 text-[10px] gap-2">
-                            <span>Faturado: <b class="text-emerald-400 font-mono">${h.faturacao.toFixed(0)} MT</b></span>
-                            ${detalheCustoLucro}
-                            <span>Gastos: <b class="text-red-400 font-mono">${h.despesas.toFixed(0)} MT</b></span>
+                        <div class="grid grid-cols-2 gap-x-2 gap-y-0.5 text-[11px] pt-1">
+                            <div class="flex justify-between"><span class="text-gray-500">Faturação:</span><span class="text-gray-200 font-mono font-bold">${h.faturacao.toFixed(2)} MT</span></div>
+                            <div class="flex justify-between"><span class="text-gray-500">Despesas:</span><span class="text-red-400 font-mono font-bold">${h.despesas.toFixed(2)} MT</span></div>
+                        </div>
+                        ${blocoLucro}
+                        
+                        <div class="mt-2.5 pt-2 border-t border-gray-800/50 flex justify-end">
+                            <button onclick="emitirPdfHistorico('${h.id}')" class="px-3 py-1.5 bg-gray-950 border border-gray-800 hover:border-amber-500/50 rounded-lg text-[10px] font-black text-amber-400 transition flex items-center gap-1">
+                                <span class="material-icons text-xs">picture_as_pdf</span> Descarregar PDF
+                            </button>
                         </div>
                     </div>`;
             });
-            aplicarRestricoesPermissao();
-        }
-
-        function emitirPdfHistorico(fechoId) {
-            const h = historicoMensal.find(x => x.id === fechoId);
-            if(!h) return alert("Erro ao carregar dados do fecho!");
-            
-            const prefixoTitulo = h.tipo === "mensal-consolidado" ? "CONSOLIDADO FINANCEIRO MENSAL MACRO" : "TURNO ARQUIVADO";
-            exportarRelatorioPDF(`${prefixoTitulo} (${h.periodo})`, h.faturacao, h.despesas, h.custo, h.lucro, h.bebidasRanking || {});
         }
 
         function fecharMesDefinitivo() {
-            if(usuarioAtivo.permissao !== 'master') return alert("Apenas o nível Master (Dono) pode consolidar o mês definitivo!");
-            
-            const turnosParaConsolidar = historicoMensal.filter(h => h.tipo !== "mensal-consolidado");
-            if (turnosParaConsolidar.length === 0) return alert("Não existem turnos arquivados no mês ativo para consolidar!");
-            
-            const nomeMesReferencia = prompt("Insira o Nome/Ano do Mês de Referência para fecho (Ex: Outubro 2026):");
-            if(!nomeMesReferencia || !nomeMesReferencia.trim()) return alert("Operação cancelada. É obrigatório definir o nome do período.");
+            let turnosParaConsolidar = historicoMensal.filter(h => h.tipo === "turno-fechado");
+            if(turnosParaConsolidar.length === 0) {
+                return alert("Não existem turnos diários no histórico para poder consolidar um mês.");
+            }
 
-            if (!confirm(`Pretende mesmo CONCLUIR, FECHAR E ARQUIVAR o mês de ${nomeMesReferencia}?\n\nIsto compilará todos os turnos atuais num único registo mensal definitivo e limpará a lista corrente.`)) return;
-            
+            const mesesNomes = ["JANEIRO", "FEVEREIRO", "MARÇO", "ABRIL", "MAIO", "JUNHO", "JULHO", "AGOSTO", "SETEMBRO", "OUTUBRO", "NOVEMBRO", "DEZEMBRO"];
+            const mAtual = new Date();
+            let nomeMesReferencia = prompt("Insira o nome do mês a fechar:", mesesNomes[mAtual.getMonth()] + " " + mAtual.getFullYear());
+            if(!nomeMesReferencia) return;
+
+            if(!confirm(`⚠️ ATENÇÃO EXCLUSIVA MASTER\nEsta acção vai agrupar os ${turnosParaConsolidar.length} turnos acumulados num Fecho Mensal Único definitivo e limpará a lista corrente.`)) return;
+
             let f = turnosParaConsolidar.reduce((s, c) => s + c.faturacao, 0);
             let c = turnosParaConsolidar.reduce((s, c) => s + c.custo, 0);
             let d = turnosParaConsolidar.reduce((s, c) => s + c.despesas, 0);
@@ -1050,20 +980,30 @@
             });
 
             let apenasHistoricosConsolidadosAntigos = historicoMensal.filter(h => h.tipo === "mensal-consolidado");
-
+            
             apenasHistoricosConsolidadosAntigos.push({
                 id: "mes_" + Date.now(),
                 tipo: "mensal-consolidado",
                 periodo: nomeMesReferencia.trim().toUpperCase(),
-                faturacao: f, custo: c, despesas: d, lucro: l,
+                faturacao: f,
+                custo: c,
+                despesas: d,
+                lucro: l,
                 bebidasRanking: rankingMensalProdutos
             });
 
             historicoMensal = apenasHistoricosConsolidadosAntigos;
-
             db.ref('historico_mes').set(historicoMensal).then(() => {
                 alert(`Mês de ${nomeMesReferencia} fechado e arquivado com sucesso!`);
             });
+        }
+
+        function emitirPdfHistorico(idCard) {
+            const item = historicoMensal.find(h => h.id === idCard);
+            if(!item) return alert("Erro ao carregar dados do relatório para gerar o PDF!");
+            
+            const tituloDoc = item.tipo === "mensal-consolidado" ? `RELATÓRIO MENSAL - ${item.periodo}` : `RELATÓRIO DE TURNO - ${item.periodo}`;
+            exportarRelatorioPDF(tituloDoc, item.faturacao, item.despesas, item.custo, item.lucro, item.bebidasRanking || {});
         }
 
         function exportarRelatorioPDF(titulo, faturado, despesas, custo, lucro, bebidas) {
@@ -1076,39 +1016,35 @@
             
             doc.setFontSize(13);
             doc.setFont("helvetica", "normal");
-            doc.text(`Relatório de Atividade: ${titulo}`, 14, 30);
-            doc.text(`Gerado em: ${new Date().toLocaleDateString('pt-PT')} ${new Date().toLocaleTimeString('pt-PT')}`, 14, 38);
+            doc.text(titulo, 14, 28);
             
-            doc.line(14, 42, 196, 42);
+            doc.setLineWidth(0.5);
+            doc.line(14, 32, 196, 32);
 
-            doc.setFont("helvetica", "bold");
-            doc.text("RESUMO FINANCEIRO CONTROLLER", 14, 52);
-            doc.setFont("helvetica", "normal");
-            doc.text(`(+) Faturação Total Bruta: ${faturado.toFixed(2)} MT`, 14, 62);
-            doc.text(`(-) Despesas / Sangrias do Período: ${despesas.toFixed(2)} MT`, 14, 70);
+            doc.setFontSize(11);
+            doc.text(`Faturação Total (Bruta): ${faturado.toFixed(2)} MT`, 14, 42);
+            doc.text(`Gastos / Sangrias Gerais: ${despesas.toFixed(2)} MT`, 14, 49);
             
-            const perm = usuarioAtivo ? usuarioAtivo.permissao : 'funcionario';
-            if(perm === 'master') {
-                doc.text(`(-) Custo de Stock Real: ${custo.toFixed(2)} MT`, 14, 78);
+            if(usuarioAtivo && usuarioAtivo.permissao === 'master') {
+                doc.text(`Custo Estimado de Stock: ${custo.toFixed(2)} MT`, 14, 56);
                 doc.setFont("helvetica", "bold");
-                doc.text(`(=) LUCRO LÍQUIDO DO DONO: ${lucro.toFixed(2)} MT`, 14, 88);
-            } else {
-                doc.setFont("helvetica", "italic");
-                doc.text("[Dados de lucro ocultos para este nível de utilizador]", 14, 78);
+                doc.text(`LUCRO LÍQUIDO FINAL: ${lucro.toFixed(2)} MT`, 14, 63);
             }
 
-            if(bebidas && Object.keys(bebidas).length > 0) {
-                doc.line(14, 96, 196, 96);
-                doc.setFont("helvetica", "bold");
-                doc.text("ARTIGOS / BEBIDAS MAIS VENDIDAS NO PERÍODO", 14, 106);
-                doc.setFont("helvetica", "normal");
-                
-                let linhaY = 116;
-                Object.entries(bebidas).sort((a,b) => b[1] - a[1]).forEach(([nome, qtd]) => {
-                    if(linhaY < 280) {
-                        doc.text(`- ${nome}: ${qtd} unidades`, 14, linhaY);
-                        linhaY += 8;
-                    }
+            doc.setFont("helvetica", "bold");
+            doc.setFontSize(12);
+            doc.text("CONSUMO CRONOLÓGICO DE ARTIGOS:", 14, 76);
+            doc.setFont("helvetica", "normal");
+            doc.setFontSize(11);
+
+            let eixoy = 84;
+            if(Object.keys(bebidas).length === 0) {
+                doc.text("Sem registo de artigos comercializados neste período.", 14, eixoy);
+            } else {
+                Object.entries(bebidas).forEach(([artigo, quantidade]) => {
+                    if(eixoy > 280) { doc.addPage(); eixoy = 20; }
+                    doc.text(`- ${artigo}: ${quantidade} Unidades`, 14, eixoy);
+                    eixoy += 7;
                 });
             }
 
@@ -1116,81 +1052,70 @@
         }
 
         function popularSelectRestock() {
-            const s = document.getElementById('restock-prod-id');
-            if(!s) return; s.innerHTML = "";
-            produtos.forEach(p => s.innerHTML += `<option value="${p.id}">${p.nome} (Stk: ${p.stock})</option>`);
+            const sel = document.getElementById('restock-prod-id');
+            if(!sel) return;
+            sel.innerHTML = "";
+            produtos.forEach(p => {
+                sel.innerHTML += `<option value="${p.id}">${p.nome} (Atual: ${p.stock} UN)</option>`;
+            });
             sugerirCustoAtual();
         }
 
         function sugerirCustoAtual() {
-            const val = document.getElementById('restock-prod-id').value;
-            if(!val) return;
-            const id = parseInt(val);
+            const id = parseInt(document.getElementById('restock-prod-id').value);
             const p = produtos.find(x => x.id === id);
-            if (p) document.getElementById('restock-custo-un').value = p.custo;
+            if(p) document.getElementById('restock-custo-un').value = p.custo || "";
         }
 
-        function executarRestock() {
-            const selectEl = document.getElementById('restock-prod-id');
-            if(!selectEl.value) return alert("Nenhum produto selecionado!");
-            
-            const id = parseInt(selectEl.value);
+        function ejecutarRestock() {
+            const id = parseInt(document.getElementById('restock-prod-id').value);
             const qty = parseInt(document.getElementById('restock-quantidade').value);
             const cst = parseFloat(document.getElementById('restock-custo-un').value);
-            
+
             if (isNaN(qty) || qty <= 0 || isNaN(cst) || cst < 0) {
                 return alert("Insira valores válidos de quantidade e custo!");
             }
 
             const p = produtos.find(x => x.id === id);
             if (p) {
-                p.stock += qty; 
+                p.stock += qty;
                 p.custo = cst;
-                
                 db.ref('produtos').set(produtos).then(() => {
                     document.getElementById('restock-quantidade').value = "";
-                    alert(`Stock de ${p.nome} aumentado com sucesso!`);
-                }).catch((error) => {
-                    alert("Erro ao salvar no Firebase: " + error.message);
+                    alert(`Stock de ${p.nome} adicionado com sucesso!`);
                 });
             }
         }
 
         function atualizarConfigProdutos() {
             const container = document.getElementById('form-config-produtos');
-            if(!container) return; container.innerHTML = "";
+            if(!container) return;
+            container.innerHTML = "";
             produtos.forEach(p => {
                 container.innerHTML += `
-                    <div class="bg-gray-950 p-3 rounded-xl border border-gray-850 space-y-2 text-xs">
-                        <div class="flex justify-between items-center font-bold text-gray-200">
-                            <span class="truncate">${p.nome}</span>
-                            <button onclick="delProd(${p.id})" class="text-red-400 p-1 master-only"><span class="material-icons text-sm">delete</span></button>
+                    <div class="bg-gray-950 p-3 rounded-xl border border-gray-850 space-y-2 text-xs flex flex-col">
+                        <div><b class="text-gray-200 block truncate">${p.nome}</b><span class="text-[10px] text-gray-500 font-mono">ID: ${p.id}</span></div>
+                        <div class="grid grid-cols-3 gap-1.5 font-mono">
+                            <div><label class="text-[9px] text-gray-500 block">Custo</label><input type="number" step="any" onchange="atualizarAtributoProduto(${p.id}, 'custo', this.value)" value="${p.custo}" class="w-full bg-gray-900 border border-gray-800 rounded px-1.5 py-1 text-red-400"></div>
+                            <div><label class="text-[9px] text-gray-500 block">Venda</label><input type="number" step="any" onchange="atualizarAtributoProduto(${p.id}, 'preco', this.value)" value="${p.preco}" class="w-full bg-gray-900 border border-gray-800 rounded px-1.5 py-1 text-emerald-400"></div>
+                            <div><label class="text-[9px] text-gray-500 block">Stock</label><input type="number" onchange="atualizarAtributoProduto(${p.id}, 'stock', this.value)" value="${p.stock}" class="w-full bg-gray-900 border border-gray-800 rounded px-1.5 py-1 text-gray-300"></div>
                         </div>
-                        <div class="grid grid-cols-3 gap-2 text-[11px]">
-                            <div><label class="text-gray-500 block mb-0.5">Custo</label><input type="number" onchange="altProd(${p.id}, 'custo', this.value)" value="${p.custo}" class="w-full bg-gray-900 border border-gray-800 rounded px-1.5 py-1 text-red-400 font-mono text-center"></div>
-                            <div><label class="text-gray-500 block mb-0.5">Venda</label><input type="number" onchange="altProd(${p.id}, 'preco', this.value)" value="${p.preco}" class="w-full bg-gray-900 border border-gray-800 rounded px-1.5 py-1 text-emerald-400 font-mono text-center"></div>
-                            <div><label class="text-gray-500 block mb-0.5">Físico</label><input type="number" onchange="altProd(${p.id}, 'stock', this.value)" value="${p.stock}" class="w-full bg-gray-900 border border-gray-800 rounded px-1.5 py-1 text-gray-300 font-mono text-center"></div>
-                        </div>
+                        <div class="flex justify-end pt-1"><button onclick="removerProdutoDefinitivo(${p.id})" class="text-red-400 text-[10px] font-bold flex items-center gap-0.5 bg-red-950/20 border border-red-900/40 px-2 py-0.5 rounded-md">🗑️ Remover Artigo</button></div>
                     </div>`;
             });
-            aplicarRestricoesPermissao();
         }
 
-        // FUNÇÃO DE ATUALIZAÇÃO RE-ESTRUTURADA PARA PREVENIR ERROS DE VÍNCULO NO FIREBASE
-        function altProd(id, prop, val) {
+        function atualizarAtributoProduto(id, campo, valor) {
             const p = produtos.find(x => x.id === id);
-            if (p && !isNaN(parseFloat(val))) { 
-                p[prop] = parseFloat(val); 
-                salvarDadosFirebase('produtos', produtos); 
-            }
+            if(!p) return;
+            p[campo] = campo === 'stock' ? parseInt(valor)||0 : parseFloat(valor)||0;
+            salvarDadosFirebase('produtos', produtos);
         }
 
-        function delProd(id) {
-            if(usuarioAtivo.permissao !== 'master') return alert("Apenas o Dono (Master) pode apagar artigos do sistema!");
-            if (confirm("Remover produto permanentemente?")) { 
-                produtos = produtos.filter(x => x.id !== id); 
-                salvarDadosFirebase('produtos', produtos); 
-            }
+        function removerProdutoDefinitivo(id) {
+            if(!confirm("Pretende remover permanentemente este artigo do cardápio?")) return;
+            produtos = produtos.filter(x => x.id !== id);
+            salvarDadosFirebase('produtos', produtos);
         }
 
         function adicionarNovoProduto() {
@@ -1198,12 +1123,114 @@
             const c = parseFloat(document.getElementById('novo-prod-custo').value);
             const p = parseFloat(document.getElementById('novo-prod-preco').value);
             const s = parseInt(document.getElementById('novo-prod-stock').value) || 0;
+            
             if(!n || isNaN(c) || isNaN(p)) return alert("Preencha os dados do produto corretamente!");
+            
             produtos.push({ id: Date.now(), nome: n, custo: c, preco: p, stock: s });
             salvarDadosFirebase('produtos', produtos);
+            
             document.getElementById('novo-prod-nome').value = "";
             document.getElementById('novo-prod-custo').value = "";
             document.getElementById('novo-prod-preco').value = "";
+            document.getElementById('novo-prod-stock').value = "0";
+        }
+
+        function atualizarListaOperadores() {
+            const container = document.getElementById('lista-operadores-sistema');
+            if(!container) return;
+            container.innerHTML = "";
+            
+            usuarios.forEach(u => {
+                let badgeColor = "text-gray-400 bg-gray-950 border-gray-800";
+                let labelPerm = "Caixa";
+                if(u.permissao === 'admin') { badgeColor = "text-amber-400 bg-amber-950/40 border-amber-900"; labelPerm = "Admin"; }
+                if(u.permissao === 'master') { badgeColor = "text-blue-400 bg-blue-950/40 border-blue-900"; labelPerm = "Master"; }
+                
+                container.innerHTML += `
+                    <div class="bg-gray-950 p-2.5 border border-gray-850 rounded-xl flex justify-between items-center text-xs">
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <p class="font-bold text-gray-200">${u.username}</p>
+                                <span class="px-1.5 py-0.5 rounded text-[9px] font-bold border ${badgeColor}">${labelPerm}</span>
+                            </div>
+                            <p class="text-[10px] text-gray-500">Pass: ${u.pass}</p>
+                        </div>
+                        <button onclick="eliminarUsuario('${u.username}')" class="text-red-400 p-1 master-only"><span class="material-icons text-sm">person_remove</span></button>
+                    </div>`;
+            });
+            aplicarRestricoesPermissao();
+        }
+
+        function adicionarUsuario() {
+            const u = document.getElementById('novo-user-nome').value.trim();
+            const p = document.getElementById('novo-user-pass').value.trim();
+            const pm = document.getElementById('novo-user-permissao').value;
+            
+            if(!u || !p) return alert("Insira o nome de utilizador e password!");
+            if(usuarios.find(x => x.username === u)) return alert("Esse utilizador já existe no sistema!");
+
+            usuarios.push({ username: u, pass: p, permissao: pm });
+            salvarDadosFirebase('usuarios', usuarios);
+            
+            document.getElementById('novo-user-nome').value = "";
+            document.getElementById('novo-user-pass').value = "";
+        }
+
+        function eliminarUsuario(username) {
+            if(username === "barman1") return alert("Não é possível remover o utilizador base de segurança!");
+            if(!confirm(`Remover permanentemente o acesso de "${username}"?`)) return;
+            usuarios = usuarios.filter(x => x.username !== username);
+            salvarDadosFirebase('usuarios', usuarios);
+        }
+
+        function tentarLoginFuncionario() {
+            const u = document.getElementById('login-user-func').value.trim();
+            const p = document.getElementById('login-pass-func').value.trim();
+            
+            const userObj = usuarios.find(x => x.username === u && x.pass === p);
+            if(userObj) {
+                usuarioAtivo = { nome: userObj.username, permissao: userObj.permissao };
+                sessionStorage.setItem('mb_sessao', JSON.stringify(usuarioAtivo));
+                inicializarSistema();
+            } else {
+                alert("Utilizador ou palavra-passe incorrectos!");
+            }
+        }
+
+        function tentarLoginAdminMaster() {
+            const pin = document.getElementById('login-pin-admin').value.trim();
+            if(pin === PIN_ADMIN_PADRAO) {
+                usuarioAtivo = { nome: "MASTER CENTRAL", permissao: "master" };
+                sessionStorage.setItem('mb_sessao', JSON.stringify(usuarioAtivo));
+                inicializarSistema();
+            } else {
+                alert("PIN Administrativo de Emergência Inválido!");
+            }
+        }
+
+        function mudarAba(aba) {
+            ['home', 'vendas-diarias', 'restock', 'financeiro-mensal', 'produtos'].forEach(a => {
+                const bloco = document.getElementById(`aba-${a}`);
+                const btn = document.getElementById(`btn-aba-${a}`);
+                if(bloco) bloco.classList.add('hidden');
+                if(btn) btn.className = "snap-center px-3 py-2 rounded-lg text-xs font-bold transition shrink-0 flex items-center gap-1.5 text-gray-400";
+            });
+
+            const blocoAtivo = document.getElementById(`aba-${aba}`);
+            const btnAtivo = document.getElementById(`btn-aba-${aba}`);
+            if(blocoAtivo) blocoAtivo.classList.remove('hidden');
+            if(btnAtivo) btnAtivo.className = "snap-center px-3 py-2 rounded-lg text-xs font-bold transition shrink-0 flex items-center gap-1.5 bg-amber-500 text-gray-950 shadow-lg shadow-amber-500/10";
+            
+            if(aba === 'home') fecharVisualizacaoMesa();
+        }
+
+        function fazerLogout() {
+            usuarioAtivo = null;
+            sessionStorage.removeItem('mb_sessao');
+            document.getElementById('login-user-func').value = "";
+            document.getElementById('login-pass-func').value = "";
+            document.getElementById('login-pin-admin').value = "";
+            inicializarSistema();
         }
 
         function inicializarSistema() {
