@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Much Bar - Mobile Ultimate v5.1</title>
+    <title>Much Bar - Mobile Ultimate v5.3</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
@@ -111,7 +111,7 @@
 
                 <div id="bloco-detalhe-comanda" class="hidden lg:flex bg-gray-900/60 border border-gray-800 rounded-2xl p-4 flex-col h-full">
                     <div class="flex justify-between items-center pb-2 border-b border-gray-800/60 mb-3">
-                        <button onclick="fecharVisualizacaoMesa()" class="lg:hidden text-amber-500 flex items-center gap-1 text-xs font-bold bg-gray-950 px-3 py-1.5 rounded-lg border border-gray-850">
+                        <button onclick="fecharVisualizacaoMesa()" class="lg:hidden text-amber-500 flex items-center gap-1 text-xs font-bold bg-gray-950 px-3 py-1.5 rounded-lg border border-gray-855">
                             <span class="material-icons text-xs">arrow_back</span> Voltar p/ Mesas
                         </button>
                         <span id="mesa-selecionada-titulo" class="text-xs font-black text-amber-400 uppercase tracking-wider">Nenhum</span>
@@ -358,52 +358,48 @@
 
         const salvarDadosFirebase = (caminho, dados) => { db.ref(caminho).set(dados); };
 
-        // ==========================================
-        // FUNÇÃO DE ORDENAÇÃO CUSTOMIZADA DO MUCHBAR
-        // ==========================================
+        // =============================================================
+        // NOVO ALGORITMO: PRIORIDADES RÍGIDAS + ORDEM NATURAL DE ID/BANCO
+        // =============================================================
         function obterProdutosOrdenados(listaProdutos) {
             if (!listaProdutos || !Array.isArray(listaProdutos)) return [];
 
-            // 1. Guardamos a sequência antiga/original guardando o índice de cada produto
-            const produtosComIndiceOriginal = listaProdutos.map((p, index) => ({ 
-                ...p, 
-                indiceOriginal: index 
-            }));
-
-            // 2. Executamos o sort baseado estritamente nas tuas regras e no índice antigo
-            return produtosComIndiceOriginal.sort((a, b) => {
-                const obterNomeChave = (nome) => nome ? nome.toLowerCase().trim() : "";
+            const obterPesoRegra = (nome) => {
+                const n = nome ? nome.toLowerCase().trim() : "";
                 
-                const nA = obterNomeChave(a.nome);
-                const nB = obterNomeChave(b.nome);
-
-                // Regra 1: Savana Lemon é SEMPRE o primeiro item do topo absoluto
-                if (nA.includes("savana lemon") && !nB.includes("savana lemon")) return -1;
-                if (!nA.includes("savana lemon") && nB.includes("savana lemon")) return 1;
-
-                // Regra 2: Impala Lata, Impala Garrafa e Pretinha vêm após a 2M Garrafa
-                const e2M = (nome) => nome.includes("2m garrafa") || nome === "2m";
-                const eDependente2M = (nome) => nome.includes("impala lata") || nome.includes("impala garrafa") || nome.includes("pretinha");
-
-                if (e2M(nA) && eDependente2M(nB)) return -1;
-                if (e2M(nB) && eDependente2M(nA)) return 1;
+                // 1. Savana Lemon em primeiro absoluto
+                if (n.includes("savana lemon")) return 1;
                 
-                // Ordenação interna estável e exata do bloco: Impala Lata -> Impala Garrafa -> Pretinha
-                if (nA.includes("impala lata") && (nB.includes("impala garrafa") || nB.includes("pretinha"))) return -1;
-                if (nA.includes("impala garrafa") && nB.includes("impala lata")) return 1;
-                if (nA.includes("impala garrafa") && nB.includes("pretinha")) return -1;
-                if (nA.includes("pretinha") && (nB.includes("impala lata") || nB.includes("impala garrafa"))) return 1;
+                // 2. Sequência após 2M Garrafa
+                if (n.includes("2m garrafa") || n === "2m") return 2;
+                if (n.includes("impala lata")) return 3;
+                if (n.includes("impala garrafa")) return 4;
+                if (n.includes("pretinha")) return 5;
+                
+                // 3. Sequência Mayfair e Txilar
+                if (n.includes("mayfair")) return 6;
+                if (n.includes("txilar guarrafa") || n.includes("txilar garrafa")) return 7;
+                
+                // 4. Sequência Corona e Brutal
+                if (n.includes("corona")) return 8;
+                if (n.includes("brutal")) return 9;
+                
+                // Sem regras específicas: Fica no fim sem alteração alfabética
+                return 99;
+            };
 
-                // Regra 3: Txilar Garrafa vem colada depois de Mayfair
-                if (nA.includes("mayfair") && (nB.includes("txilar guarrafa") || nB.includes("txilar garrafa"))) return -1;
-                if (nB.includes("mayfair") && (nA.includes("txilar guarrafa") || nA.includes("txilar garrafa"))) return 1;
+            return [...listaProdutos].sort((a, b) => {
+                const pesoA = obterPesoRegra(a.nome);
+                const pesoB = obterPesoRegra(b.nome);
 
-                // Regra 4: Brutal vem colada depois da Corona
-                if (nA.includes("corona") && nB.includes("brutal")) return -1;
-                if (nB.includes("corona") && nA.includes("brutal")) return 1;
+                if (pesoA !== pesoB) {
+                    return pesoA - pesoB;
+                }
 
-                // Fluxo Padrão: Se não for nenhuma exceção, mantém a sequência antiga exata
-                return a.indiceOriginal - b.indiceOriginal;
+                // Ordem Natural de Inserção: Desempata pelo ID/Timestamp gerado na criação do item
+                const idA = a.id || 0;
+                const idB = b.id || 0;
+                return idA - idB;
             });
         }
 
@@ -460,9 +456,6 @@
             document.getElementById('modal-stock-caixa').classList.add('hidden');
         }
 
-        // =======================================================
-        // COMPONENTE DE RENDERIZAÇÃO DA LISTA DE STOCK ORDENADA
-        // =======================================================
         function atualizarModalStockCaixa() {
             const container = document.getElementById('lista-stock-caixa');
             if(!container) return;
@@ -473,8 +466,6 @@
             }
             
             container.innerHTML = "";
-            
-            // Passa os produtos pela tua função inteligente de ordenação
             const produtosOrdenados = obterProdutosOrdenados(produtos);
             
             produtosOrdenados.forEach(p => {
@@ -570,7 +561,6 @@
             if(!container) return;
             container.innerHTML = "";
             
-            // Também aplicamos a ordenação na vitrina de vendas para manter consistência
             const produtosOrdenadosUI = obterProdutosOrdenados(produtos);
             
             produtosOrdenadosUI.forEach(p => {
@@ -604,7 +594,7 @@
             it.forEach(i => {
                 tot += (i.preco * i.qtd);
                 container.innerHTML += `
-                    <div class="flex items-center justify-between p-3 bg-gray-950 border border-gray-850 rounded-xl">
+                    <div class="flex items-center justify-between p-3 bg-gray-950 border border-gray-855 rounded-xl">
                         <div class="flex-1 min-w-0 pr-2">
                             <p class="text-xs font-bold text-gray-200 truncate">${i.nome}</p>
                             <p class="text-[10px] font-mono text-gray-500">${i.preco} MT x ${i.qtd}</p>
@@ -629,7 +619,7 @@
             mesas.forEach(m => {
                 const qtdItens = (m.itens || []).reduce((acc, curr) => acc + curr.qtd, 0);
                 const estaAtiva = m.id === mesaSelecionadaId;
-                let bgMesa = "bg-gray-950 border-gray-850 hover:border-gray-800";
+                let bgMesa = "bg-gray-950 border-gray-855 hover:border-gray-800";
                 if (qtdItens > 0) bgMesa = "bg-amber-950/20 border-amber-900/60 hover:border-amber-700/60";
                 if (estaAtiva) bgMesa = "bg-amber-600 text-gray-950 border-amber-500";
                 
@@ -741,7 +731,7 @@
             containerProds.innerHTML = "";
             Object.keys(mapProds).forEach(k => {
                 containerProds.innerHTML += `
-                    <div class="bg-gray-950 p-2 border border-gray-850 rounded-xl flex justify-between">
+                    <div class="bg-gray-950 p-2 border border-gray-855 rounded-xl flex justify-between">
                         <span class="text-gray-400 truncate pr-1">${k}</span>
                         <span class="font-mono font-black text-amber-500">${mapProds[k]} un</span>
                     </div>`;
@@ -751,7 +741,7 @@
             containerVendas.innerHTML = vendasCronologicas.length === 0 ? `<p class="text-gray-600 text-center py-2 text-xs">Nenhum fecho efetuado.</p>` : "";
             vendasCronologicas.forEach(v => {
                 containerVendas.innerHTML += `
-                    <div onclick="alert('Artigos: \\n${v.artigos.map(a => '- '+a.nome+' x'+a.qtd).join('\\n')}')" class="p-2.5 bg-gray-950 border border-gray-850 rounded-xl flex justify-between items-center text-xs cursor-pointer active:bg-gray-900">
+                    <div onclick="alert('Artigos: \\n${v.artigos.map(a => '- '+a.nome+' x'+a.qtd).join('\\n')}')" class="p-2.5 bg-gray-950 border border-gray-855 rounded-xl flex justify-between items-center text-xs cursor-pointer active:bg-gray-900">
                         <div>
                             <p class="font-bold text-gray-200">${v.mesa} (${v.hora})</p>
                             <p class="text-[10px] text-gray-500">Caixa: ${v.operador}</p>
@@ -764,7 +754,7 @@
             containerDesp.innerHTML = despesasTurno.length === 0 ? `<p class="text-gray-600 text-center py-1 text-[11px]">Nenhuma sangria gravada.</p>` : "";
             despesasTurno.forEach(d => {
                 containerDesp.innerHTML += `
-                    <div class="p-2 bg-gray-950 border border-gray-850 rounded-xl flex justify-between items-center text-[11px]">
+                    <div class="p-2 bg-gray-950 border border-gray-855 rounded-xl flex justify-between items-center text-[11px]">
                         <span class="text-gray-400 font-bold">${d.descricao} (${d.hora})</span>
                         <span class="font-mono font-black text-red-400">-${d.valor.toFixed(2)} MT</span>
                     </div>`;
@@ -822,7 +812,7 @@
             
             [...historicoMensal].reverse().forEach(h => {
                 const icon = h.tipo === 'mes' ? 'archive' : 'history';
-                const border = h.tipo === 'mes' ? 'border-amber-600/40 bg-amber-950/10' : 'border-gray-850 bg-gray-950';
+                const border = h.tipo === 'mes' ? 'border-amber-600/40 bg-amber-950/10' : 'border-gray-855 bg-gray-950';
                 const titulo = h.tipo === 'mes' ? `MÊS CONSOLIDADO: ${h.referencia}` : `Turno: ${h.data} às ${h.hora}`;
                 
                 let layoutExtras = `
@@ -922,7 +912,7 @@
 
             pdf.setFont("helvetica", "normal");
             pdf.text("--------------------------------------------------", 40, 60, { align: "center" });
-            pdf.text("Much Bar Mobile v5.1 - Maputo", 40, 65, { align: "center" });
+            pdf.text("Much Bar Mobile v5.3 - Maputo", 40, 65, { align: "center" });
 
             pdf.save(`MuchBar_Doc_${doc.id}.pdf`);
         }
@@ -940,7 +930,7 @@
             p.stock = (p.stock || 0) + qtd;
             salvarDadosFirebase('produtos', produtos);
             qtdInput.value = "";
-            alert("Stock atualizado!");
+            alert("Stock updated!");
         }
 
         function popularSelectRestock() {
@@ -948,7 +938,6 @@
             if(!select) return;
             select.innerHTML = "";
             
-            // Reordenamos também o select de entrada para facilitar encontrar os produtos
             const produtosOrdenadosUI = obterProdutosOrdenados(produtos);
             
             produtosOrdenadosUI.forEach(p => {
@@ -962,7 +951,7 @@
             container.innerHTML = "";
             produtos.forEach((p, index) => {
                 container.innerHTML += `
-                    <div class="p-3 bg-gray-950 border border-gray-850 rounded-xl space-y-2 text-xs">
+                    <div class="p-3 bg-gray-950 border border-gray-855 rounded-xl space-y-2 text-xs">
                         <p class="font-black text-amber-400 uppercase tracking-wide">${p.nome}</p>
                         <div class="grid grid-cols-3 gap-1">
                             <div><label class="text-[9px] text-gray-500 font-bold block uppercase">Custo</label><input type="number" value="${p.custo}" onchange="alterarPrecoProduto(${index}, 'custo', this.value)" class="w-full bg-gray-900 border border-gray-800 rounded p-1 font-mono text-red-400"></div>
@@ -1019,7 +1008,7 @@
             container.innerHTML = "";
             usuarios.forEach((u, index) => {
                 container.innerHTML += `
-                    <div class="p-2.5 bg-gray-950 border border-gray-850 rounded-xl flex justify-between items-center text-xs">
+                    <div class="p-2.5 bg-gray-950 border border-gray-855 rounded-xl flex justify-between items-center text-xs">
                         <div>
                             <p class="font-bold text-gray-200">${u.username.toUpperCase()}</p>
                             <p class="text-[10px] text-gray-500 uppercase">Acesso: ${u.permissao}</p>
