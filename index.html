@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Much Bar - Mobile Ultimate v5.0</title>
+    <title>Much Bar - Mobile Ultimate v5.1</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
@@ -125,7 +125,7 @@
                     </div>
                     
                     <div class="fixed bottom-0 left-0 right-0 p-4 bg-gray-950 border-t border-gray-850 lg:relative lg:bg-transparent lg:border-t-0 lg:p-0 mt-auto z-40 space-y-2.5">
-                        <div class="flex justify-between items-baseline lg:bg-gray-950 lg:p-3 lg:rounded-xl lg:border lg:border-gray-850">
+                        <div class="flex justify-between items-baseline lg:bg-gray-950 lg:p-3 lg:rounded-xl lg:border lg:border-gray-855">
                             <span class="text-xs font-bold text-gray-400">Total Ocupado:</span>
                             <span id="total-comanda" class="text-xl font-mono font-black text-emerald-400">0,00 MT</span>
                         </div>
@@ -149,9 +149,9 @@
                         <span class="material-icons text-sm">analytics</span> Relatório do Turno
                     </h3>
                     
-                    <div class="grid grid-cols-2 gap-3 mb-3 border-b border-gray-800/60 pb-3 text-xs adm-geral">
+                    <div class="grid grid-cols-2 gap-3 mb-3 border-b border-gray-800/60 pb-3 text-xs">
                         <div>
-                            <p class="text-[9px] uppercase font-bold text-gray-500">Vendas Brutas</p>
+                            <p class="text-[9px] uppercase font-bold text-gray-500">O Meu Faturado (Turno)</p>
                             <p id="rel-turno-faturado" class="text-base font-mono font-black text-emerald-400">0,00 MT</p>
                         </div>
                         <div class="master-only">
@@ -162,7 +162,7 @@
                             <p class="text-[9px] uppercase font-bold text-gray-500">Ganhos Brutos</p>
                             <p id="rel-turno-lucro" class="text-base font-mono font-black text-amber-500">0,00 MT</p>
                         </div>
-                        <div>
+                        <div class="adm-geral">
                             <p class="text-[9px] uppercase font-bold text-gray-500">Transações</p>
                             <p id="rel-turno-contas" class="text-base font-mono font-black text-gray-300">0</p>
                         </div>
@@ -174,7 +174,7 @@
 
                 <div id="indicadores-financeiros-macro" class="grid grid-cols-1 sm:grid-cols-3 gap-2 adm-geral">
                     <div class="bg-gray-900 border border-gray-800 p-3.5 rounded-xl flex justify-between items-center">
-                        <span class="text-[10px] text-gray-500 uppercase font-black tracking-wider">Faturação</span>
+                        <span class="text-[10px] text-gray-500 uppercase font-black tracking-wider">Faturação Geral</span>
                         <span id="hoje-faturacao" class="font-mono font-black text-emerald-400">0,00 MT</span>
                     </div>
                     <div class="bg-gray-900 border border-gray-800 p-3.5 rounded-xl flex justify-between items-center">
@@ -213,19 +213,13 @@
                 <div class="text-center pb-2 border-b border-gray-800"><h2 class="text-sm font-black text-gray-200 uppercase tracking-wide">Dar Entrada de Mercadoria</h2></div>
                 <div class="space-y-1.5">
                     <label class="text-[10px] uppercase font-bold text-gray-400">Selecione o Artigo</label>
-                    <select id="restock-prod-id" onchange="sugerirCustoAtual()" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-3 text-sm text-gray-200 focus:outline-none"></select>
+                    <select id="restock-prod-id" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-3 text-sm text-gray-200 focus:outline-none"></select>
                 </div>
-                <div class="grid grid-cols-2 gap-3">
-                    <div class="space-y-1.5">
-                        <label class="text-[10px] uppercase font-bold text-gray-400">Quantidade Nova</label>
-                        <input type="number" id="restock-quantidade" placeholder="Ex: 24" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-sm text-gray-200">
-                    </div>
-                    <div class="space-y-1.5">
-                        <label class="text-[10px] uppercase font-bold text-gray-400">Custo Unitário (MT)</label>
-                        <input type="number" id="restock-custo-un" placeholder="Ex: 45" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-sm text-amber-500 font-mono">
-                    </div>
+                <div class="space-y-1.5">
+                    <label class="text-[10px] uppercase font-bold text-gray-400">Quantidade a Adicionar</label>
+                    <input type="number" id="restock-quantidade" placeholder="Ex: 24" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-3 text-sm text-gray-200 font-mono text-center text-lg text-amber-400 focus:outline-none focus:border-amber-500">
                 </div>
-                <button onclick="executarRestock()" class="w-full bg-amber-600 hover:bg-amber-500 text-gray-950 font-black py-3 px-4 rounded-xl text-xs transition">Confirmar Entrada de Stock</button>
+                <button onclick="executarRestock()" class="w-full bg-amber-600 hover:bg-amber-500 text-gray-950 font-black py-3 px-4 rounded-xl text-xs transition tracking-wider">Confirmar Entrada de Stock</button>
             </div>
 
             <div id="aba-financeiro-mensal" class="space-y-4 hidden adm-geral w-full">
@@ -236,7 +230,7 @@
                             <p class="text-[10px] text-gray-500">Resumo de todos os fechos de turno guardados neste mês</p>
                         </div>
                         <div id="container-btn-fechar-mes">
-                            <button onclick="fecharMesDefinitivo()" class="bg-red-950 hover:bg-red-900 border border-red-850 text-red-400 px-4 py-2.5 rounded-xl text-xs font-black transition w-full sm:w-auto flex items-center justify-center gap-1 shadow-lg uppercase tracking-wider">
+                            <button onclick="fecharMesDefinitivo()" class="bg-red-950 hover:bg-red-900 border border-red-855 text-red-400 px-4 py-2.5 rounded-xl text-xs font-black transition w-full sm:w-auto flex items-center justify-center gap-1 shadow-lg uppercase tracking-wider">
                                 <span class="material-icons text-xs">lock</span> CONSOLIDAR & ARQUIVAR MÊS
                             </button>
                         </div>
@@ -478,7 +472,7 @@
             });
         }
 
-        function alterarQuantidadeItem(prodId, alteracao, mesaId) {
+        function ajustarQuantidadeItem(prodId, alteracao, mesaId) {
             const mesa = mesas.find(m => m.id === mesaId);
             const produtoOriginal = produtos.find(p => p.id === prodId);
             if (!mesa || !produtoOriginal) return;
@@ -565,7 +559,7 @@
                 return alert("Operação cancelada! PIN incorreto ou não inserido.");
             }
 
-            const confirmacaoPalavra = prompt("⚠️ SEGUNDA VALIDAÇÃO CRÍTICA!\nEsta ação apagará permanentemente TODAS as vendas do dia, despesas e faturamentos acumulados.\n\nO stock e preços serão preservados.\n\nPara confirmar e executar a limpeza definitiva, digite a palavra: RESTAURAR");
+            const confirmacaoPalavra = prompt("⚠️ SEGUNDA VALIDAÇÃO CRÍTICA!\nEsta acção apagará permanentemente TODAS as vendas do dia, despesas e faturamentos acumulados.\n\nO stock e preços serão preservados.\n\nPara confirmar e executar a limpeza definitiva, digite a palavra: RESTAURAR");
             if (!confirmacaoPalavra || confirmacaoPalavra.trim().toUpperCase() !== "RESTAURAR") {
                 return alert("Operação cancelada! A palavra de confirmação não foi introduzida corretamente.");
             }
@@ -643,9 +637,9 @@
                             <p class="text-[10px] text-gray-500 font-mono">${i.preco.toFixed(2)} x ${i.qtd} = ${(i.preco * i.qtd).toFixed(2)} MT</p>
                         </div>
                         <div class="flex items-center gap-1 shrink-0">
-                            <button onclick="alterarQuantidadeItem(${i.id}, -1, ${mesa.id})" class="w-7 h-7 bg-gray-900 border border-gray-800 hover:border-red-900 text-red-400 font-bold rounded-lg text-xs flex items-center justify-center">-</button>
+                            <button onclick="ajustarQuantidadeItem(${i.id}, -1, ${mesa.id})" class="w-7 h-7 bg-gray-900 border border-gray-800 hover:border-red-900 text-red-400 font-bold rounded-lg text-xs flex items-center justify-center">-</button>
                             <span class="w-6 text-center font-mono font-black text-gray-200 text-xs">${i.qtd}</span>
-                            <button onclick="alterarQuantidadeItem(${i.id}, 1, ${mesa.id})" class="w-7 h-7 bg-gray-900 border border-gray-800 hover:border-emerald-900 text-emerald-400 font-bold rounded-lg text-xs flex items-center justify-center">+</button>
+                            <button onclick="ajustarQuantidadeItem(${i.id}, 1, ${mesa.id})" class="w-7 h-7 bg-gray-900 border border-gray-800 hover:border-emerald-900 text-emerald-400 font-bold rounded-lg text-xs flex items-center justify-center">+</button>
                         </div>
                     </div>`;
             });
@@ -700,7 +694,7 @@
             let custoStockDia = vendasCronologicas.reduce((acc, cur) => acc + (cur.custoTotal || 0), 0);
             let lucroLiquidoDia = faturamentoDia - despesasDia - custoStockDia;
 
-            // Preenchimento de dados administrativos
+            // Preenchimento de dados administrativos e caixa (agora o caixa pode ver o seu faturado)
             if(document.getElementById('hoje-faturacao')) document.getElementById('hoje-faturacao').innerText = `${faturamentoDia.toFixed(2)} MT`;
             if(document.getElementById('hoje-despesas')) document.getElementById('hoje-despesas').innerText = `${despesasDia.toFixed(2)} MT`;
             if(document.getElementById('hoje-lucro')) document.getElementById('hoje-lucro').innerText = `${lucroLiquidoDia.toFixed(2)} MT`;
@@ -710,7 +704,7 @@
             if(document.getElementById('rel-turno-lucro')) document.getElementById('rel-turno-lucro').innerText = `${(faturamentoDia - custoStockDia).toFixed(2)} MT`;
             if(document.getElementById('rel-turno-contas')) document.getElementById('rel-turno-contas').innerText = vendasCronologicas.length;
 
-            // Quantidade de Produtos vendidos durante o turno (Acessível ao Caixa)
+            // Quantidade de Produtos vendidos durante o turno
             let resumoProds = {};
             vendasCronologicas.forEach(v => {
                 (v.produtos || []).forEach(p => {
@@ -723,7 +717,7 @@
                 contRelProds.innerHTML = Object.keys(resumoProds).length === 0 ? `<p class="text-gray-600 italic text-[10px] col-span-2">Nenhum artigo saído.</p>` : "";
                 Object.entries(resumoProds).forEach(([nome, q]) => {
                     contRelProds.innerHTML += `
-                        <div class="bg-gray-950 border border-gray-850 p-2 rounded-xl flex justify-between font-mono">
+                        <div class="bg-gray-950 border border-gray-855 p-2 rounded-xl flex justify-between font-mono">
                             <span class="text-gray-300 truncate">${nome}</span>
                             <b class="text-amber-500">${q} UN</b>
                         </div>`;
@@ -740,7 +734,7 @@
                     let botoesAcao = "";
                     let visualizacaoValorMesa = "";
 
-                    // Apenas gestores podem ver valores das mesas fechadas no histórico cronológico
+                    // Apenas gestores podem ver valores das mesas fechadas no histórico individual cronológico
                     if(perm === 'admin' || perm === 'master') {
                         visualizacaoValorMesa = `<span class="font-mono font-black text-emerald-400">${v.total.toFixed(2)} MT</span>`;
                         botoesAcao = `
@@ -752,7 +746,6 @@
 
                     let listaProdutosVendidos = "";
                     (v.produtos || []).forEach(p => {
-                        // Oculta subvalores do caixa, exibe apenas quantitativos lançados
                         let textoPrecoItem = (perm === 'admin' || perm === 'master') ? `<span>${p.faturadoTotal.toFixed(2)} MT</span>` : "";
                         listaProdutosVendidos += `
                             <div class="flex justify-between items-center text-[11px] text-gray-400 py-0.5 font-mono">
@@ -1089,31 +1082,22 @@
             produtos.forEach(p => {
                 sel.innerHTML += `<option value="${p.id}">${p.nome} (Atual: ${p.stock} UN)</option>`;
             });
-            sugerirCustoAtual();
-        }
-
-        function sugerirCustoAtual() {
-            const id = parseInt(document.getElementById('restock-prod-id').value);
-            const p = produtos.find(x => x.id === id);
-            if(p) document.getElementById('restock-custo-un').value = p.custo || "";
         }
 
         function executarRestock() {
             const id = parseInt(document.getElementById('restock-prod-id').value);
             const qty = parseInt(document.getElementById('restock-quantidade').value);
-            const cst = parseFloat(document.getElementById('restock-custo-un').value);
 
-            if (isNaN(qty) || qty <= 0 || isNaN(cst) || cst < 0) {
-                return alert("Insira valores válidos de quantidade e custo!");
+            if (isNaN(qty) || qty <= 0) {
+                return alert("Insira uma quantidade válida de entrada!");
             }
 
             const p = produtos.find(x => x.id === id);
             if (p) {
                 p.stock += qty;
-                p.custo = cst;
                 db.ref('produtos').set(produtos).then(() => {
                     document.getElementById('restock-quantidade').value = "";
-                    alert(`Stock de ${p.nome} adicionado com sucesso!`);
+                    alert(`Stock de ${p.nome} atualizado com +${qty} unidades com sucesso!`);
                 });
             }
         }
@@ -1178,7 +1162,7 @@
                 if(u.permissao === 'master') { badgeColor = "text-blue-400 bg-blue-950/40 border-blue-900"; labelPerm = "Master"; }
                 
                 container.innerHTML += `
-                    <div class="bg-gray-950 p-2.5 border border-gray-850 rounded-xl flex justify-between items-center text-xs">
+                    <div class="bg-gray-950 p-2.5 border border-gray-855 rounded-xl flex justify-between items-center text-xs">
                         <div>
                             <div class="flex items-center gap-2">
                                 <p class="font-bold text-gray-200">${u.username}</p>
@@ -1242,7 +1226,6 @@
         function mudarAba(aba) {
             const perm = usuarioAtivo ? usuarioAtivo.permissao : 'funcionario';
             
-            // Trava de segurança extra para impedir navegação forçada via console por exemplo
             if ((aba === 'restock' || aba === 'financeiro-mensal' || aba === 'produtos') && perm === 'funcionario') {
                 return;
             }
