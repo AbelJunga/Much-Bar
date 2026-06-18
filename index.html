@@ -80,7 +80,7 @@
             <button id="btn-aba-vendas-diarias" onclick="mudarAba('vendas-diarias')" class="snap-center px-3 py-2 rounded-lg text-xs font-bold transition shrink-0 flex items-center gap-1.5 text-gray-400">
                 <span class="material-icons text-xs">receipt_long</span> Turno
             </button>
-            <button id="btn-aba-restock" onclick="mudarAba('restock')" class="snap-center px-3 py-2 rounded-lg text-xs font-bold transition shrink-0 flex items-center gap-1.5 text-gray-400 adm-geral">
+            <button id="btn-aba-restock" onclick="mudarAba('restock')" class="snap-center px-3 py-2 rounded-lg text-xs font-bold transition shrink-0 flex items-center gap-1.5 text-gray-400">
                 <span class="material-icons text-xs">inventory</span> Stock
             </button>
             <button id="btn-aba-financeiro-mensal" onclick="mudarAba('financeiro-mensal')" class="snap-center px-3 py-2 rounded-lg text-xs font-bold transition shrink-0 flex items-center gap-1.5 text-gray-400 adm-geral">
@@ -170,6 +170,9 @@
 
                     <p class="text-[9px] font-black text-gray-400 uppercase tracking-wider mb-1.5">Artigos Saídos no Turno:</p>
                     <div id="rel-turno-lista-produtos" class="grid grid-cols-2 gap-2 text-[11px]"></div>
+                    
+                    <p class="text-[9px] font-black text-blue-400 uppercase tracking-wider mt-3 mb-1.5 border-t border-gray-800/60 pt-3">Entradas de Stock no Turno:</p>
+                    <div id="rel-turno-lista-entradas" class="grid grid-cols-2 gap-2 text-[11px]"></div>
                 </div>
 
                 <div id="indicadores-financeiros-macro" class="grid grid-cols-1 sm:grid-cols-3 gap-2 adm-geral">
@@ -209,7 +212,7 @@
                 </div>
             </div>
 
-            <div id="aba-restock" class="max-w-md mx-auto bg-gray-900 border border-gray-800 p-5 rounded-2xl space-y-4 hidden adm-geral w-full">
+            <div id="aba-restock" class="max-w-md mx-auto bg-gray-900 border border-gray-800 p-5 rounded-2xl space-y-4 hidden w-full">
                 <div class="text-center pb-2 border-b border-gray-800"><h2 class="text-sm font-black text-gray-200 uppercase tracking-wide">Dar Entrada de Mercadoria</h2></div>
                 <div class="space-y-1.5">
                     <label class="text-[10px] uppercase font-bold text-gray-400">Selecione o Artigo</label>
@@ -352,6 +355,7 @@
         let despesasTurno = [];
         let vendasCronologicas = [];
         let historicoMensal = [];
+        let entradasTurno = [];
 
         let usuarioAtivo = JSON.parse(sessionStorage.getItem('mb_sessao')) || null;
         let mesaSelecionadaId = null;
@@ -399,6 +403,11 @@
             db.ref('historico_mes').on('value', (snapshot) => {
                 historicoMensal = snapshot.val() || [];
                 if (usuarioAtivo) atualizarTabelaMensal();
+            });
+            
+            db.ref('entradas_turno').on('value', (snapshot) => {
+                entradasTurno = snapshot.val() || [];
+                if (usuarioAtivo) atualizarPainelVendas();
             });
         }
 
@@ -570,6 +579,7 @@
                 vendas_dia: [],
                 despesas: [],
                 mesas: [],
+                entradas_turno: [],
                 historico_mes: []
             }).then(() => {
                 fecharVisualizacaoMesa();
@@ -694,7 +704,6 @@
             let custoStockDia = vendasCronologicas.reduce((acc, cur) => acc + (cur.custoTotal || 0), 0);
             let lucroLiquidoDia = faturamentoDia - despesasDia - custoStockDia;
 
-            // Preenchimento de dados administrativos e caixa (agora o caixa pode ver o seu faturado)
             if(document.getElementById('hoje-faturacao')) document.getElementById('hoje-faturacao').innerText = `${faturamentoDia.toFixed(2)} MT`;
             if(document.getElementById('hoje-despesas')) document.getElementById('hoje-despesas').innerText = `${despesasDia.toFixed(2)} MT`;
             if(document.getElementById('hoje-lucro')) document.getElementById('hoje-lucro').innerText = `${lucroLiquidoDia.toFixed(2)} MT`;
@@ -704,7 +713,6 @@
             if(document.getElementById('rel-turno-lucro')) document.getElementById('rel-turno-lucro').innerText = `${(faturamentoDia - custoStockDia).toFixed(2)} MT`;
             if(document.getElementById('rel-turno-contas')) document.getElementById('rel-turno-contas').innerText = vendasCronologicas.length;
 
-            // Quantidade de Produtos vendidos durante o turno
             let resumoProds = {};
             vendasCronologicas.forEach(v => {
                 (v.produtos || []).forEach(p => {
@@ -723,6 +731,23 @@
                         </div>`;
                 });
             }
+            
+            let resumoEntradas = {};
+            entradasTurno.forEach(e => {
+                resumoEntradas[e.nome] = (resumoEntradas[e.nome] || 0) + e.qtd;
+            });
+
+            const contRelEntradas = document.getElementById('rel-turno-lista-entradas');
+            if(contRelEntradas) {
+                contRelEntradas.innerHTML = Object.keys(resumoEntradas).length === 0 ? `<p class="text-gray-600 italic text-[10px] col-span-2">Nenhuma entrada registada.</p>` : "";
+                Object.entries(resumoEntradas).forEach(([nome, q]) => {
+                    contRelEntradas.innerHTML += `
+                        <div class="bg-gray-950 border border-gray-855 p-2 rounded-xl flex justify-between font-mono">
+                            <span class="text-gray-300 truncate">${nome}</span>
+                            <b class="text-blue-400">+${q} UN</b>
+                        </div>`;
+                });
+            }
 
             const containerCronologico = document.getElementById('lista-vendas-dia');
             if(containerCronologico) {
@@ -734,7 +759,6 @@
                     let botoesAcao = "";
                     let visualizacaoValorMesa = "";
 
-                    // Apenas gestores podem ver valores das mesas fechadas no histórico individual cronológico
                     if(perm === 'admin' || perm === 'master') {
                         visualizacaoValorMesa = `<span class="font-mono font-black text-emerald-400">${v.total.toFixed(2)} MT</span>`;
                         botoesAcao = `
@@ -893,6 +917,11 @@
                     rankingBebidas[p.nome] = (rankingBebidas[p.nome] || 0) + p.qtd;
                 });
             });
+            
+            let rankingEntradas = {};
+            entradasTurno.forEach(e => {
+                rankingEntradas[e.nome] = (rankingEntradas[e.nome] || 0) + e.qtd;
+            });
 
             const agora = new Date();
             const dataStr = agora.getDate().toString().padStart(2,'0') + "/" + (agora.getMonth()+1).toString().padStart(2,'0') + "/" + agora.getFullYear() + " " + agora.getHours().toString().padStart(2,'0') + ":" + agora.getMinutes().toString().padStart(2,'0');
@@ -905,7 +934,8 @@
                 custo: custoStockTurno,
                 despesas: despesasTurnoTotal,
                 lucro: lucroTurno,
-                bebidasRanking: rankingBebidas
+                bebidasRanking: rankingBebidas,
+                entradasRanking: rankingEntradas
             };
 
             historicoMensal.push(novoRegistroHistorico);
@@ -913,6 +943,7 @@
             db.ref().update({
                 vendas_dia: [],
                 despesas: [],
+                entradas_turno: [],
                 historico_mes: historicoMensal
             }).then(() => {
                 alert("🎉 Turno arquivado com sucesso no histórico!");
@@ -997,6 +1028,15 @@
                     });
                 }
             });
+            
+            let rankingMensalEntradas = {};
+            turnosParaConsolidar.forEach(turno => {
+                if(turno.entradasRanking) {
+                    Object.entries(turno.entradasRanking).forEach(([nome, qtd]) => {
+                        rankingMensalEntradas[nome] = (rankingMensalEntradas[nome] || 0) + qtd;
+                    });
+                }
+            });
 
             let apenasHistoricosConsolidadosAntigos = historicoMensal.filter(h => h.tipo === "mensal-consolidado");
             
@@ -1008,7 +1048,8 @@
                 custo: c,
                 despesas: d,
                 lucro: l,
-                bebidasRanking: rankingMensalProdutos
+                bebidasRanking: rankingMensalProdutos,
+                entradasRanking: rankingMensalEntradas
             });
 
             historicoMensal = apenasHistoricosConsolidadosAntigos;
@@ -1027,10 +1068,10 @@
             }
             
             const tituloDoc = item.tipo === "mensal-consolidado" ? `RELATÓRIO MENSAL - ${item.periodo}` : `RELATÓRIO DE TURNO - ${item.periodo}`;
-            exportarRelatorioPDF(tituloDoc, item.faturacao, item.despesas, item.custo, item.lucro, item.bebidasRanking || {});
+            exportarRelatorioPDF(tituloDoc, item.faturacao, item.despesas, item.custo, item.lucro, item.bebidasRanking || {}, item.entradasRanking || {});
         }
 
-        function exportarRelatorioPDF(titulo, faturado, despesas, custo, lucro, bebidas) {
+        function exportarRelatorioPDF(titulo, faturado, despesas, custo, lucro, bebidas, entradas) {
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
 
@@ -1067,7 +1108,26 @@
             } else {
                 Object.entries(bebidas).forEach(([artigo, quantidade]) => {
                     if(eixoy > 280) { doc.addPage(); eixoy = 20; }
-                    doc.text(`- ${artigo}: ${quantidade} Unidades`, 14, eixoy);
+                    doc.text(`- ${artigo}: ${quantidade} Unidades vendidas`, 14, eixoy);
+                    eixoy += 7;
+                });
+            }
+
+            eixoy += 5;
+            if(eixoy > 280) { doc.addPage(); eixoy = 20; }
+            doc.setFont("helvetica", "bold");
+            doc.setFontSize(12);
+            doc.text("ENTRADAS DE STOCK (RESTOCK):", 14, eixoy);
+            doc.setFont("helvetica", "normal");
+            doc.setFontSize(11);
+            eixoy += 7;
+            
+            if(!entradas || Object.keys(entradas).length === 0) {
+                doc.text("Sem registo de entradas de stock neste período.", 14, eixoy);
+            } else {
+                Object.entries(entradas).forEach(([artigo, quantidade]) => {
+                    if(eixoy > 280) { doc.addPage(); eixoy = 20; }
+                    doc.text(`+ ${artigo}: ${quantidade} Unidades adicionadas`, 14, eixoy);
                     eixoy += 7;
                 });
             }
@@ -1095,7 +1155,19 @@
             const p = produtos.find(x => x.id === id);
             if (p) {
                 p.stock += qty;
-                db.ref('produtos').set(produtos).then(() => {
+                
+                const novaEntrada = {
+                    id: Date.now(),
+                    prodId: p.id,
+                    nome: p.nome,
+                    qtd: qty
+                };
+                entradasTurno.push(novaEntrada);
+
+                db.ref().update({
+                    produtos: produtos,
+                    entradas_turno: entradasTurno
+                }).then(() => {
                     document.getElementById('restock-quantidade').value = "";
                     alert(`Stock de ${p.nome} atualizado com +${qty} unidades com sucesso!`);
                 });
@@ -1226,7 +1298,7 @@
         function mudarAba(aba) {
             const perm = usuarioAtivo ? usuarioAtivo.permissao : 'funcionario';
             
-            if ((aba === 'restock' || aba === 'financeiro-mensal' || aba === 'produtos') && perm === 'funcionario') {
+            if ((aba === 'financeiro-mensal' || aba === 'produtos') && perm === 'funcionario') {
                 return;
             }
 
