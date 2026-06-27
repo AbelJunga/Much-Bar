@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Much Bar - Mobile Ultimate v5.1</title>
+    <title>Much Bar - Mobile Ultimate v5.2 (Estável)</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
@@ -362,9 +362,31 @@
 
         const salvarDadosFirebase = (caminho, dados) => { db.ref(caminho).set(dados); };
 
+        // --- NOVA LÓGICA DE ORDENAÇÃO MANUAL ---
+        function ordenarProdutosPersonalizado(lista) {
+            const ordemPrioridade = ["savana lemon", "2m", "impala", "txilar", "heineken"];
+            return lista.sort((a, b) => {
+                const nomeA = a.nome.toLowerCase();
+                const nomeB = b.nome.toLowerCase();
+                
+                let posA = 999;
+                let posB = 999;
+                
+                ordemPrioridade.forEach((marca, index) => {
+                    if (nomeA.includes(marca) && posA === 999) posA = index;
+                    if (nomeB.includes(marca) && posB === 999) posB = index;
+                });
+                
+                if (posA !== posB) return posA - posB;
+                return a.nome.localeCompare(b.nome);
+            });
+        }
+
+        // --- CORREÇÃO DE ARRAYS (O Bug do Firebase resolvido) ---
         function carregarEEscutarFirebase() {
             db.ref('produtos').on('value', (snapshot) => {
-                produtos = snapshot.val() || [];
+                const dados = snapshot.val();
+                produtos = dados ? ordenarProdutosPersonalizado(Object.values(dados).filter(Boolean)) : [];
                 if (usuarioAtivo) {
                     renderizarBotoesProdutos();
                     atualizarConfigProdutos();
@@ -374,12 +396,14 @@
             });
 
             db.ref('usuarios').on('value', (snapshot) => {
-                usuarios = snapshot.val() || [{ username: "barman1", pass: "4321", permissao: "funcionario" }];
+                const dados = snapshot.val();
+                usuarios = dados ? Object.values(dados).filter(Boolean) : [{ username: "barman1", pass: "4321", permissao: "funcionario" }];
                 if (usuarioAtivo) atualizarListaOperadores();
             });
 
             db.ref('mesas').on('value', (snapshot) => {
-                mesas = snapshot.val() || [];
+                const dados = snapshot.val();
+                mesas = dados ? Object.values(dados).filter(Boolean) : [];
                 if (usuarioAtivo) {
                     atualizarPainelMesas();
                     if (mesaSelecionadaId) {
@@ -391,22 +415,26 @@
             });
 
             db.ref('despesas').on('value', (snapshot) => {
-                despesasTurno = snapshot.val() || [];
+                const dados = snapshot.val();
+                despesasTurno = dados ? Object.values(dados).filter(Boolean) : [];
                 if (usuarioAtivo) atualizarPainelVendas();
             });
 
             db.ref('vendas_dia').on('value', (snapshot) => {
-                vendasCronologicas = snapshot.val() || [];
+                const dados = snapshot.val();
+                vendasCronologicas = dados ? Object.values(dados).filter(Boolean) : [];
                 if (usuarioAtivo) atualizarPainelVendas();
             });
 
             db.ref('historico_mes').on('value', (snapshot) => {
-                historicoMensal = snapshot.val() || [];
+                const dados = snapshot.val();
+                historicoMensal = dados ? Object.values(dados).filter(Boolean) : [];
                 if (usuarioAtivo) atualizarTabelaMensal();
             });
             
             db.ref('entradas_turno').on('value', (snapshot) => {
-                entradasTurno = snapshot.val() || [];
+                const dados = snapshot.val();
+                entradasTurno = dados ? Object.values(dados).filter(Boolean) : [];
                 if (usuarioAtivo) atualizarPainelVendas();
             });
         }
@@ -460,8 +488,8 @@
             document.getElementById('bloco-detalhe-comanda').classList.remove('hidden', 'lg:flex');
             document.getElementById('bloco-vitrine-produtos').classList.remove('hidden', 'lg:flex');
             const m = mesas.find(x => x.id === id);
-            document.getElementById('mesa-selecionada-titulo').innerText = m.nome;
-            atualizarItensComanda(m);
+            document.getElementById('mesa-selecionada-titulo').innerText = m ? m.nome : "Desconhecida";
+            if(m) atualizarItensComanda(m);
         }
 
         function eliminarMesaVaziaAtual() {
@@ -476,15 +504,19 @@
                 });
             }
             mesas = mesas.filter(m => m.id !== mesaSelecionadaId);
-            db.ref().update({ mesas: mesas, produtos: produtos }).then(() => {
-                fecharVisualizacaoMesa();
-            });
+            
+            // Garantir gravação atómica
+            db.ref('mesas').set(mesas);
+            db.ref('produtos').set(produtos).then(() => fecharVisualizacaoMesa());
         }
 
         function ajustarQuantidadeItem(prodId, alteracao, mesaId) {
             const mesa = mesas.find(m => m.id === mesaId);
             const produtoOriginal = produtos.find(p => p.id === prodId);
-            if (!mesa || !produtoOriginal) return;
+            
+            if (!mesa || !produtoOriginal) {
+                return alert("Erro: Esta mesa ou artigo foram alterados noutro terminal. Atualize.");
+            }
 
             if (!mesa.itens) mesa.itens = [];
             const item = mesa.itens.find(i => i.id === prodId);
@@ -494,16 +526,24 @@
 
             if (item) {
                 item.qtd += alteracao;
-                produtoOriginal.stock -= alteracao;
+                produtoOriginal.stock -= alteracao; // Reduz stock na hora
                 if (item.qtd <= 0) mesa.itens = mesa.itens.filter(i => i.id !== prodId);
             }
-            db.ref().update({ mesas: mesas, produtos: produtos });
+            
+            // Gravação segura
+            db.ref('mesas').set(mesas);
+            db.ref('produtos').set(produtos);
         }
 
+        // --- ATUALIZAÇÃO: TRAVA DE SEGURANÇA E REDUÇÃO IMEDIATA ---
         function adicionarItemMesa(prodId) {
             if (!mesaSelecionadaId) return;
             const mesa = mesas.find(m => m.id === mesaSelecionadaId);
             const prod = produtos.find(p => p.id === prodId);
+            
+            if (!mesa || !prod) {
+                return alert("Erro: Esta mesa ou artigo não estão disponíveis ou foram removidos. Aguarde atualização automática.");
+            }
             
             if (prod.stock <= 0) return alert("Artigo esgotado!");
 
@@ -514,8 +554,12 @@
             } else {
                 mesa.itens.push({ id: prod.id, nome: prod.nome, preco: prod.preco, custo: prod.custo, qtd: 1 });
             }
-            prod.stock--;
-            db.ref().update({ mesas: mesas, produtos: produtos });
+            
+            prod.stock--; // Esta linha sempre existiu, mas falhava na gravação anterior
+            
+            // Gravar separadamente garante que concorrências não partam as arrays
+            db.ref('mesas').set(mesas);
+            db.ref('produtos').set(produtos);
         }
 
         function renderizarBotoesProdutos() {
@@ -689,10 +733,8 @@
             vendasCronologicas.push(novaVenda);
             mesas = mesas.filter(m => m.id !== mesaSelecionadaId);
 
-            db.ref().update({
-                mesas: mesas,
-                vendas_dia: vendasCronologicas
-            }).then(() => {
+            db.ref('mesas').set(mesas);
+            db.ref('vendas_dia').set(vendasCronologicas).then(() => {
                 alert(`Conta fechada com sucesso!`);
                 fecharVisualizacaoMesa();
             });
@@ -844,10 +886,8 @@
             });
 
             mesas.push({ id: Date.now(), nome: venda.mesa + " (Reaberta)", itens: itensReabertos });
-            db.ref().update({
-                mesas: mesas,
-                vendas_dia: vendasCronologicas.filter(v => v.id !== idVenda)
-            });
+            db.ref('mesas').set(mesas);
+            db.ref('vendas_dia').set(vendasCronologicas.filter(v => v.id !== idVenda));
         }
 
         function apagarMesaFechadaDefinitivo(idVenda) {
@@ -860,10 +900,8 @@
                 if (prodGeral) prodGeral.stock += p.qtd;
             });
 
-            db.ref().update({
-                produtos: produtos,
-                vendas_dia: vendasCronologicas.filter(v => v.id !== idVenda)
-            });
+            db.ref('produtos').set(produtos);
+            db.ref('vendas_dia').set(vendasCronologicas.filter(v => v.id !== idVenda));
         }
 
         function adicionarDespesa() {
