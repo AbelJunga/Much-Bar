@@ -527,8 +527,11 @@
                 if (item.qtd <= 0) mesa.itens = mesa.itens.filter(i => i.id !== prodId);
             }
             
-            // Gravação isolada apenas dos itens desta mesa
+            mesa.abertaPor = usuarioAtivo ? usuarioAtivo.nome : "Desconhecido"; // Atualiza para quem editou por ultimo
+            
+            // Gravação isolada apenas dos itens e quem editou nesta mesa
             db.ref(`mesas/${mesa.id}/itens`).set(mesa.itens);
+            db.ref(`mesas/${mesa.id}/abertaPor`).set(mesa.abertaPor);
             db.ref('produtos').set(produtos);
         }
 
@@ -552,9 +555,11 @@
             }
             
             prod.stock--;
+            mesa.abertaPor = usuarioAtivo ? usuarioAtivo.nome : "Desconhecido"; // Atualiza para quem editou por ultimo
             
-            // Gravação isolada apenas dos itens desta mesa
+            // Gravação isolada apenas dos itens e quem editou nesta mesa
             db.ref(`mesas/${mesa.id}/itens`).set(mesa.itens);
+            db.ref(`mesas/${mesa.id}/abertaPor`).set(mesa.abertaPor);
             db.ref('produtos').set(produtos);
         }
 
@@ -639,7 +644,7 @@
                 id: Date.now(), 
                 nome: nomeMesa, 
                 itens: [],
-                abertaPor: usuarioAtivo ? usuarioAtivo.nome : "Desconhecido" // Regista quem abriu
+                abertaPor: usuarioAtivo ? usuarioAtivo.nome : "Desconhecido" // Regista quem abriu inicialmente
             };
             
             // Gravação isolada desta mesa no Firebase
@@ -663,7 +668,7 @@
                     <div onclick="selecionarMesa(${m.id})" class="p-3 border rounded-xl flex justify-between items-center transition cursor-pointer ${activeCls}">
                         <div class="truncate">
                             <p class="text-xs font-black text-gray-200">${m.nome.toUpperCase()}</p>
-                            <p class="text-[10px] text-gray-500 font-bold">${qtdItens} un lançadas | <span class="text-blue-400">Abr: ${m.abertaPor || 'N/A'}</span></p>
+                            <p class="text-[10px] text-gray-500 font-bold">${qtdItens} un lançadas | <span class="text-blue-400">Edt: ${m.abertaPor || 'N/A'}</span></p>
                         </div>
                         <span class="text-xs font-mono font-black ${total > 0 ? 'text-emerald-400' : 'text-gray-600'}">${total.toFixed(2)} MT</span>
                     </div>`;
@@ -725,7 +730,7 @@
             const novaVenda = {
                 id: Date.now(),
                 mesa: mesa.nome,
-                abertaPor: mesa.abertaPor || "Desconhecido", // Registo do autor da abertura
+                abertaPor: mesa.abertaPor || "Desconhecido", // Será a última pessoa que editou
                 fechadaPor: usuarioAtivo ? usuarioAtivo.nome : "Desconhecido", // Registo de quem fecha
                 hora: horaStr,
                 total: t,
@@ -805,6 +810,9 @@
 
                     if(perm === 'admin' || perm === 'master') {
                         visualizacaoValorMesa = `<span class="font-mono font-black text-emerald-400">${v.total.toFixed(2)} MT</span>`;
+                    }
+                    
+                    if(perm === 'master') {
                         botoesAcao = `
                             <div class="flex gap-1.5 justify-end mt-2 pt-2 border-t border-gray-900">
                                 <button onclick="event.stopPropagation(); reabrirMesaFechada('${v.id}')" class="px-2 py-0.5 bg-gray-900 border border-gray-855 hover:border-amber-500 rounded text-[10px] text-amber-500 font-bold">✏️ Reabrir</button>
@@ -829,7 +837,7 @@
                                     <span class="text-gray-500 font-mono">${v.hora}</span> 
                                     <span class="font-black text-gray-200">${v.mesa.toUpperCase()}</span>
                                     <div class="mt-0.5 text-[9px] font-bold tracking-wide">
-                                        <span class="text-blue-400 bg-blue-950/40 px-1 rounded">Abr: ${v.abertaPor || '-'}</span>
+                                        <span class="text-blue-400 bg-blue-950/40 px-1 rounded">Edt: ${v.abertaPor || '-'}</span>
                                         <span class="text-amber-500 bg-amber-950/40 px-1 rounded ml-1">Fch: ${v.fechadaPor || '-'}</span>
                                     </div>
                                 </div>
@@ -876,6 +884,7 @@
         }
 
         function reabrirMesaFechada(idVenda) {
+            if (!usuarioAtivo || usuarioAtivo.permissao !== 'master') return alert("Acesso negado. Apenas o Master tem permissão para reabrir mesas.");
             if (!confirm("Pretende reabrir esta mesa? Ela voltará para o painel de mesas activas.")) return;
             const venda = vendasCronologicas.find(v => v.id === idVenda);
             if (!venda) return;
@@ -904,6 +913,7 @@
         }
 
         function apagarMesaFechadaDefinitivo(idVenda) {
+            if (!usuarioAtivo || usuarioAtivo.permissao !== 'master') return alert("Acesso negado. Apenas o Master tem permissão para apagar vendas.");
             if (!confirm("Eliminar esta venda permanentemente? O stock correspondente retornará ao inventário.")) return;
             const venda = vendasCronologicas.find(v => v.id === idVenda);
             if (!venda) return;
