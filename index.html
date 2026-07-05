@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Much Bar - Mobile Ultimate v5.2 (Estável)</title>
+    <title>Much Bar - Mobile Ultimate v5.3 (Estável & Seguro)</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
@@ -362,7 +362,6 @@
 
         const salvarDadosFirebase = (caminho, dados) => { db.ref(caminho).set(dados); };
 
-        // --- NOVA LÓGICA DE ORDENAÇÃO MANUAL ---
         function ordenarProdutosPersonalizado(lista) {
             const ordemPrioridade = ["savana lemon", "2m", "impala", "txilar", "heineken"];
             return lista.sort((a, b) => {
@@ -382,7 +381,6 @@
             });
         }
 
-        // --- CORREÇÃO DE ARRAYS (O Bug do Firebase resolvido) ---
         function carregarEEscutarFirebase() {
             db.ref('produtos').on('value', (snapshot) => {
                 const dados = snapshot.val();
@@ -503,10 +501,9 @@
                     if(original) original.stock += p.qtd;
                 });
             }
-            mesas = mesas.filter(m => m.id !== mesaSelecionadaId);
             
-            // Garantir gravação atómica
-            db.ref('mesas').set(mesas);
+            // Gravação isolada: remove apenas esta mesa sem subscrever toda a lista
+            db.ref(`mesas/${mesa.id}`).remove();
             db.ref('produtos').set(produtos).then(() => fecharVisualizacaoMesa());
         }
 
@@ -526,16 +523,15 @@
 
             if (item) {
                 item.qtd += alteracao;
-                produtoOriginal.stock -= alteracao; // Reduz stock na hora
+                produtoOriginal.stock -= alteracao;
                 if (item.qtd <= 0) mesa.itens = mesa.itens.filter(i => i.id !== prodId);
             }
             
-            // Gravação segura
-            db.ref('mesas').set(mesas);
+            // Gravação isolada apenas dos itens desta mesa
+            db.ref(`mesas/${mesa.id}/itens`).set(mesa.itens);
             db.ref('produtos').set(produtos);
         }
 
-        // --- ATUALIZAÇÃO: TRAVA DE SEGURANÇA E REDUÇÃO IMEDIATA ---
         function adicionarItemMesa(prodId) {
             if (!mesaSelecionadaId) return;
             const mesa = mesas.find(m => m.id === mesaSelecionadaId);
@@ -555,10 +551,10 @@
                 mesa.itens.push({ id: prod.id, nome: prod.nome, preco: prod.preco, custo: prod.custo, qtd: 1 });
             }
             
-            prod.stock--; // Esta linha sempre existiu, mas falhava na gravação anterior
+            prod.stock--;
             
-            // Gravar separadamente garante que concorrências não partam as arrays
-            db.ref('mesas').set(mesas);
+            // Gravação isolada apenas dos itens desta mesa
+            db.ref(`mesas/${mesa.id}/itens`).set(mesa.itens);
             db.ref('produtos').set(produtos);
         }
 
@@ -620,10 +616,10 @@
             if (!confirm("Tem a certeza absoluta de que quer redefinir os movimentos agora?")) return;
 
             db.ref().update({
-                vendas_dia: [],
-                despesas: [],
-                mesas: [],
-                entradas_turno: [],
+                vendas_dia: null,
+                despesas: null,
+                mesas: null,
+                entradas_turno: null,
                 historico_mes: []
             }).then(() => {
                 fecharVisualizacaoMesa();
@@ -639,9 +635,15 @@
             if (!nomeMesa || nomeMesa === "+") {
                 nomeMesa = "Venda Rápida";
             }
-            const novaMesa = { id: Date.now(), nome: nomeMesa, itens: [] };
-            mesas.push(novaMesa);
-            db.ref('mesas').set(mesas).then(() => {
+            const novaMesa = { 
+                id: Date.now(), 
+                nome: nomeMesa, 
+                itens: [],
+                abertaPor: usuarioAtivo ? usuarioAtivo.nome : "Desconhecido" // Regista quem abriu
+            };
+            
+            // Gravação isolada desta mesa no Firebase
+            db.ref(`mesas/${novaMesa.id}`).set(novaMesa).then(() => {
                 inp.value = "";
                 if(nomeMesa === "Venda Rápida") selecionarMesa(novaMesa.id);
             });
@@ -661,7 +663,7 @@
                     <div onclick="selecionarMesa(${m.id})" class="p-3 border rounded-xl flex justify-between items-center transition cursor-pointer ${activeCls}">
                         <div class="truncate">
                             <p class="text-xs font-black text-gray-200">${m.nome.toUpperCase()}</p>
-                            <p class="text-[10px] text-gray-500 font-bold">${qtdItens} un lançadas</p>
+                            <p class="text-[10px] text-gray-500 font-bold">${qtdItens} un lançadas | <span class="text-blue-400">Abr: ${m.abertaPor || 'N/A'}</span></p>
                         </div>
                         <span class="text-xs font-mono font-black ${total > 0 ? 'text-emerald-400' : 'text-gray-600'}">${total.toFixed(2)} MT</span>
                     </div>`;
@@ -723,6 +725,8 @@
             const novaVenda = {
                 id: Date.now(),
                 mesa: mesa.nome,
+                abertaPor: mesa.abertaPor || "Desconhecido", // Registo do autor da abertura
+                fechadaPor: usuarioAtivo ? usuarioAtivo.nome : "Desconhecido", // Registo de quem fecha
                 hora: horaStr,
                 total: t,
                 custoTotal: c,
@@ -730,11 +734,9 @@
                 produtos: mesa.itens.map(x => ({ id: x.id, nome: x.nome, qtd: x.qtd, faturadoTotal: x.preco * x.qtd, custoTotal: x.custo * x.qtd }))
             };
 
-            vendasCronologicas.push(novaVenda);
-            mesas = mesas.filter(m => m.id !== mesaSelecionadaId);
-
-            db.ref('mesas').set(mesas);
-            db.ref('vendas_dia').set(vendasCronologicas).then(() => {
+            // Gravações isoladas para evitar sobrescrever dados de outros utilizadores
+            db.ref(`vendas_dia/${novaVenda.id}`).set(novaVenda);
+            db.ref(`mesas/${mesa.id}`).remove().then(() => {
                 alert(`Conta fechada com sucesso!`);
                 fecharVisualizacaoMesa();
             });
@@ -826,6 +828,10 @@
                                 <div class="truncate">
                                     <span class="text-gray-500 font-mono">${v.hora}</span> 
                                     <span class="font-black text-gray-200">${v.mesa.toUpperCase()}</span>
+                                    <div class="mt-0.5 text-[9px] font-bold tracking-wide">
+                                        <span class="text-blue-400 bg-blue-950/40 px-1 rounded">Abr: ${v.abertaPor || '-'}</span>
+                                        <span class="text-amber-500 bg-amber-950/40 px-1 rounded ml-1">Fch: ${v.fechadaPor || '-'}</span>
+                                    </div>
                                 </div>
                                 <div class="flex items-center gap-1.5">
                                     ${visualizacaoValorMesa}
@@ -885,9 +891,16 @@
                 };
             });
 
-            mesas.push({ id: Date.now(), nome: venda.mesa + " (Reaberta)", itens: itensReabertos });
-            db.ref('mesas').set(mesas);
-            db.ref('vendas_dia').set(vendasCronologicas.filter(v => v.id !== idVenda));
+            const novaMesaId = Date.now();
+            const mesaReaberta = { 
+                id: novaMesaId, 
+                nome: venda.mesa + " (Reaberta)", 
+                itens: itensReabertos,
+                abertaPor: usuarioAtivo ? usuarioAtivo.nome : "Desconhecido" 
+            };
+
+            db.ref(`mesas/${novaMesaId}`).set(mesaReaberta);
+            db.ref(`vendas_dia/${idVenda}`).remove();
         }
 
         function apagarMesaFechadaDefinitivo(idVenda) {
@@ -901,7 +914,7 @@
             });
 
             db.ref('produtos').set(produtos);
-            db.ref('vendas_dia').set(vendasCronologicas.filter(v => v.id !== idVenda));
+            db.ref(`vendas_dia/${idVenda}`).remove();
         }
 
         function adicionarDespesa() {
@@ -979,9 +992,9 @@
             historicoMensal.push(novoRegistroHistorico);
 
             db.ref().update({
-                vendas_dia: [],
-                despesas: [],
-                entradas_turno: [],
+                vendas_dia: null,
+                despesas: null,
+                entradas_turno: null,
                 historico_mes: historicoMensal
             }).then(() => {
                 alert("🎉 Turno arquivado com sucesso no histórico!");
