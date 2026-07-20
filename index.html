@@ -371,17 +371,15 @@
                 const nomeA = a.nome.toLowerCase();
                 const nomeB = b.nome.toLowerCase();
                 
-                let posA = 999;
-                let posB = 999;
+                let posA = ordemPrioridade.findIndex(marca => nomeA.includes(marca));
+                let posB = ordemPrioridade.findIndex(marca => nomeB.includes(marca));
                 
-                ordemPrioridade.forEach((marca, index) => {
-                    if (nomeA.includes(marca) && posA === 999) posA = index;
-                    if (nomeB.includes(marca) && posB === 999) posB = index;
-                });
+                if (posA === -1) posA = 999;
+                if (posB === -1) posB = 999;
                 
                 if (posA !== posB) return posA - posB;
                 
-                return a.id - b.id; 
+                return nomeA.localeCompare(nomeB);
             });
         }
 
