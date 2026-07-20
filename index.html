@@ -227,14 +227,17 @@
 
             <div id="aba-financeiro-mensal" class="space-y-4 hidden adm-geral w-full">
                 <div class="bg-gray-900 border border-gray-800 p-4 rounded-2xl space-y-3">
-                    <div class="flex flex-col gap-2 sm:flex-row sm:justify-between sm:items-center border-b border-gray-800 pb-2">
+                    <div class="flex flex-col gap-2 border-b border-gray-800 pb-2">
                         <div>
                             <h3 class="text-xs font-black text-amber-400 uppercase tracking-wider">Mês Corrente Ativo</h3>
-                            <p class="text-[10px] text-gray-500">Resumo de todos os fechos de turno guardados neste mês</p>
+                            <p class="text-[10px] text-gray-500 mb-2">Resumo de todos os fechos de turno guardados neste mês</p>
                         </div>
-                        <div id="container-btn-fechar-mes">
+                        <div id="container-btn-fechar-mes" class="flex flex-col sm:flex-row gap-2">
+                            <button onclick="fecharSemanaDefinitiva()" class="bg-blue-950 hover:bg-blue-900 border border-blue-855 text-blue-400 px-4 py-2.5 rounded-xl text-xs font-black transition w-full sm:w-auto flex items-center justify-center gap-1 shadow-lg uppercase tracking-wider">
+                                <span class="material-icons text-xs">calendar_view_week</span> CONSOLIDAR SEMANA
+                            </button>
                             <button onclick="fecharMesDefinitivo()" class="bg-red-950 hover:bg-red-900 border border-red-855 text-red-400 px-4 py-2.5 rounded-xl text-xs font-black transition w-full sm:w-auto flex items-center justify-center gap-1 shadow-lg uppercase tracking-wider">
-                                <span class="material-icons text-xs">lock</span> CONSOLIDAR & ARQUIVAR MÊS
+                                <span class="material-icons text-xs">lock</span> CONSOLIDAR MÊS
                             </button>
                         </div>
                     </div>
@@ -260,7 +263,7 @@
                 </div>
 
                 <div class="space-y-2">
-                    <h3 class="text-xs font-black text-gray-400 uppercase tracking-wider pl-1">Arquivo Histórico (Turnos & Meses Fechados)</h3>
+                    <h3 class="text-xs font-black text-gray-400 uppercase tracking-wider pl-1">Arquivo Histórico (Turnos, Semanas & Meses)</h3>
                     <div id="cards-historico-mensal" class="space-y-2"></div>
                 </div>
             </div>
@@ -271,7 +274,7 @@
                         <span class="material-icons text-xs">restart_alt</span> Zona Crítica: Restauro de Testes (Limpeza)
                     </h3>
                     <p class="text-[11px] text-gray-400">
-                        Esta função apaga permanentemente **todas as vendas, contas abertas, despesas e históricos mensais acumulados**, preparando o sistema para o uso prático real. 
+                        Esta função apaga permanentemente **todas as vendas, contas abertas, despesas e históricos acumulados**, preparando o sistema para o uso prático real. 
                         <b class="text-amber-400 font-bold block mt-1">O seu Stock, Artigos, Preços e Utilizadores serão preservados.</b>
                     </p>
                     <button onclick="restaurarSistemaApenasMovimentos()" class="w-full bg-red-600 hover:bg-red-500 text-gray-950 font-black py-2.5 px-4 rounded-xl text-xs transition tracking-wide shadow-md uppercase">
@@ -363,7 +366,7 @@
         const salvarDadosFirebase = (caminho, dados) => { db.ref(caminho).set(dados); };
 
         function ordenarProdutosPersonalizado(lista) {
-            const ordemPrioridade = ["savana lemon", "2m", "impala", "txilar", "heineken"];
+            const ordemPrioridade = ["savana lemon", "savana dry", "bernini lata", "corona", "2m lata", "2m garrafa", "impala lata"];
             return lista.sort((a, b) => {
                 const nomeA = a.nome.toLowerCase();
                 const nomeB = b.nome.toLowerCase();
@@ -377,7 +380,8 @@
                 });
                 
                 if (posA !== posB) return posA - posB;
-                return a.nome.localeCompare(b.nome);
+                
+                return a.id - b.id; 
             });
         }
 
@@ -502,7 +506,6 @@
                 });
             }
             
-            // Gravação isolada: remove apenas esta mesa sem subscrever toda a lista
             db.ref(`mesas/${mesa.id}`).remove();
             db.ref('produtos').set(produtos).then(() => fecharVisualizacaoMesa());
         }
@@ -527,8 +530,10 @@
                 if (item.qtd <= 0) mesa.itens = mesa.itens.filter(i => i.id !== prodId);
             }
             
-            // Gravação isolada apenas dos itens desta mesa
+            mesa.abertaPor = usuarioAtivo ? usuarioAtivo.nome : "Desconhecido"; 
+            
             db.ref(`mesas/${mesa.id}/itens`).set(mesa.itens);
+            db.ref(`mesas/${mesa.id}/abertaPor`).set(mesa.abertaPor);
             db.ref('produtos').set(produtos);
         }
 
@@ -552,9 +557,10 @@
             }
             
             prod.stock--;
+            mesa.abertaPor = usuarioAtivo ? usuarioAtivo.nome : "Desconhecido";
             
-            // Gravação isolada apenas dos itens desta mesa
             db.ref(`mesas/${mesa.id}/itens`).set(mesa.itens);
+            db.ref(`mesas/${mesa.id}/abertaPor`).set(mesa.abertaPor);
             db.ref('produtos').set(produtos);
         }
 
@@ -593,7 +599,7 @@
 
             const containerBtnMes = document.getElementById('container-btn-fechar-mes');
             if (containerBtnMes) {
-                if (perm === 'master') containerBtnMes.classList.remove('hidden');
+                if (perm === 'master') containerBtnMes.classList.remove('hidden', 'flex');
                 else containerBtnMes.classList.add('hidden');
             }
         }
@@ -639,10 +645,9 @@
                 id: Date.now(), 
                 nome: nomeMesa, 
                 itens: [],
-                abertaPor: usuarioAtivo ? usuarioAtivo.nome : "Desconhecido" // Regista quem abriu
+                abertaPor: usuarioAtivo ? usuarioAtivo.nome : "Desconhecido"
             };
             
-            // Gravação isolada desta mesa no Firebase
             db.ref(`mesas/${novaMesa.id}`).set(novaMesa).then(() => {
                 inp.value = "";
                 if(nomeMesa === "Venda Rápida") selecionarMesa(novaMesa.id);
@@ -663,7 +668,7 @@
                     <div onclick="selecionarMesa(${m.id})" class="p-3 border rounded-xl flex justify-between items-center transition cursor-pointer ${activeCls}">
                         <div class="truncate">
                             <p class="text-xs font-black text-gray-200">${m.nome.toUpperCase()}</p>
-                            <p class="text-[10px] text-gray-500 font-bold">${qtdItens} un lançadas | <span class="text-blue-400">Abr: ${m.abertaPor || 'N/A'}</span></p>
+                            <p class="text-[10px] text-gray-500 font-bold">${qtdItens} un lançadas | <span class="text-blue-400">Edt: ${m.abertaPor || 'N/A'}</span></p>
                         </div>
                         <span class="text-xs font-mono font-black ${total > 0 ? 'text-emerald-400' : 'text-gray-600'}">${total.toFixed(2)} MT</span>
                     </div>`;
@@ -725,8 +730,8 @@
             const novaVenda = {
                 id: Date.now(),
                 mesa: mesa.nome,
-                abertaPor: mesa.abertaPor || "Desconhecido", // Registo do autor da abertura
-                fechadaPor: usuarioAtivo ? usuarioAtivo.nome : "Desconhecido", // Registo de quem fecha
+                abertaPor: mesa.abertaPor || "Desconhecido", 
+                fechadaPor: usuarioAtivo ? usuarioAtivo.nome : "Desconhecido", 
                 hora: horaStr,
                 total: t,
                 custoTotal: c,
@@ -734,7 +739,6 @@
                 produtos: mesa.itens.map(x => ({ id: x.id, nome: x.nome, qtd: x.qtd, faturadoTotal: x.preco * x.qtd, custoTotal: x.custo * x.qtd }))
             };
 
-            // Gravações isoladas para evitar sobrescrever dados de outros utilizadores
             db.ref(`vendas_dia/${novaVenda.id}`).set(novaVenda);
             db.ref(`mesas/${mesa.id}`).remove().then(() => {
                 alert(`Conta fechada com sucesso!`);
@@ -805,6 +809,9 @@
 
                     if(perm === 'admin' || perm === 'master') {
                         visualizacaoValorMesa = `<span class="font-mono font-black text-emerald-400">${v.total.toFixed(2)} MT</span>`;
+                    }
+                    
+                    if(perm === 'master') {
                         botoesAcao = `
                             <div class="flex gap-1.5 justify-end mt-2 pt-2 border-t border-gray-900">
                                 <button onclick="event.stopPropagation(); reabrirMesaFechada('${v.id}')" class="px-2 py-0.5 bg-gray-900 border border-gray-855 hover:border-amber-500 rounded text-[10px] text-amber-500 font-bold">✏️ Reabrir</button>
@@ -829,7 +836,7 @@
                                     <span class="text-gray-500 font-mono">${v.hora}</span> 
                                     <span class="font-black text-gray-200">${v.mesa.toUpperCase()}</span>
                                     <div class="mt-0.5 text-[9px] font-bold tracking-wide">
-                                        <span class="text-blue-400 bg-blue-950/40 px-1 rounded">Abr: ${v.abertaPor || '-'}</span>
+                                        <span class="text-blue-400 bg-blue-950/40 px-1 rounded">Edt: ${v.abertaPor || '-'}</span>
                                         <span class="text-amber-500 bg-amber-950/40 px-1 rounded ml-1">Fch: ${v.fechadaPor || '-'}</span>
                                     </div>
                                 </div>
@@ -876,6 +883,7 @@
         }
 
         function reabrirMesaFechada(idVenda) {
+            if (!usuarioAtivo || usuarioAtivo.permissao !== 'master') return alert("Acesso negado. Apenas o Master tem permissão para reabrir mesas.");
             if (!confirm("Pretende reabrir esta mesa? Ela voltará para o painel de mesas activas.")) return;
             const venda = vendasCronologicas.find(v => v.id === idVenda);
             if (!venda) return;
@@ -904,6 +912,7 @@
         }
 
         function apagarMesaFechadaDefinitivo(idVenda) {
+            if (!usuarioAtivo || usuarioAtivo.permissao !== 'master') return alert("Acesso negado. Apenas o Master tem permissão para apagar vendas.");
             if (!confirm("Eliminar esta venda permanentemente? O stock correspondente retornará ao inventário.")) return;
             const venda = vendasCronologicas.find(v => v.id === idVenda);
             if (!venda) return;
@@ -1002,13 +1011,67 @@
             });
         }
 
-        function atualizarTabelaMensal() {
-            let apenasTurnosDesteMes = historicoMensal.filter(h => h.tipo === "turno-fechado");
+        function fecharSemanaDefinitiva() {
+            let turnosParaConsolidar = historicoMensal.filter(h => h.tipo === "turno-fechado");
+            if(turnosParaConsolidar.length === 0) {
+                return alert("Não existem turnos diários no histórico para consolidar uma semana.");
+            }
+
+            let nomeSemanaReferencia = prompt("Insira a identificação da semana (Ex: Semana 1 - Agosto):", "Semana - ");
+            if(!nomeSemanaReferencia) return;
+
+            if(!confirm(`Esta acção vai agrupar os ${turnosParaConsolidar.length} turnos soltos num Fecho Semanal Único.`)) return;
+
+            let f = turnosParaConsolidar.reduce((s, c) => s + c.faturacao, 0);
+            let c = turnosParaConsolidar.reduce((s, c) => s + c.custo, 0);
+            let d = turnosParaConsolidar.reduce((s, c) => s + c.despesas, 0);
+            let l = turnosParaConsolidar.reduce((s, c) => s + c.lucro, 0);
+
+            let rankingSemanalProdutos = {};
+            turnosParaConsolidar.forEach(turno => {
+                if(turno.bebidasRanking) {
+                    Object.entries(turno.bebidasRanking).forEach(([nome, qtd]) => {
+                        rankingSemanalProdutos[nome] = (rankingSemanalProdutos[nome] || 0) + qtd;
+                    });
+                }
+            });
             
-            let fMes = apenasTurnosDesteMes.reduce((s, c) => s + c.faturacao, 0);
-            let cMes = apenasTurnosDesteMes.reduce((s, c) => s + c.custo, 0);
-            let dMes = apenasTurnosDesteMes.reduce((s, c) => s + c.despesas, 0);
-            let lMes = apenasTurnosDesteMes.reduce((s, c) => s + c.lucro, 0);
+            let rankingSemanalEntradas = {};
+            turnosParaConsolidar.forEach(turno => {
+                if(turno.entradasRanking) {
+                    Object.entries(turno.entradasRanking).forEach(([nome, qtd]) => {
+                        rankingSemanalEntradas[nome] = (rankingSemanalEntradas[nome] || 0) + qtd;
+                    });
+                }
+            });
+
+            let historicoRestante = historicoMensal.filter(h => h.tipo !== "turno-fechado");
+            
+            historicoRestante.push({
+                id: "semana_" + Date.now(),
+                tipo: "semanal-consolidado",
+                periodo: nomeSemanaReferencia.trim().toUpperCase(),
+                faturacao: f,
+                custo: c,
+                despesas: d,
+                lucro: l,
+                bebidasRanking: rankingSemanalProdutos,
+                entradasRanking: rankingSemanalEntradas
+            });
+
+            historicoMensal = historicoRestante;
+            db.ref('historico_mes').set(historicoMensal).then(() => {
+                alert(`Semana '${nomeSemanaReferencia}' fechada e arquivada com sucesso!`);
+            });
+        }
+
+        function atualizarTabelaMensal() {
+            let itensCorrentes = historicoMensal.filter(h => h.tipo === "turno-fechado" || h.tipo === "semanal-consolidado");
+            
+            let fMes = itensCorrentes.reduce((s, c) => s + c.faturacao, 0);
+            let cMes = itensCorrentes.reduce((s, c) => s + c.custo, 0);
+            let dMes = itensCorrentes.reduce((s, c) => s + c.despesas, 0);
+            let lMes = itensCorrentes.reduce((s, c) => s + c.lucro, 0);
 
             if(document.getElementById('acumulado-mes-faturado')) document.getElementById('acumulado-mes-faturado').innerText = `${fMes.toFixed(2)} MT`;
             if(document.getElementById('acumulado-mes-custo')) document.getElementById('acumulado-mes-custo').innerText = `${cMes.toFixed(2)} MT`;
@@ -1022,9 +1085,22 @@
             const perm = usuarioAtivo ? usuarioAtivo.permissao : 'funcionario';
 
             [...historicoMensal].reverse().forEach(h => {
-                const esConsolidado = h.tipo === "mensal-consolidado";
-                const cardBg = esConsolidado ? 'border-2 border-amber-500/80 bg-amber-950/20 shadow-lg shadow-amber-500/5' : 'bg-gray-900 border-gray-800';
-                const tagIcon = esConsolidado ? '📊 [FECHO MENSAL BRUTO]' : '📅 Período Turno:';
+                const esConsolidadoMes = h.tipo === "mensal-consolidado";
+                const esConsolidadoSemana = h.tipo === "semanal-consolidado";
+                
+                let cardBg = 'bg-gray-900 border-gray-800';
+                let tagIcon = '📅 Período Turno:';
+                let corIcone = 'text-gray-400';
+
+                if (esConsolidadoMes) {
+                    cardBg = 'border-2 border-amber-500/80 bg-amber-950/20 shadow-lg shadow-amber-500/5';
+                    tagIcon = '📊 [FECHO MENSAL BRUTO]';
+                    corIcone = 'text-amber-400';
+                } else if (esConsolidadoSemana) {
+                    cardBg = 'border border-blue-500/60 bg-blue-950/20 shadow-md shadow-blue-500/5';
+                    tagIcon = '🗓️ [FECHO SEMANAL]';
+                    corIcone = 'text-blue-400';
+                }
                 
                 const blocoLucro = (perm === 'master') ? `
                     <div class="flex justify-between items-baseline pt-1 text-[11px] border-t border-gray-800/50 mt-1">
@@ -1035,7 +1111,7 @@
                 container.innerHTML += `
                     <div class="p-3 border rounded-xl flex flex-col transition ${cardBg}">
                         <div class="flex justify-between items-center mb-1">
-                            <span class="text-[9px] font-black tracking-wider uppercase ${esConsolidado ? 'text-amber-400' : 'text-gray-400'}">${tagIcon}</span>
+                            <span class="text-[9px] font-black tracking-wider uppercase ${corIcone}">${tagIcon}</span>
                             <span class="text-[10px] font-mono font-bold text-gray-400">${h.periodo}</span>
                         </div>
                         <div class="grid grid-cols-2 gap-x-2 gap-y-0.5 text-[11px] pt-1">
@@ -1054,9 +1130,9 @@
         }
 
         function fecharMesDefinitivo() {
-            let turnosParaConsolidar = historicoMensal.filter(h => h.tipo === "turno-fechado");
-            if(turnosParaConsolidar.length === 0) {
-                return alert("Não existem turnos diários no histórico para poder consolidar um mês.");
+            let itensParaConsolidar = historicoMensal.filter(h => h.tipo === "turno-fechado" || h.tipo === "semanal-consolidado");
+            if(itensParaConsolidar.length === 0) {
+                return alert("Não existem turnos ou semanas no histórico para consolidar um mês.");
             }
 
             const mesesNomes = ["JANEIRO", "FEVEREIRO", "MARÇO", "ABRIL", "MAIO", "JUNHO", "JULHO", "AGOSTO", "SETEMBRO", "OUTUBRO", "NOVEMBRO", "DEZEMBRO"];
@@ -1064,26 +1140,26 @@
             let nomeMesReferencia = prompt("Insira o nome do mês a fechar:", mesesNomes[mAtual.getMonth()] + " " + mAtual.getFullYear());
             if(!nomeMesReferencia) return;
 
-            if(!confirm(`⚠️ ATENÇÃO EXCLUSIVA MASTER\nEsta acção vai agrupar os ${turnosParaConsolidar.length} turnos acumulados num Fecho Mensal Único definitivo e limpará a lista corrente.`)) return;
+            if(!confirm(`⚠️ ATENÇÃO EXCLUSIVA MASTER\nEsta acção vai agrupar os ${itensParaConsolidar.length} registos (turnos e semanas) num Fecho Mensal Único definitivo e limpará a lista corrente.`)) return;
 
-            let f = turnosParaConsolidar.reduce((s, c) => s + c.faturacao, 0);
-            let c = turnosParaConsolidar.reduce((s, c) => s + c.custo, 0);
-            let d = turnosParaConsolidar.reduce((s, c) => s + c.despesas, 0);
-            let l = turnosParaConsolidar.reduce((s, c) => s + c.lucro, 0);
+            let f = itensParaConsolidar.reduce((s, c) => s + c.faturacao, 0);
+            let c = itensParaConsolidar.reduce((s, c) => s + c.custo, 0);
+            let d = itensParaConsolidar.reduce((s, c) => s + c.despesas, 0);
+            let l = itensParaConsolidar.reduce((s, c) => s + c.lucro, 0);
 
             let rankingMensalProdutos = {};
-            turnosParaConsolidar.forEach(turno => {
-                if(turno.bebidasRanking) {
-                    Object.entries(turno.bebidasRanking).forEach(([nome, qtd]) => {
+            itensParaConsolidar.forEach(item => {
+                if(item.bebidasRanking) {
+                    Object.entries(item.bebidasRanking).forEach(([nome, qtd]) => {
                         rankingMensalProdutos[nome] = (rankingMensalProdutos[nome] || 0) + qtd;
                     });
                 }
             });
             
             let rankingMensalEntradas = {};
-            turnosParaConsolidar.forEach(turno => {
-                if(turno.entradasRanking) {
-                    Object.entries(turno.entradasRanking).forEach(([nome, qtd]) => {
+            itensParaConsolidar.forEach(item => {
+                if(item.entradasRanking) {
+                    Object.entries(item.entradasRanking).forEach(([nome, qtd]) => {
                         rankingMensalEntradas[nome] = (rankingMensalEntradas[nome] || 0) + qtd;
                     });
                 }
@@ -1118,7 +1194,13 @@
                 return alert("Operadores de caixa não possuem permissão para exportar relatórios financeiros!");
             }
             
-            const tituloDoc = item.tipo === "mensal-consolidado" ? `RELATÓRIO MENSAL - ${item.periodo}` : `RELATÓRIO DE TURNO - ${item.periodo}`;
+            let tituloDoc = `RELATÓRIO DE TURNO - ${item.periodo}`;
+            if (item.tipo === "mensal-consolidado") {
+                tituloDoc = `RELATÓRIO MENSAL - ${item.periodo}`;
+            } else if (item.tipo === "semanal-consolidado") {
+                tituloDoc = `RELATÓRIO SEMANAL - ${item.periodo}`;
+            }
+            
             exportarRelatorioPDF(tituloDoc, item.faturacao, item.despesas, item.custo, item.lucro, item.bebidasRanking || {}, item.entradasRanking || {});
         }
 
