@@ -1706,6 +1706,17 @@
                 const subAtual = p.subcategoria || 'Outros';
                 const isComida = catAtual.toLowerCase().includes('comida');
 
+                let optionsCatHtml = "";
+                Object.keys(subcategoriasMap).forEach(c => {
+                    optionsCatHtml += `<option value="${c}" ${c === catAtual ? 'selected' : ''}>${c.toUpperCase()}</option>`;
+                });
+
+                let subsDisponiveis = subcategoriasMap[catAtual] || ["Outros"];
+                let optionsSubHtml = "";
+                subsDisponiveis.forEach(s => {
+                    optionsSubHtml += `<option value="${s}" ${s === subAtual ? 'selected' : ''}>${s}</option>`;
+                });
+
                 let blocoStockOuNao = !isComida 
                     ? `<div><label class="text-[9px] text-gray-500 block">Stock</label><input type="number" onchange="atualizarAtributoProduto(${p.id}, 'stock', this.value)" value="${p.stock}" class="w-full bg-gray-900 border border-gray-800 rounded px-1.5 py-1 text-gray-300"></div>`
                     : `<div><label class="text-[9px] text-gray-500 block">Stock</label><span class="text-[10px] text-gray-500 block py-1 font-sans italic">Não aplicável</span></div>`;
@@ -1717,8 +1728,21 @@
                 container.innerHTML += `
                     <div class="bg-gray-950 p-3 rounded-xl border border-gray-855 space-y-2 text-xs flex flex-col">
                         <div>
-                            <b class="text-gray-200 block truncate">${p.nome}</b>
-                            <span class="text-[9px] text-amber-400 font-bold uppercase">${catAtual} > ${subAtual}</span>
+                            <b class="text-gray-200 block truncate mb-1.5">${p.nome}</b>
+                            <div class="grid grid-cols-2 gap-1.5">
+                                <div>
+                                    <label class="text-[9px] text-gray-500 block">Categoria</label>
+                                    <select onchange="alterarCategoriaProdutoConfig(${p.id}, this.value)" class="w-full bg-gray-900 border border-gray-800 rounded px-1 py-1 text-amber-400 text-[11px] font-bold uppercase">
+                                        ${optionsCatHtml}
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="text-[9px] text-gray-500 block">Subcategoria</label>
+                                    <select onchange="atualizarAtributoProdutoTexto(${p.id}, 'subcategoria', this.value)" class="w-full bg-gray-900 border border-gray-800 rounded px-1 py-1 text-amber-300 text-[11px]">
+                                        ${optionsSubHtml}
+                                    </select>
+                                </div>
+                            </div>
                         </div>
                         <div class="grid grid-cols-3 gap-1.5 font-mono">
                             ${blocoCustoOuNao}
@@ -1728,6 +1752,28 @@
                         <div class="flex justify-end pt-1"><button onclick="removerProdutoDefinitivo(${p.id})" class="text-red-400 text-[10px] font-bold flex items-center gap-0.5 bg-red-950/20 border border-red-900/40 px-2 py-0.5 rounded-md">🗑️ Remover Artigo</button></div>
                     </div>`;
             });
+        }
+
+        function alterarCategoriaProdutoConfig(id, novaCat) {
+            const p = produtos.find(x => x.id === id);
+            if(!p) return;
+            p.categoria = novaCat;
+            const subsPermitidas = subcategoriasMap[novaCat] || ["Outros"];
+            if(!subsPermitidas.includes(p.subcategoria)) {
+                p.subcategoria = subsPermitidas[0] || "Outros";
+            }
+            if(novaCat.toLowerCase().includes('comida')) {
+                p.stock = 0;
+                p.custo = 0;
+            }
+            salvarDadosFirebase('produtos', produtos);
+        }
+
+        function atualizarAtributoProdutoTexto(id, campo, valor) {
+            const p = produtos.find(x => x.id === id);
+            if(!p) return;
+            p[campo] = valor;
+            salvarDadosFirebase('produtos', produtos);
         }
 
         function atualizarAtributoProduto(id, campo, valor) {
@@ -1845,58 +1891,58 @@
             const perm = usuarioAtivo ? usuarioAtivo.permissao : 'funcionario';
             
             if ((aba === 'financeiro-mensal' || aba === 'produtos') && perm === 'funcionario') {
-                return;
+                return alert("Acesso Restrito. Operadores de caixa não têm permissão para abrir esta secção.");
             }
 
             ['home', 'vendas-diarias', 'restock', 'financeiro-mensal', 'produtos'].forEach(a => {
-                const bloco = document.getElementById(`aba-${a}`);
-                const btn = document.getElementById(`btn-aba-${a}`);
-                if(bloco) bloco.classList.add('hidden');
-                if(btn) btn.className = "snap-center px-3 py-2 rounded-lg text-xs font-bold transition shrink-0 flex items-center gap-1.5 text-gray-400";
+                const el = document.getElementById('aba-' + a);
+                const btn = document.getElementById('btn-aba-' + a);
+                if(el) el.classList.add('hidden');
+                if(btn) {
+                    btn.classList.remove('bg-amber-500', 'text-gray-950', 'font-black');
+                    btn.classList.add('text-gray-400');
+                }
             });
 
-            const blocoAtivo = document.getElementById(`aba-${aba}`);
-            const btnAtivo = document.getElementById(`btn-aba-${aba}`);
-            if(blocoAtivo) blocoAtivo.classList.remove('hidden');
-            if(btnAtivo) btnAtivo.className = "snap-center px-3 py-2 rounded-lg text-xs font-bold transition shrink-0 flex items-center gap-1.5 bg-amber-500 text-gray-950 shadow-lg shadow-amber-500/10";
-            
-            if(aba === 'home') fecharVisualizacaoMesa();
-        }
+            const alvoEl = document.getElementById('aba-' + aba);
+            const alvoBtn = document.getElementById('btn-aba-' + aba);
+            if(alvoEl) alvoEl.classList.remove('hidden');
+            if(alvoBtn) {
+                alvoBtn.classList.add('bg-amber-500', 'text-gray-950', 'font-black');
+                alvoBtn.classList.remove('text-gray-400');
+            }
 
-        function fazerLogout() {
-            usuarioAtivo = null;
-            sessionStorage.removeItem('mb_sessao');
-            document.getElementById('login-user-func').value = "";
-            document.getElementById('login-pass-func').value = "";
-            document.getElementById('login-pin-admin').value = "";
-            inicializarSistema();
-        }
-
-        function inicializarSistema() {
-            if (usuarioAtivo) {
-                document.getElementById('tela-login').classList.add('hidden');
-                document.getElementById('sistema-conteudo').classList.remove('hidden');
-                document.getElementById('nome-usuario-ativo').innerText = usuarioAtivo.nome.toUpperCase();
-                
-                let cargo = "Caixa";
-                if(usuarioAtivo.permissao === 'master') cargo = "Dono (Master)";
-                else if(usuarioAtivo.permissao === 'admin') cargo = "Administrador";
-                document.getElementById('txt-permissao').innerText = cargo;
-                
-                atualizarSelectsCategoriasAdmin();
-                renderizarBotoesCategoriasFiltro();
-                renderizarGestaoCategoriasAdmin();
-                alternarCamposCriacaoProduto();
-                aplicarRestricoesPermissao();
-                atualizarListaOperadores();
-                mudarAba('home');
-            } else {
-                document.getElementById('tela-login').classList.remove('hidden');
-                document.getElementById('sistema-conteudo').classList.add('hidden');
+            if(aba === 'home') {
+                if(!mesaSelecionadaId) fecharVisualizacaoMesa();
             }
         }
 
-        window.onload = () => { carregarEEscutarFirebase(); inicializarSistema(); };
+        function fazerLogout() {
+            sessionStorage.removeItem('mb_sessao');
+            usuarioAtivo = null;
+            document.getElementById('sistema-conteudo').classList.add('hidden');
+            document.getElementById('tela-login').classList.remove('hidden');
+        }
+
+        function inicializarSistema() {
+            document.getElementById('tela-login').classList.add('hidden');
+            document.getElementById('sistema-conteudo').classList.remove('hidden');
+            
+            if(usuarioAtivo) {
+                document.getElementById('nome-usuario-ativo').innerText = usuarioAtivo.nome.toUpperCase();
+                document.getElementById('txt-permissao').innerText = `PERFIL: ${usuarioAtivo.permissao.toUpperCase()}`;
+            }
+
+            aplicarRestricoesPermissao();
+            mudarAba('home');
+            carregarEEscutarFirebase();
+        }
+
+        window.onload = function() {
+            if(usuarioAtivo) {
+                inicializarSistema();
+            }
+        }
     </script>
 </body>
 </html>
