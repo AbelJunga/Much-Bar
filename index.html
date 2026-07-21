@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Much Bar - Mobile Ultimate v5.7 (Categorias Dinâmicas & Subcategorias)</title>
+    <title>Much Bar - Mobile Ultimate v5.8 (Relatórios Separados)</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
@@ -286,7 +286,6 @@
                     </button>
                 </div>
 
-                <!-- Gestão Dinâmica de Categorias e Subcategorias -->
                 <div class="bg-gray-900 border border-gray-800 p-4 rounded-2xl space-y-3">
                     <h3 class="text-xs font-black text-gray-400 uppercase tracking-wider border-b border-gray-800 pb-2">Gestão de Categorias e Subcategorias</h3>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -1477,9 +1476,12 @@
                         </div>
                         ${blocoLucro}
                         
-                        <div class="mt-2.5 pt-2 border-t border-gray-800/50 flex justify-end">
-                            <button onclick="emitirPdfHistorico('${h.id}')" class="px-3 py-1.5 bg-gray-950 border border-gray-800 hover:border-amber-500/50 rounded-lg text-[10px] font-black text-amber-400 transition flex items-center gap-1">
-                                <span class="material-icons text-xs">picture_as_pdf</span> Descarregar PDF
+                        <div class="mt-2.5 pt-2 border-t border-gray-800/50 flex flex-wrap gap-2 justify-end">
+                            <button onclick="emitirPdfHistorico('${h.id}', 'comida')" class="px-2.5 py-1.5 bg-orange-950/40 border border-orange-850 hover:border-orange-500/50 rounded-lg text-[10px] font-black text-orange-400 transition flex items-center gap-1">
+                                <span class="material-icons text-xs">picture_as_pdf</span> PDF Comida
+                            </button>
+                            <button onclick="emitirPdfHistorico('${h.id}', 'bebida')" class="px-2.5 py-1.5 bg-blue-950/40 border border-blue-850 hover:border-blue-500/50 rounded-lg text-[10px] font-black text-blue-400 transition flex items-center gap-1">
+                                <span class="material-icons text-xs">picture_as_pdf</span> PDF Bebida
                             </button>
                         </div>
                     </div>`;
@@ -1550,7 +1552,7 @@
             });
         }
 
-        function emitirPdfHistorico(idCard) {
+        function emitirPdfHistorico(idCard, tipoRelatorio) {
             const item = historicoMensal.find(h => h.id === idCard);
             if(!item) return alert("Erro ao carregar dados do relatório para gerar o PDF!");
             
@@ -1559,23 +1561,64 @@
                 return alert("Operadores de caixa não possuem permissão para exportar relatórios financeiros!");
             }
             
-            let tituloDoc = `RELATÓRIO DE TURNO - ${item.periodo}`;
+            let tipoPeriodoTxt = `TURNO - ${item.periodo}`;
             if (item.tipo === "mensal-consolidado") {
-                tituloDoc = `RELATÓRIO MENSAL - ${item.periodo}`;
+                tipoPeriodoTxt = `MENSAL - ${item.periodo}`;
             } else if (item.tipo === "semanal-consolidado") {
-                tituloDoc = `RELATÓRIO SEMANAL - ${item.periodo}`;
+                tipoPeriodoTxt = `SEMANAL - ${item.periodo}`;
             }
-            
-            exportarRelatorioPDF(tituloDoc, item.faturacao, item.despesas, item.custo, item.lucro, item.comidaRanking || {}, item.bebidasRanking || {}, item.entradasRanking || {});
+
+            if (tipoRelatorio === 'comida') {
+                exportarRelatorioPDFComida(`RELATÓRIO DE COMIDA - ${tipoPeriodoTxt}`, item.faturacao, item.comidaRanking || {});
+            } else {
+                exportarRelatorioPDFBebida(`RELATÓRIO DE BEBIDAS - ${tipoPeriodoTxt}`, item.faturacao, item.despesas, item.custo, item.lucro, item.bebidasRanking || {}, item.entradasRanking || {});
+            }
         }
 
-        function exportarRelatorioPDF(titulo, faturado, despesas, custo, lucro, comida, bebidas, entradas) {
+        function exportarRelatorioPDFComida(titulo, faturado, comida) {
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
 
             doc.setFont("helvetica", "bold");
             doc.setFontSize(22);
-            doc.text("MUCH BAR - SISTEMA DE GESTÃO", 14, 20);
+            doc.text("MUCH BAR - SETOR DE COMIDA", 14, 20);
+            
+            doc.setFontSize(13);
+            doc.setFont("helvetica", "normal");
+            doc.text(titulo, 14, 28);
+            
+            doc.setLineWidth(0.5);
+            doc.line(14, 32, 196, 32);
+
+            let eixoy = 42;
+
+            doc.setFont("helvetica", "bold");
+            doc.setFontSize(12);
+            doc.text("ARTIGOS DE COMIDA COMERCIALIZADOS:", 14, eixoy);
+            doc.setFont("helvetica", "normal");
+            doc.setFontSize(11);
+            eixoy += 7;
+
+            if(Object.keys(comida).length === 0) {
+                doc.text("Sem registo de itens de comida comercializados.", 14, eixoy);
+            } else {
+                Object.entries(comida).forEach(([artigo, quantidade]) => {
+                    if(eixoy > 280) { doc.addPage(); eixoy = 20; }
+                    doc.text(`- ${artigo}: ${quantidade} Unidades`, 14, eixoy);
+                    eixoy += 7;
+                });
+            }
+
+            doc.save(`MuchBar_Relatorio_Comida_${Date.now()}.pdf`);
+        }
+
+        function exportarRelatorioPDFBebida(titulo, faturado, despesas, custo, lucro, bebidas, entradas) {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            doc.setFont("helvetica", "bold");
+            doc.setFontSize(22);
+            doc.text("MUCH BAR - SETOR DE BEBIDAS", 14, 20);
             
             doc.setFontSize(13);
             doc.setFont("helvetica", "normal");
@@ -1585,7 +1628,7 @@
             doc.line(14, 32, 196, 32);
 
             doc.setFontSize(11);
-            doc.text(`Faturação Total (Bruta): ${faturado.toFixed(2)} MT`, 14, 42);
+            doc.text(`Faturação Total (Bebidas/Outros): ${faturado.toFixed(2)} MT`, 14, 42);
             doc.text(`Gastos / Sangrias Gerais: ${despesas.toFixed(2)} MT`, 14, 49);
             
             if(usuarioAtivo && usuarioAtivo.permissao === 'master') {
@@ -1598,27 +1641,7 @@
 
             doc.setFont("helvetica", "bold");
             doc.setFontSize(12);
-            doc.text("RELATÓRIO DE COMIDA:", 14, eixoy);
-            doc.setFont("helvetica", "normal");
-            doc.setFontSize(11);
-            eixoy += 7;
-
-            if(Object.keys(comida).length === 0) {
-                doc.text("Sem registo de itens de comida comercializados.", 14, eixoy);
-                eixoy += 7;
-            } else {
-                Object.entries(comida).forEach(([artigo, quantidade]) => {
-                    if(eixoy > 280) { doc.addPage(); eixoy = 20; }
-                    doc.text(`- ${artigo}: ${quantidade} Unidades`, 14, eixoy);
-                    eixoy += 7;
-                });
-            }
-
-            eixoy += 3;
-            if(eixoy > 270) { doc.addPage(); eixoy = 20; }
-            doc.setFont("helvetica", "bold");
-            doc.setFontSize(12);
-            doc.text("RELATÓRIO DE BEBIDAS / OUTROS:", 14, eixoy);
+            doc.text("BEBIDAS / OUTROS COMERCIALIZADOS:", 14, eixoy);
             doc.setFont("helvetica", "normal");
             doc.setFontSize(11);
             eixoy += 7;
@@ -1634,7 +1657,7 @@
                 });
             }
 
-            eixoy += 5;
+            eixoy += 3;
             if(eixoy > 270) { doc.addPage(); eixoy = 20; }
             doc.setFont("helvetica", "bold");
             doc.setFontSize(12);
@@ -1653,7 +1676,7 @@
                 });
             }
 
-            doc.save(`MuchBar_Relatorio_${Date.now()}.pdf`);
+            doc.save(`MuchBar_Relatorio_Bebidas_${Date.now()}.pdf`);
         }
 
         function popularSelectRestock() {
@@ -1837,112 +1860,100 @@
                         <button onclick="eliminarUsuario('${u.username}')" class="text-red-400 p-1 master-only"><span class="material-icons text-sm">person_remove</span></button>
                     </div>`;
             });
-            aplicarRestricoesPermissao();
         }
 
         function adicionarUsuario() {
-            const u = document.getElementById('novo-user-nome').value.trim();
-            const p = document.getElementById('novo-user-pass').value.trim();
-            const pm = document.getElementById('novo-user-permissao').value;
-            
-            if(!u || !p) return alert("Insira o nome de utilizador e password!");
-            if(usuarios.find(x => x.username === u)) return alert("Esse utilizador já existe no sistema!");
+            const uInp = document.getElementById('novo-user-nome');
+            const pInp = document.getElementById('novo-user-pass');
+            const permInp = document.getElementById('novo-user-permissao');
 
-            usuarios.push({ username: u, pass: p, permissao: pm });
-            salvarDadosFirebase('usuarios', usuarios);
-            
-            document.getElementById('novo-user-nome').value = "";
-            document.getElementById('novo-user-pass').value = "";
+            const u = uInp.value.trim();
+            const p = pInp.value.trim();
+            const perm = permInp.value;
+
+            if(!u || !p) return alert("Insira o nome de utilizador e a palavra-passe!");
+            if(usuarios.some(x => x.username === u)) return alert("Este nome de utilizador já existe!");
+
+            usuarios.push({ username: u, pass: p, permissao: perm });
+            db.ref('usuarios').set(usuarios).then(() => {
+                uInp.value = "";
+                pInp.value = "";
+                alert("Utilizador criado com sucesso!");
+            });
         }
 
         function eliminarUsuario(username) {
-            if(username === "barman1") return alert("Não é possível remover o utilizador base de segurança!");
-            if(!confirm(`Remover permanentemente o acesso de "${username}"?`)) return;
+            if(username === "barman1") return alert("O utilizador predefinido do sistema não pode ser removido.");
+            if(usuarios.length <= 1) return alert("Deve manter pelo menos um utilizador no sistema.");
+            if(!confirm(`Tem a certeza que deseja remover o operador '${username}'?`)) return;
+
             usuarios = usuarios.filter(x => x.username !== username);
-            salvarDadosFirebase('usuarios', usuarios);
+            db.ref('usuarios').set(usuarios).then(() => alert("Utilizador removido com sucesso!"));
         }
 
         function tentarLoginFuncionario() {
             const u = document.getElementById('login-user-func').value.trim();
             const p = document.getElementById('login-pass-func').value.trim();
-            
-            const userObj = usuarios.find(x => x.username === u && x.pass === p);
-            if(userObj) {
-                usuarioAtivo = { nome: userObj.username, permissao: userObj.permissao };
+
+            const encontrado = usuarios.find(x => x.username === u && x.pass === p);
+            if(encontrado) {
+                usuarioAtivo = encontrado;
                 sessionStorage.setItem('mb_sessao', JSON.stringify(usuarioAtivo));
-                inicializarSistema();
+                entrarNoSistema();
             } else {
-                alert("Utilizador ou palavra-passe incorrectos!");
+                alert("Utilizador ou palavra-passe incorretos!");
             }
         }
 
         function tentarLoginAdminMaster() {
             const pin = document.getElementById('login-pin-admin').value.trim();
             if(pin === PIN_ADMIN_PADRAO) {
-                usuarioAtivo = { nome: "MASTER CENTRAL", permissao: "master" };
+                usuarioAtivo = { username: "Dono Master", pass: "***", permissao: "master" };
                 sessionStorage.setItem('mb_sessao', JSON.stringify(usuarioAtivo));
-                inicializarSistema();
+                entrarNoSistema();
             } else {
-                alert("PIN Administrativo de Emergência Inválido!");
+                alert("PIN Master incorreto!");
             }
         }
 
-        function mudarAba(aba) {
-            const perm = usuarioAtivo ? usuarioAtivo.permissao : 'funcionario';
+        function entrarNoSistema() {
+            document.getElementById('tela-login').classList.add('hidden');
+            document.getElementById('sistema-conteudo').classList.remove('hidden');
             
-            if ((aba === 'financeiro-mensal' || aba === 'produtos') && perm === 'funcionario') {
-                return alert("Acesso Restrito. Operadores de caixa não têm permissão para abrir esta secção.");
-            }
-
-            ['home', 'vendas-diarias', 'restock', 'financeiro-mensal', 'produtos'].forEach(a => {
-                const el = document.getElementById('aba-' + a);
-                const btn = document.getElementById('btn-aba-' + a);
-                if(el) el.classList.add('hidden');
-                if(btn) {
-                    btn.classList.remove('bg-amber-500', 'text-gray-950', 'font-black');
-                    btn.classList.add('text-gray-400');
-                }
-            });
-
-            const alvoEl = document.getElementById('aba-' + aba);
-            const alvoBtn = document.getElementById('btn-aba-' + aba);
-            if(alvoEl) alvoEl.classList.remove('hidden');
-            if(alvoBtn) {
-                alvoBtn.classList.add('bg-amber-500', 'text-gray-950', 'font-black');
-                alvoBtn.classList.remove('text-gray-400');
-            }
-
-            if(aba === 'home') {
-                if(!mesaSelecionadaId) fecharVisualizacaoMesa();
-            }
+            document.getElementById('nome-usuario-ativo').innerText = usuarioAtivo.nome || usuarioAtivo.username;
+            document.getElementById('txt-permissao').innerText = `Perfil: ${usuarioAtivo.permissao.toUpperCase()}`;
+            
+            aplicarRestricoesPermissao();
+            mudarAba('home');
         }
 
         function fazerLogout() {
             sessionStorage.removeItem('mb_sessao');
             usuarioAtivo = null;
-            document.getElementById('sistema-conteudo').classList.add('hidden');
-            document.getElementById('tela-login').classList.remove('hidden');
+            location.reload();
         }
 
-        function inicializarSistema() {
-            document.getElementById('tela-login').classList.add('hidden');
-            document.getElementById('sistema-conteudo').classList.remove('hidden');
-            
-            if(usuarioAtivo) {
-                document.getElementById('nome-usuario-ativo').innerText = usuarioAtivo.nome.toUpperCase();
-                document.getElementById('txt-permissao').innerText = `PERFIL: ${usuarioAtivo.permissao.toUpperCase()}`;
-            }
+        function mudarAba(idAba) {
+            const abas = ['home', 'vendas-diarias', 'restock', 'financeiro-mensal', 'produtos'];
+            abas.forEach(a => {
+                const el = document.getElementById(`aba-${a}`);
+                const btn = document.getElementById(`btn-aba-${a}`);
+                if(el) el.classList.add('hidden');
+                if(btn) btn.className = "snap-center px-3 py-2 rounded-lg text-xs font-bold transition shrink-0 flex items-center gap-1.5 text-gray-400";
+            });
 
-            aplicarRestricoesPermissao();
-            mudarAba('home');
+            const alvoEl = document.getElementById(`aba-${idAba}`);
+            const alvoBtn = document.getElementById(`btn-aba-${idAba}`);
+            if(alvoEl) alvoEl.classList.remove('hidden');
+            if(alvoBtn) alvoBtn.className = "snap-center px-3 py-2 rounded-lg text-xs font-bold transition shrink-0 flex items-center gap-1.5 bg-amber-500 text-gray-950 shadow-md";
+        }
+
+        window.onload = () => {
             carregarEEscutarFirebase();
-        }
-
-        window.onload = function() {
             if(usuarioAtivo) {
-                inicializarSistema();
+                entrarNoSistema();
             }
-        }
+        };
     </script>
 </body>
 </html>
