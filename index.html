@@ -1072,23 +1072,50 @@
             if(document.getElementById('rel-turno-lucro')) document.getElementById('rel-turno-lucro').innerText = `${(faturamentoDia - custoStockDia).toFixed(2)} MT`;
             if(document.getElementById('rel-turno-contas')) document.getElementById('rel-turno-contas').innerText = vendasCronologicas.length;
 
-            let resumoProds = {};
+            let resumoProdsComida = {};
+            let resumoProdsBebida = {};
+            
             vendasCronologicas.forEach(v => {
                 (v.produtos || []).forEach(p => {
-                    resumoProds[p.nome] = (resumoProds[p.nome] || 0) + p.qtd;
+                    const isComida = (p.categoria || '').toLowerCase().includes('comida');
+                    if (isComida) {
+                        resumoProdsComida[p.nome] = (resumoProdsComida[p.nome] || 0) + p.qtd;
+                    } else {
+                        resumoProdsBebida[p.nome] = (resumoProdsBebida[p.nome] || 0) + p.qtd;
+                    }
                 });
             });
 
             const contRelProds = document.getElementById('rel-turno-lista-produtos');
             if(contRelProds) {
-                contRelProds.innerHTML = Object.keys(resumoProds).length === 0 ? `<p class="text-gray-600 italic text-[10px] col-span-2">Nenhum artigo saído.</p>` : "";
-                Object.entries(resumoProds).forEach(([nome, q]) => {
-                    contRelProds.innerHTML += `
-                        <div class="bg-gray-950 border border-gray-855 p-2 rounded-xl flex justify-between font-mono">
-                            <span class="text-gray-300 truncate">${nome}</span>
-                            <b class="text-amber-500">${q} UN</b>
-                        </div>`;
-                });
+                const totalArtigosCount = Object.keys(resumoProdsComida).length + Object.keys(resumoProdsBebida).length;
+                contRelProds.innerHTML = totalArtigosCount === 0 ? `<p class="text-gray-600 italic text-[10px] col-span-2">Nenhum artigo saído.</p>` : "";
+                
+                let htmlRelatorioArtigos = "";
+                
+                if (Object.keys(resumoProdsComida).length > 0) {
+                    htmlRelatorioArtigos += `<div class="col-span-full text-[10px] font-black text-orange-400 uppercase tracking-wider mt-1 border-b border-orange-500/20 pb-0.5">🍽️ Relatório de Comida</div>`;
+                    Object.entries(resumoProdsComida).forEach(([nome, q]) => {
+                        htmlRelatorioArtigos += `
+                            <div class="bg-gray-950 border border-gray-855 p-2 rounded-xl flex justify-between font-mono col-span-1">
+                                <span class="text-gray-300 truncate">${nome}</span>
+                                <b class="text-orange-400">${q} UN</b>
+                            </div>`;
+                    });
+                }
+
+                if (Object.keys(resumoProdsBebida).length > 0) {
+                    htmlRelatorioArtigos += `<div class="col-span-full text-[10px] font-black text-blue-400 uppercase tracking-wider mt-2 border-b border-blue-500/20 pb-0.5">🍷 Relatório de Bebidas / Outros</div>`;
+                    Object.entries(resumoProdsBebida).forEach(([nome, q]) => {
+                        htmlRelatorioArtigos += `
+                            <div class="bg-gray-950 border border-gray-855 p-2 rounded-xl flex justify-between font-mono col-span-1">
+                                <span class="text-gray-300 truncate">${nome}</span>
+                                <b class="text-amber-500">${q} UN</b>
+                            </div>`;
+                    });
+                }
+                
+                contRelProds.innerHTML = htmlRelatorioArtigos;
             }
             
             let resumoEntradas = {};
@@ -1285,10 +1312,17 @@
             let custoStockTurno = vendasCronologicas.reduce((s, c) => s + (c.custoTotal || 0), 0);
             let lucroTurno = faturamentoTurno - despesasTurnoTotal - custoStockTurno;
 
+            let rankingComida = {};
             let rankingBebidas = {};
+            
             vendasCronologicas.forEach(v => {
                 (v.produtos || []).forEach(p => {
-                    rankingBebidas[p.nome] = (rankingBebidas[p.nome] || 0) + p.qtd;
+                    const isComida = (p.categoria || '').toLowerCase().includes('comida');
+                    if (isComida) {
+                        rankingComida[p.nome] = (rankingComida[p.nome] || 0) + p.qtd;
+                    } else {
+                        rankingBebidas[p.nome] = (rankingBebidas[p.nome] || 0) + p.qtd;
+                    }
                 });
             });
             
@@ -1308,6 +1342,7 @@
                 custo: custoStockTurno,
                 despesas: despesasTurnoTotal,
                 lucro: lucroTurno,
+                comidaRanking: rankingComida,
                 bebidasRanking: rankingBebidas,
                 entradasRanking: rankingEntradas
             };
@@ -1341,11 +1376,18 @@
             let d = turnosParaConsolidar.reduce((s, c) => s + c.despesas, 0);
             let l = turnosParaConsolidar.reduce((s, c) => s + c.lucro, 0);
 
-            let rankingSemanalProdutos = {};
+            let rankingSemanalComida = {};
+            let rankingSemanalBebidas = {};
+            
             turnosParaConsolidar.forEach(turno => {
+                if(turno.comidaRanking) {
+                    Object.entries(turno.comidaRanking).forEach(([nome, qtd]) => {
+                        rankingSemanalComida[nome] = (rankingSemanalComida[nome] || 0) + qtd;
+                    });
+                }
                 if(turno.bebidasRanking) {
                     Object.entries(turno.bebidasRanking).forEach(([nome, qtd]) => {
-                        rankingSemanalProdutos[nome] = (rankingSemanalProdutos[nome] || 0) + qtd;
+                        rankingSemanalBebidas[nome] = (rankingSemanalBebidas[nome] || 0) + qtd;
                     });
                 }
             });
@@ -1369,7 +1411,8 @@
                 custo: c,
                 despesas: d,
                 lucro: l,
-                bebidasRanking: rankingSemanalProdutos,
+                comidaRanking: rankingSemanalComida,
+                bebidasRanking: rankingSemanalBebidas,
                 entradasRanking: rankingSemanalEntradas
             });
 
@@ -1461,11 +1504,18 @@
             let d = itensParaConsolidar.reduce((s, c) => s + c.despesas, 0);
             let l = itensParaConsolidar.reduce((s, c) => s + c.lucro, 0);
 
-            let rankingMensalProdutos = {};
+            let rankingMensalComida = {};
+            let rankingMensalBebidas = {};
+            
             itensParaConsolidar.forEach(item => {
+                if(item.comidaRanking) {
+                    Object.entries(item.comidaRanking).forEach(([nome, qtd]) => {
+                        rankingMensalComida[nome] = (rankingMensalComida[nome] || 0) + qtd;
+                    });
+                }
                 if(item.bebidasRanking) {
                     Object.entries(item.bebidasRanking).forEach(([nome, qtd]) => {
-                        rankingMensalProdutos[nome] = (rankingMensalProdutos[nome] || 0) + qtd;
+                        rankingMensalBebidas[nome] = (rankingMensalBebidas[nome] || 0) + qtd;
                     });
                 }
             });
@@ -1489,7 +1539,8 @@
                 custo: c,
                 despesas: d,
                 lucro: l,
-                bebidasRanking: rankingMensalProdutos,
+                comidaRanking: rankingMensalComida,
+                bebidasRanking: rankingMensalBebidas,
                 entradasRanking: rankingMensalEntradas
             });
 
@@ -1515,10 +1566,10 @@
                 tituloDoc = `RELATÓRIO SEMANAL - ${item.periodo}`;
             }
             
-            exportarRelatorioPDF(tituloDoc, item.faturacao, item.despesas, item.custo, item.lucro, item.bebidasRanking || {}, item.entradasRanking || {});
+            exportarRelatorioPDF(tituloDoc, item.faturacao, item.despesas, item.custo, item.lucro, item.comidaRanking || {}, item.bebidasRanking || {}, item.entradasRanking || {});
         }
 
-        function exportarRelatorioPDF(titulo, faturado, despesas, custo, lucro, bebidas, entradas) {
+        function exportarRelatorioPDF(titulo, faturado, despesas, custo, lucro, comida, bebidas, entradas) {
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
 
@@ -1543,25 +1594,48 @@
                 doc.text(`LUCRO LÍQUIDO FINAL: ${lucro.toFixed(2)} MT`, 14, 63);
             }
 
+            let eixoy = 74;
+
             doc.setFont("helvetica", "bold");
             doc.setFontSize(12);
-            doc.text("CONSUMO CRONOLÓGICO DE ARTIGOS:", 14, 76);
+            doc.text("RELATÓRIO DE COMIDA:", 14, eixoy);
             doc.setFont("helvetica", "normal");
             doc.setFontSize(11);
+            eixoy += 7;
 
-            let eixoy = 84;
+            if(Object.keys(comida).length === 0) {
+                doc.text("Sem registo de itens de comida comercializados.", 14, eixoy);
+                eixoy += 7;
+            } else {
+                Object.entries(comida).forEach(([artigo, quantidade]) => {
+                    if(eixoy > 280) { doc.addPage(); eixoy = 20; }
+                    doc.text(`- ${artigo}: ${quantidade} Unidades`, 14, eixoy);
+                    eixoy += 7;
+                });
+            }
+
+            eixoy += 3;
+            if(eixoy > 270) { doc.addPage(); eixoy = 20; }
+            doc.setFont("helvetica", "bold");
+            doc.setFontSize(12);
+            doc.text("RELATÓRIO DE BEBIDAS / OUTROS:", 14, eixoy);
+            doc.setFont("helvetica", "normal");
+            doc.setFontSize(11);
+            eixoy += 7;
+
             if(Object.keys(bebidas).length === 0) {
-                doc.text("Sem registo de artigos comercializados neste período.", 14, eixoy);
+                doc.text("Sem registo de bebidas comercializadas.", 14, eixoy);
+                eixoy += 7;
             } else {
                 Object.entries(bebidas).forEach(([artigo, quantidade]) => {
                     if(eixoy > 280) { doc.addPage(); eixoy = 20; }
-                    doc.text(`- ${artigo}: ${quantidade} Unidades vendidas`, 14, eixoy);
+                    doc.text(`- ${artigo}: ${quantidade} Unidades`, 14, eixoy);
                     eixoy += 7;
                 });
             }
 
             eixoy += 5;
-            if(eixoy > 280) { doc.addPage(); eixoy = 20; }
+            if(eixoy > 270) { doc.addPage(); eixoy = 20; }
             doc.setFont("helvetica", "bold");
             doc.setFontSize(12);
             doc.text("ENTRADAS DE STOCK (RESTOCK):", 14, eixoy);
