@@ -339,7 +339,7 @@
                     </div>
 
                     <div class="grid grid-cols-2 gap-2">
-                        <div class="space-y-1"><label class="text-[10px] text-gray-500 uppercase font-bold">Custo de Compra (MT)</label><input type="number" id="novo-prod-custo" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-sm text-red-400 font-mono"></div>
+                        <div class="space-y-1" id="grupo-input-custo"><label class="text-[10px] text-gray-500 uppercase font-bold">Custo de Compra (MT)</label><input type="number" id="novo-prod-custo" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-sm text-red-400 font-mono"></div>
                         <div class="space-y-1"><label class="text-[10px] text-gray-500 uppercase font-bold">Venda (MT)</label><input type="number" id="novo-prod-preco" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-sm text-emerald-400 font-mono"></div>
                     </div>
                     <div class="space-y-1" id="grupo-input-stock"><label class="text-[10px] text-gray-500 uppercase font-bold">Stock Inicial</label><input type="number" id="novo-prod-stock" value="0" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-sm text-gray-300 font-mono"></div>
@@ -373,7 +373,6 @@
     <script>
         const PIN_ADMIN_PADRAO = "5369"; 
 
-        // Estrutura inicial padrão se o banco estiver vazio
         let subcategoriasMap = {
             bebidas: ["Cervejas", "Sumos", "Refrigerantes", "Vinhos", "Destilados", "Águas", "Outros"],
             comidas: ["Petiscos", "Sopas", "Doses", "Pratos do Dia", "Acompanhamentos", "Sobremesas", "Outros"]
@@ -445,7 +444,6 @@
             db.ref('produtos').on('value', (snapshot) => {
                 const dados = snapshot.val();
                 produtos = dados ? ordenarProdutosPersonalizado(Object.values(dados).filter(Boolean)) : [];
-                // Garantir regra de subcategoria default "Outros" se faltar
                 produtos.forEach(p => {
                     if (!p.subcategoria || !(subcategoriasMap[p.categoria] || []).includes(p.subcategoria)) {
                         p.subcategoria = "Outros";
@@ -503,7 +501,6 @@
             });
         }
 
-        // Funções de Gestão Dinâmica de Categorias e Subcategorias
         function atualizarSelectsCategoriasAdmin() {
             const catSelect = document.getElementById('novo-prod-categoria');
             const selectParaSub = document.getElementById('select-cat-para-sub');
@@ -610,12 +607,17 @@
         function alternarCamposCriacaoProduto() {
             const cat = document.getElementById('novo-prod-categoria').value;
             const grupoStock = document.getElementById('grupo-input-stock');
-            if (!grupoStock) return;
+            const grupoCusto = document.getElementById('grupo-input-custo');
+            if (!grupoStock || !grupoCusto) return;
+            
             if (cat.toLowerCase().includes('comida')) {
                 grupoStock.classList.add('hidden');
+                grupoCusto.classList.add('hidden');
                 document.getElementById('novo-prod-stock').value = "0";
+                document.getElementById('novo-prod-custo').value = "0";
             } else {
                 grupoStock.classList.remove('hidden');
+                grupoCusto.classList.remove('hidden');
             }
         }
 
@@ -955,7 +957,6 @@
                 return;
             }
 
-            // Separar itens por Comida e Bebida (ou categorias genéricas)
             const comidasItens = items.filter(i => (i.categoria || '').toLowerCase().includes('comida'));
             const bebidasItens = items.filter(i => !(i.categoria || '').toLowerCase().includes('comida'));
 
@@ -1632,6 +1633,10 @@
                     ? `<div><label class="text-[9px] text-gray-500 block">Stock</label><input type="number" onchange="atualizarAtributoProduto(${p.id}, 'stock', this.value)" value="${p.stock}" class="w-full bg-gray-900 border border-gray-800 rounded px-1.5 py-1 text-gray-300"></div>`
                     : `<div><label class="text-[9px] text-gray-500 block">Stock</label><span class="text-[10px] text-gray-500 block py-1 font-sans italic">Não aplicável</span></div>`;
 
+                let blocoCustoOuNao = !isComida
+                    ? `<div><label class="text-[9px] text-gray-500 block">Custo</label><input type="number" step="any" onchange="atualizarAtributoProduto(${p.id}, 'custo', this.value)" value="${p.custo}" class="w-full bg-gray-900 border border-gray-800 rounded px-1.5 py-1 text-red-400"></div>`
+                    : `<div><label class="text-[9px] text-gray-500 block">Custo</label><span class="text-[10px] text-gray-500 block py-1 font-sans italic">0 MT</span></div>`;
+
                 container.innerHTML += `
                     <div class="bg-gray-950 p-3 rounded-xl border border-gray-855 space-y-2 text-xs flex flex-col">
                         <div>
@@ -1639,7 +1644,7 @@
                             <span class="text-[9px] text-amber-400 font-bold uppercase">${catAtual} > ${subAtual}</span>
                         </div>
                         <div class="grid grid-cols-3 gap-1.5 font-mono">
-                            <div><label class="text-[9px] text-gray-500 block">Custo</label><input type="number" step="any" onchange="atualizarAtributoProduto(${p.id}, 'custo', this.value)" value="${p.custo}" class="w-full bg-gray-900 border border-gray-800 rounded px-1.5 py-1 text-red-400"></div>
+                            ${blocoCustoOuNao}
                             <div><label class="text-[9px] text-gray-500 block">Venda</label><input type="number" step="any" onchange="atualizarAtributoProduto(${p.id}, 'preco', this.value)" value="${p.preco}" class="w-full bg-gray-900 border border-gray-800 rounded px-1.5 py-1 text-emerald-400"></div>
                             ${blocoStockOuNao}
                         </div>
@@ -1665,14 +1670,14 @@
             const n = document.getElementById('novo-prod-nome').value.trim();
             const cat = document.getElementById('novo-prod-categoria').value;
             let sub = document.getElementById('novo-prod-subcategoria').value;
-            const c = parseFloat(document.getElementById('novo-prod-custo').value);
-            const p = parseFloat(document.getElementById('novo-prod-preco').value);
             const isComida = cat.toLowerCase().includes('comida');
+            
+            const c = isComida ? 0 : parseFloat(document.getElementById('novo-prod-custo').value);
+            const p = parseFloat(document.getElementById('novo-prod-preco').value);
             const s = isComida ? 0 : (parseInt(document.getElementById('novo-prod-stock').value) || 0);
             
-            if(!n || isNaN(c) || isNaN(p)) return alert("Preencha os dados do produto corretamente!");
+            if(!n || (!isComida && isNaN(c)) || isNaN(p)) return alert("Preencha os dados do produto corretamente!");
             
-            // Regra: Todo produto que nao tiver subcategoria por default deve estar na subcategoria outros
             if (!sub || !sub.trim()) {
                 sub = "Outros";
             }
