@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Much Bar - Mobile Ultimate v5.6 (Categorias Dinâmicas & Subcategorias)</title>
+    <title>Much Bar - Mobile Ultimate v5.7 (Categorias Dinâmicas & Subcategorias)</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
@@ -445,6 +445,9 @@
                 const dados = snapshot.val();
                 produtos = dados ? ordenarProdutosPersonalizado(Object.values(dados).filter(Boolean)) : [];
                 produtos.forEach(p => {
+                    if (!p.categoria || !subcategoriasMap[p.categoria]) {
+                        p.categoria = Object.keys(subcategoriasMap)[0] || "bebidas";
+                    }
                     if (!p.subcategoria || !(subcategoriasMap[p.categoria] || []).includes(p.subcategoria)) {
                         p.subcategoria = "Outros";
                     }
