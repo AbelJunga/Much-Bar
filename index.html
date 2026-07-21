@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Much Bar - Mobile Ultimate v5.5 (Comidas sem Stock & Separação por Cores)</title>
+    <title>Much Bar - Mobile Ultimate v5.6 (Categorias Dinâmicas & Subcategorias)</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
@@ -139,11 +139,7 @@
                     <div class="bg-gray-900/60 border border-gray-800 rounded-2xl p-4 flex flex-col h-full">
                         <h2 class="text-xs font-black text-gray-400 uppercase tracking-wider mb-2">Toque para Adicionar Item</h2>
                         
-                        <div class="flex gap-1.5 mb-2">
-                            <button onclick="mudarFiltroCategoria('todas')" id="filtro-cat-todas" class="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-amber-500 text-gray-950 transition">Todas</button>
-                            <button onclick="mudarFiltroCategoria('bebidas')" id="filtro-cat-bebidas" class="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-gray-950 border border-gray-800 text-gray-300 transition">Bebidas</button>
-                            <button onclick="mudarFiltroCategoria('comidas')" id="filtro-cat-comidas" class="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-gray-950 border border-gray-800 text-gray-300 transition">Comidas</button>
-                        </div>
+                        <div id="container-botoes-categorias-filtro" class="flex gap-1.5 mb-2 overflow-x-auto scrollbar-none pb-1"></div>
                         <div id="container-subcategorias-filtro" class="flex gap-1 overflow-x-auto scrollbar-none mb-3 pb-1 shrink-0"></div>
 
                         <div id="botoes-produtos" class="grid grid-cols-2 sm:grid-cols-3 gap-2 pb-12 lg:pb-0 overflow-y-auto flex-1"></div>
@@ -290,6 +286,25 @@
                     </button>
                 </div>
 
+                <!-- Gestão Dinâmica de Categorias e Subcategorias -->
+                <div class="bg-gray-900 border border-gray-800 p-4 rounded-2xl space-y-3">
+                    <h3 class="text-xs font-black text-gray-400 uppercase tracking-wider border-b border-gray-800 pb-2">Gestão de Categorias e Subcategorias</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div class="space-y-2 bg-gray-950 p-3 rounded-xl border border-gray-855">
+                            <p class="text-[10px] uppercase font-bold text-amber-400">Criar Nova Categoria</p>
+                            <input type="text" id="nova-cat-nome" placeholder="Ex: Petiscos" class="w-full bg-gray-900 border border-gray-800 rounded-lg px-2.5 py-2 text-xs text-gray-200">
+                            <button onclick="adicionarCategoriaSistema()" class="w-full bg-amber-600 text-gray-950 font-black py-2 rounded-lg text-xs">Adicionar Categoria</button>
+                        </div>
+                        <div class="space-y-2 bg-gray-950 p-3 rounded-xl border border-gray-855">
+                            <p class="text-[10px] uppercase font-bold text-amber-400">Criar Subcategoria</p>
+                            <select id="select-cat-para-sub" class="w-full bg-gray-900 border border-gray-800 rounded-lg px-2 py-1.5 text-xs text-gray-200"></select>
+                            <input type="text" id="nova-subcat-nome" placeholder="Ex: Especiais do Chef" class="w-full bg-gray-900 border border-gray-800 rounded-lg px-2.5 py-1.5 text-xs text-gray-200">
+                            <button onclick="adicionarSubcategoriaSistema()" class="w-full bg-amber-600 text-gray-950 font-black py-2 rounded-lg text-xs">Adicionar Subcategoria</button>
+                        </div>
+                    </div>
+                    <div id="lista-categorias-gestao" class="space-y-2 pt-2"></div>
+                </div>
+
                 <div class="bg-gray-900 border border-gray-800 p-4 rounded-2xl space-y-3">
                     <h3 class="text-xs font-black text-gray-400 uppercase tracking-wider border-b border-gray-800 pb-2">Controlo & Níveis de Utilizadores</h3>
                     <div class="space-y-2">
@@ -315,10 +330,7 @@
                     <div class="grid grid-cols-2 gap-2">
                         <div class="space-y-1">
                             <label class="text-[10px] text-gray-500 uppercase font-bold">Categoria</label>
-                            <select id="novo-prod-categoria" onchange="alternarCamposCriacaoProduto(); atualizarSubcategoriasAdminSelect();" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-sm text-gray-200">
-                                <option value="bebidas">Bebidas</option>
-                                <option value="comidas">Comidas</option>
-                            </select>
+                            <select id="novo-prod-categoria" onchange="alternarCamposCriacaoProduto(); atualizarSubcategoriasAdminSelect();" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-sm text-gray-200"></select>
                         </div>
                         <div class="space-y-1">
                             <label class="text-[10px] text-gray-500 uppercase font-bold">Subcategoria</label>
@@ -361,9 +373,10 @@
     <script>
         const PIN_ADMIN_PADRAO = "5369"; 
 
-        const subcategoriasMap = {
+        // Estrutura inicial padrão se o banco estiver vazio
+        let subcategoriasMap = {
             bebidas: ["Cervejas", "Sumos", "Refrigerantes", "Vinhos", "Destilados", "Águas", "Outros"],
-            comidas: ["Petiscos", "Sopas", "Doses", "Pratos do Dia", "Acompanhamentos", "Sobremesas"]
+            comidas: ["Petiscos", "Sopas", "Doses", "Pratos do Dia", "Acompanhamentos", "Sobremesas", "Outros"]
         };
 
         const firebaseConfig = {
@@ -415,9 +428,29 @@
         }
 
         function carregarEEscutarFirebase() {
+            db.ref('subcategoriasMap').on('value', (snapshot) => {
+                const dados = snapshot.val();
+                if (dados) {
+                    subcategoriasMap = dados;
+                } else {
+                    db.ref('subcategoriasMap').set(subcategoriasMap);
+                }
+                if (usuarioAtivo) {
+                    atualizarSelectsCategoriasAdmin();
+                    renderizarBotoesCategoriasFiltro();
+                    renderizarGestaoCategoriasAdmin();
+                }
+            });
+
             db.ref('produtos').on('value', (snapshot) => {
                 const dados = snapshot.val();
                 produtos = dados ? ordenarProdutosPersonalizado(Object.values(dados).filter(Boolean)) : [];
+                // Garantir regra de subcategoria default "Outros" se faltar
+                produtos.forEach(p => {
+                    if (!p.subcategoria || !(subcategoriasMap[p.categoria] || []).includes(p.subcategoria)) {
+                        p.subcategoria = "Outros";
+                    }
+                });
                 if (usuarioAtivo) {
                     renderizarBotoesProdutos();
                     atualizarConfigProdutos();
@@ -470,16 +503,107 @@
             });
         }
 
+        // Funções de Gestão Dinâmica de Categorias e Subcategorias
+        function atualizarSelectsCategoriasAdmin() {
+            const catSelect = document.getElementById('novo-prod-categoria');
+            const selectParaSub = document.getElementById('select-cat-para-sub');
+            if(!catSelect) return;
+
+            const cats = Object.keys(subcategoriasMap);
+            catSelect.innerHTML = "";
+            if(selectParaSub) selectParaSub.innerHTML = "";
+
+            cats.forEach(c => {
+                catSelect.innerHTML += `<option value="${c}">${c.toUpperCase()}</option>`;
+                if(selectParaSub) selectParaSub.innerHTML += `<option value="${c}">${c.toUpperCase()}</option>`;
+            });
+            atualizarSubcategoriasAdminSelect();
+        }
+
         function atualizarSubcategoriasAdminSelect() {
             const catSelect = document.getElementById('novo-prod-categoria');
             const subSelect = document.getElementById('novo-prod-subcategoria');
             if(!catSelect || !subSelect) return;
             
             const catVal = catSelect.value;
-            const subs = subcategoriasMap[catVal] || [];
+            const subs = subcategoriasMap[catVal] || ["Outros"];
             subSelect.innerHTML = "";
             subs.forEach(s => {
                 subSelect.innerHTML += `<option value="${s}">${s}</option>`;
+            });
+        }
+
+        function adicionarCategoriaSistema() {
+            const inp = document.getElementById('nova-cat-nome');
+            const nomeCat = inp.value.trim().toLowerCase();
+            if(!nomeCat) return alert("Insira o nome da categoria!");
+            if(subcategoriasMap[nomeCat]) return alert("Esta categoria já existe!");
+
+            subcategoriasMap[nomeCat] = ["Outros"];
+            db.ref('subcategoriasMap').set(subcategoriasMap).then(() => {
+                inp.value = "";
+                alert("Categoria criada com sucesso!");
+            });
+        }
+
+        function removerCategoriaSistema(cat) {
+            if(Object.keys(subcategoriasMap).length <= 1) return alert("Deve manter pelo menos uma categoria no sistema!");
+            if(!confirm(`Tem a certeza que deseja eliminar a categoria '${cat}' e todas as suas subcategorias?`)) return;
+
+            delete subcategoriasMap[cat];
+            db.ref('subcategoriasMap').set(subcategoriasMap).then(() => {
+                if(categoriaFiltroAtiva === cat) categoriaFiltroAtiva = 'todas';
+                alert("Categoria removida com sucesso!");
+            });
+        }
+
+        function adicionarSubcategoriaSistema() {
+            const catSel = document.getElementById('select-cat-para-sub').value;
+            const inpSub = document.getElementById('nova-subcat-nome');
+            const nomeSub = inpSub.value.trim();
+            if(!nomeSub) return alert("Insira o nome da subcategoria!");
+
+            if(!subcategoriasMap[catSel]) subcategoriasMap[catSel] = ["Outros"];
+            if(subcategoriasMap[catSel].includes(nomeSub)) return alert("Esta subcategoria já existe nesta categoria!");
+
+            subcategoriasMap[catSel].push(nomeSub);
+            db.ref('subcategoriasMap').set(subcategoriasMap).then(() => {
+                inpSub.value = "";
+                alert("Subcategoria adicionada com sucesso!");
+            });
+        }
+
+        function removerSubcategoriaSistema(cat, sub) {
+            if(sub === "Outros") return alert("A subcategoria padrão 'Outros' não pode ser removida!");
+            if(!confirm(`Remover a subcategoria '${sub}' da categoria '${cat}'?`)) return;
+
+            subcategoriasMap[cat] = subcategoriasMap[cat].filter(s => s !== sub);
+            db.ref('subcategoriasMap').set(subcategoriasMap).then(() => {
+                alert("Subcategoria removida com sucesso!");
+            });
+        }
+
+        function renderizarGestaoCategoriasAdmin() {
+            const container = document.getElementById('lista-categorias-gestao');
+            if(!container) return;
+            container.innerHTML = "";
+
+            Object.entries(subcategoriasMap).forEach(([cat, subs]) => {
+                let subsHtml = "";
+                subs.forEach(s => {
+                    subsHtml += `<span class="bg-gray-900 border border-gray-800 text-gray-300 px-2 py-0.5 rounded text-[10px] flex items-center gap-1">
+                        ${s} ${s !== 'Outros' ? `<button onclick="removerSubcategoriaSistema('${cat}', '${s}')" class="text-red-400 font-bold hover:text-red-300">×</button>` : ''}
+                    </span>`;
+                });
+
+                container.innerHTML += `
+                    <div class="bg-gray-950 p-2.5 rounded-xl border border-gray-855 text-xs space-y-2">
+                        <div class="flex justify-between items-center">
+                            <span class="font-bold text-amber-400 uppercase">📁 ${cat}</span>
+                            <button onclick="removerCategoriaSistema('${cat}')" class="text-red-400 text-[10px] font-bold">🗑️ Apagar Categoria</button>
+                        </div>
+                        <div class="flex flex-wrap gap-1">${subsHtml}</div>
+                    </div>`;
             });
         }
 
@@ -487,7 +611,7 @@
             const cat = document.getElementById('novo-prod-categoria').value;
             const grupoStock = document.getElementById('grupo-input-stock');
             if (!grupoStock) return;
-            if (cat === 'comidas') {
+            if (cat.toLowerCase().includes('comida')) {
                 grupoStock.classList.add('hidden');
                 document.getElementById('novo-prod-stock').value = "0";
             } else {
@@ -495,18 +619,26 @@
             }
         }
 
+        function renderizarBotoesCategoriasFiltro() {
+            const container = document.getElementById('container-botoes-categorias-filtro');
+            if(!container) return;
+            container.innerHTML = "";
+
+            const cats = Object.keys(subcategoriasMap);
+            const ativoTodas = categoriaFiltroAtiva === 'todas';
+            
+            container.innerHTML += `<button onclick="mudarFiltroCategoria('todas')" class="px-2.5 py-1 rounded-lg text-[10px] font-bold ${ativoTodas ? 'bg-amber-500 text-gray-950' : 'bg-gray-950 border border-gray-800 text-gray-300'} transition shrink-0">Todas</button>`;
+
+            cats.forEach(c => {
+                const ativo = categoriaFiltroAtiva === c;
+                container.innerHTML += `<button onclick="mudarFiltroCategoria('${c}')" class="px-2.5 py-1 rounded-lg text-[10px] font-bold ${ativo ? 'bg-amber-500 text-gray-950' : 'bg-gray-950 border border-gray-800 text-gray-300'} transition shrink-0 uppercase">${c}</button>`;
+            });
+        }
+
         function mudarFiltroCategoria(cat) {
             categoriaFiltroAtiva = cat;
             subcategoriaFiltroAtiva = 'todas';
-            
-            ['todas', 'bebidas', 'comidas'].forEach(c => {
-                const btn = document.getElementById(`filtro-cat-${c}`);
-                if(btn) {
-                    if(c === cat) btn.className = "px-2.5 py-1 rounded-lg text-[10px] font-bold bg-amber-500 text-gray-950 transition";
-                    else btn.className = "px-2.5 py-1 rounded-lg text-[10px] font-bold bg-gray-950 border border-gray-800 text-gray-300 transition";
-                }
-            });
-
+            renderizarBotoesCategoriasFiltro();
             renderizarBarraSubcategoriasFiltro();
             renderizarBotoesProdutos();
         }
@@ -522,7 +654,7 @@
             }
             container.classList.remove('hidden');
 
-            const subs = subcategoriasMap[categoriaFiltroAtiva] || [];
+            const subs = subcategoriasMap[categoriaFiltroAtiva] || ["Outros"];
             
             let html = `<button onclick="mudarFiltroSubcategoria('todas')" class="px-2 py-0.5 rounded text-[9px] font-bold ${subcategoriaFiltroAtiva === 'todas' ? 'bg-amber-600 text-gray-950' : 'bg-gray-950 border border-gray-800 text-gray-400'} shrink-0">Todas</button>`;
             
@@ -552,8 +684,8 @@
             const container = document.getElementById('lista-stock-caixa');
             if(!container) return;
             
-            const apenasBebidas = produtos.filter(p => (p.categoria || 'bebidas') === 'bebidas');
-            container.innerHTML = apenasBebidas.length === 0 ? `<p class="text-gray-500 text-center py-2">Nenhuma bebida cadastrada.</p>` : "";
+            const apenasBebidas = produtos.filter(p => !(p.categoria || '').toLowerCase().includes('comida'));
+            container.innerHTML = apenasBebidas.length === 0 ? `<p class="text-gray-500 text-center py-2">Nenhuma bebida cadastrada com stock.</p>` : "";
             
             apenasBebidas.forEach(p => {
                 let badgeStockColor = "text-emerald-400 bg-emerald-950/40 border-emerald-900";
@@ -564,7 +696,7 @@
                     <div class="flex justify-between items-center p-2.5 bg-gray-950 border border-gray-850 rounded-xl">
                         <div class="truncate pr-2">
                             <span class="font-bold text-gray-200 block truncate">${p.nome}</span>
-                            <span class="text-[9px] text-gray-500 uppercase">Bebidas / ${p.subcategoria || 'Outros'}</span>
+                            <span class="text-[9px] text-gray-500 uppercase">${p.categoria} / ${p.subcategoria || 'Outros'}</span>
                         </div>
                         <span class="px-2.5 py-1 font-mono font-black border rounded-lg text-xs tracking-wider shrink-0 ${badgeStockColor}">
                             ${p.stock} UN
@@ -605,7 +737,7 @@
                 if(!confirm("A mesa tem produtos lançados. Deseja mesmo eliminar e retornar o stock das bebidas?")) return;
                 mesa.itens.forEach(p => {
                     const original = produtos.find(x => x.id === p.id);
-                    if(original && (original.categoria || 'bebidas') === 'bebidas') {
+                    if(original && !original.categoria.toLowerCase().includes('comida')) {
                         original.stock += p.qtd;
                     }
                 });
@@ -626,14 +758,14 @@
             if (!mesa.itens) mesa.itens = [];
             const item = mesa.itens.find(i => i.id === prodId);
             
-            const catProd = produtoOriginal.categoria || 'bebidas';
+            const isComida = produtoOriginal.categoria.toLowerCase().includes('comida');
 
             if (!item && alteracao < 0) return;
-            if (alteracao > 0 && catProd === 'bebidas' && produtoOriginal.stock <= 0) return alert("Falta de Stock Geral para esta bebida!");
+            if (alteracao > 0 && !isComida && produtoOriginal.stock <= 0) return alert("Falta de Stock Geral para esta bebida!");
 
             if (item) {
                 item.qtd += alteracao;
-                if (catProd === 'bebidas') {
+                if (!isComida) {
                     produtoOriginal.stock -= alteracao;
                 }
                 if (item.qtd <= 0) mesa.itens = mesa.itens.filter(i => i.id !== prodId);
@@ -643,7 +775,7 @@
             
             db.ref(`mesas/${mesa.id}/itens`).set(mesa.itens);
             db.ref(`mesas/${mesa.id}/abertaPor`).set(mesa.abertaPor);
-            if (catProd === 'bebidas') {
+            if (!isComida) {
                 db.ref('produtos').set(produtos);
             }
         }
@@ -657,18 +789,18 @@
                 return alert("Erro: Esta mesa ou artigo não estão disponíveis ou foram removidos. Aguarde atualização automática.");
             }
             
-            const catProd = prod.categoria || 'bebidas';
-            if (catProd === 'bebidas' && prod.stock <= 0) return alert("Bebida esgotada!");
+            const isComida = prod.categoria.toLowerCase().includes('comida');
+            if (!isComida && prod.stock <= 0) return alert("Bebida esgotada!");
 
             if (!mesa.itens) mesa.itens = [];
             const exist = mesa.itens.find(i => i.id === prodId);
             if (exist) {
                 exist.qtd++;
             } else {
-                mesa.itens.push({ id: prod.id, nome: prod.nome, categoria: catProd, preco: prod.preco, custo: prod.custo, qtd: 1 });
+                mesa.itens.push({ id: prod.id, nome: prod.nome, categoria: prod.categoria, preco: prod.preco, custo: prod.custo, qtd: 1 });
             }
             
-            if (catProd === 'bebidas') {
+            if (!isComida) {
                 prod.stock--;
                 db.ref('produtos').set(produtos);
             }
@@ -685,7 +817,7 @@
             container.innerHTML = "";
             
             const prodsFiltrados = produtos.filter(p => {
-                const catProd = p.categoria || 'bebidas';
+                const catProd = p.categoria;
                 const subProd = p.subcategoria || 'Outros';
 
                 if (categoriaFiltroAtiva !== 'todas' && catProd !== categoriaFiltroAtiva) return false;
@@ -699,11 +831,11 @@
             }
 
             prodsFiltrados.forEach(p => {
-                const catProd = p.categoria || 'bebidas';
-                const esgotado = catProd === 'bebidas' && p.stock <= 0;
+                const isComida = p.categoria.toLowerCase().includes('comida');
+                const esgotado = !isComida && p.stock <= 0;
                 const cls = esgotado ? "bg-gray-950 border-gray-900 text-gray-600 opacity-40" : "bg-gray-950 border-gray-800 text-amber-400 active:bg-amber-500/10";
                 
-                let infoStockTxt = catProd === 'bebidas' ? `<span class="text-[9px] font-mono ${p.stock <= 5 ? 'text-red-400':'text-gray-500'} font-bold">${p.stock} UN</span>` : `<span class="text-[9px] font-mono text-gray-600 font-bold">Sem Stock</span>`;
+                let infoStockTxt = !isComida ? `<span class="text-[9px] font-mono ${p.stock <= 5 ? 'text-red-400':'text-gray-500'} font-bold">${p.stock} UN</span>` : `<span class="text-[9px] font-mono text-gray-600 font-bold">Sem Stock</span>`;
 
                 container.innerHTML += `
                     <button onclick="adicionarItemMesa(${p.id})" ${esgotado ? 'disabled':''} class="p-3 border rounded-xl text-left flex flex-col justify-between transition h-20 ${cls}">
@@ -823,9 +955,9 @@
                 return;
             }
 
-            // Separar itens por Comida e Bebida
-            const comidasItens = items.filter(i => (i.categoria || 'bebidas') === 'comidas');
-            const bebidasItens = items.filter(i => (i.categoria || 'bebidas') === 'bebidas');
+            // Separar itens por Comida e Bebida (ou categorias genéricas)
+            const comidasItens = items.filter(i => (i.categoria || '').toLowerCase().includes('comida'));
+            const bebidasItens = items.filter(i => !(i.categoria || '').toLowerCase().includes('comida'));
 
             const subtotalComidas = comidasItens.reduce((acc, cur) => acc + (cur.preco * cur.qtd), 0);
             const subtotalBebidas = bebidasItens.reduce((acc, cur) => acc + (cur.preco * cur.qtd), 0);
@@ -833,7 +965,6 @@
 
             let htmlConteudo = "";
 
-            // Bloco de Comidas (Cor Laranja)
             if (comidasItens.length > 0) {
                 htmlConteudo += `
                     <div class="border border-orange-500/40 bg-orange-950/10 rounded-xl p-2.5 space-y-2 mb-2">
@@ -850,13 +981,12 @@
                 htmlConteudo += `</div>`;
             }
 
-            // Bloco de Bebidas (Cor Azul)
             if (bebidasItens.length > 0) {
                 htmlConteudo += `
                     <div class="border border-blue-500/40 bg-blue-950/10 rounded-xl p-2.5 space-y-2 mb-2">
                         <div class="flex justify-between items-center pb-1.5 border-b border-blue-500/20 text-xs">
                             <span class="font-black text-blue-400 uppercase tracking-wider flex items-center gap-1">
-                                <span class="material-icons text-xs">local_bar</span> Bebidas
+                                <span class="material-icons text-xs">local_bar</span> Bebidas / Outros
                             </span>
                             <span class="font-mono font-bold text-blue-400">Subtotal: ${subtotalBebidas.toFixed(2)} MT</span>
                         </div>
@@ -913,7 +1043,7 @@
                 total: t,
                 custoTotal: c,
                 lucroTotal: l,
-                produtos: mesa.itens.map(x => ({ id: x.id, nome: x.nome, categoria: x.categoria || 'bebidas', qtd: x.qtd, faturadoTotal: x.preco * x.qtd, custoTotal: x.custo * x.qtd }))
+                produtos: mesa.itens.map(x => ({ id: x.id, nome: x.nome, categoria: x.categoria, qtd: x.qtd, faturadoTotal: x.preco * x.qtd, custoTotal: x.custo * x.qtd }))
             };
 
             db.ref(`vendas_dia/${novaVenda.id}`).set(novaVenda);
@@ -1070,7 +1200,7 @@
                 return {
                     id: p.id,
                     nome: p.nome,
-                    categoria: p.categoria || 'bebidas',
+                    categoria: p.categoria,
                     qtd: p.qtd,
                     preco: p.faturadoTotal / p.qtd,
                     custo: prodGeral ? prodGeral.custo : p.custoTotal / p.qtd
@@ -1097,7 +1227,7 @@
 
             venda.produtos.forEach(p => {
                 const prodGeral = produtos.find(x => x.id === p.id);
-                if (prodGeral && (prodGeral.categoria || 'bebidas') === 'bebidas') {
+                if (prodGeral && !prodGeral.categoria.toLowerCase().includes('comida')) {
                     prodGeral.stock += p.qtd;
                 }
             });
@@ -1453,7 +1583,7 @@
             if(!sel) return;
             sel.innerHTML = "";
             
-            const apenasBebidas = produtos.filter(p => (p.categoria || 'bebidas') === 'bebidas');
+            const apenasBebidas = produtos.filter(p => !p.categoria.toLowerCase().includes('comida'));
             apenasBebidas.forEach(p => {
                 sel.innerHTML += `<option value="${p.id}">${p.nome} (Atual: ${p.stock} UN)</option>`;
             });
@@ -1494,10 +1624,11 @@
             if(!container) return;
             container.innerHTML = "";
             produtos.forEach(p => {
-                const catAtual = p.categoria || 'bebidas';
+                const catAtual = p.categoria;
                 const subAtual = p.subcategoria || 'Outros';
+                const isComida = catAtual.toLowerCase().includes('comida');
 
-                let blocoStockOuNao = catAtual === 'bebidas' 
+                let blocoStockOuNao = !isComida 
                     ? `<div><label class="text-[9px] text-gray-500 block">Stock</label><input type="number" onchange="atualizarAtributoProduto(${p.id}, 'stock', this.value)" value="${p.stock}" class="w-full bg-gray-900 border border-gray-800 rounded px-1.5 py-1 text-gray-300"></div>`
                     : `<div><label class="text-[9px] text-gray-500 block">Stock</label><span class="text-[10px] text-gray-500 block py-1 font-sans italic">Não aplicável</span></div>`;
 
@@ -1533,12 +1664,18 @@
         function adicionarNovoProduto() {
             const n = document.getElementById('novo-prod-nome').value.trim();
             const cat = document.getElementById('novo-prod-categoria').value;
-            const sub = document.getElementById('novo-prod-subcategoria').value;
+            let sub = document.getElementById('novo-prod-subcategoria').value;
             const c = parseFloat(document.getElementById('novo-prod-custo').value);
             const p = parseFloat(document.getElementById('novo-prod-preco').value);
-            const s = cat === 'comidas' ? 0 : (parseInt(document.getElementById('novo-prod-stock').value) || 0);
+            const isComida = cat.toLowerCase().includes('comida');
+            const s = isComida ? 0 : (parseInt(document.getElementById('novo-prod-stock').value) || 0);
             
             if(!n || isNaN(c) || isNaN(p)) return alert("Preencha os dados do produto corretamente!");
+            
+            // Regra: Todo produto que nao tiver subcategoria por default deve estar na subcategoria outros
+            if (!sub || !sub.trim()) {
+                sub = "Outros";
+            }
             
             produtos.push({ id: Date.now(), nome: n, categoria: cat, subcategoria: sub, custo: c, preco: p, stock: s });
             salvarDadosFirebase('produtos', produtos);
@@ -1664,8 +1801,10 @@
                 else if(usuarioAtivo.permissao === 'admin') cargo = "Administrador";
                 document.getElementById('txt-permissao').innerText = cargo;
                 
+                atualizarSelectsCategoriasAdmin();
+                renderizarBotoesCategoriasFiltro();
+                renderizarGestaoCategoriasAdmin();
                 alternarCamposCriacaoProduto();
-                atualizarSubcategoriasAdminSelect();
                 aplicarRestricoesPermissao();
                 atualizarListaOperadores();
                 mudarAba('home');
