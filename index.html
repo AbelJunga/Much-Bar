@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Much Bar - Mobile Ultimate v5.3 (Estável & Seguro)</title>
+    <title>Much Bar - Mobile Ultimate v5.4 (Categorias & Subcategorias)</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
@@ -136,9 +136,18 @@
                 </div>
 
                 <div id="bloco-vitrine-produtos" class="hidden lg:flex flex-col h-full">
-                    <div class="bg-gray-900/60 border border-gray-800 rounded-2xl p-4 flex flex-col">
-                        <h2 class="text-xs font-black text-gray-400 uppercase tracking-wider mb-3">Toque para Adicionar Item</h2>
-                        <div id="botoes-produtos" class="grid grid-cols-2 sm:grid-cols-3 gap-2 pb-12 lg:pb-0"></div>
+                    <div class="bg-gray-900/60 border border-gray-800 rounded-2xl p-4 flex flex-col h-full">
+                        <h2 class="text-xs font-black text-gray-400 uppercase tracking-wider mb-2">Toque para Adicionar Item</h2>
+                        
+                        <!-- Filtros por Categoria e Subcategoria -->
+                        <div class="flex gap-1.5 mb-2">
+                            <button onclick="mudarFiltroCategoria('todas')" id="filtro-cat-todas" class="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-amber-500 text-gray-950 transition">Todas</button>
+                            <button onclick="mudarFiltroCategoria('bebidas')" id="filtro-cat-bebidas" class="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-gray-950 border border-gray-800 text-gray-300 transition">Bebidas</button>
+                            <button onclick="mudarFiltroCategoria('comidas')" id="filtro-cat-comidas" class="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-gray-950 border border-gray-800 text-gray-300 transition">Comidas</button>
+                        </div>
+                        <div id="container-subcategorias-filtro" class="flex gap-1 overflow-x-auto scrollbar-none mb-3 pb-1 shrink-0"></div>
+
+                        <div id="botoes-produtos" class="grid grid-cols-2 sm:grid-cols-3 gap-2 pb-12 lg:pb-0 overflow-y-auto flex-1"></div>
                     </div>
                 </div>
             </div>
@@ -302,7 +311,22 @@
 
                 <div class="bg-gray-900 border border-gray-800 p-4 rounded-2xl space-y-3">
                     <h3 class="text-xs font-black text-gray-400 uppercase tracking-wider border-b border-gray-800 pb-2">Novo Artigo de Venda</h3>
-                    <div class="space-y-1"><label class="text-[10px] text-gray-500 uppercase font-bold">Nome do Artigo</label><input type="text" id="novo-prod-nome" placeholder="Ex: Cerveja Preta" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-sm text-gray-200"></div>
+                    <div class="space-y-1"><label class="text-[10px] text-gray-500 uppercase font-bold">Nome do Artigo</label><input type="text" id="novo-prod-nome" placeholder="Ex: Cerveja Preta / Frango à Bitoque" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-sm text-gray-200"></div>
+                    
+                    <div class="grid grid-cols-2 gap-2">
+                        <div class="space-y-1">
+                            <label class="text-[10px] text-gray-500 uppercase font-bold">Categoria</label>
+                            <select id="novo-prod-categoria" onchange="atualizarSubcategoriasAdminSelect()" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-sm text-gray-200">
+                                <option value="bebidas">Bebidas</option>
+                                <option value="comidas">Comidas</option>
+                            </select>
+                        </div>
+                        <div class="space-y-1">
+                            <label class="text-[10px] text-gray-500 uppercase font-bold">Subcategoria</label>
+                            <select id="novo-prod-subcategoria" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-sm text-gray-200"></select>
+                        </div>
+                    </div>
+
                     <div class="grid grid-cols-2 gap-2">
                         <div class="space-y-1"><label class="text-[10px] text-gray-500 uppercase font-bold">Custo (MT)</label><input type="number" id="novo-prod-custo" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-sm text-red-400 font-mono"></div>
                         <div class="space-y-1"><label class="text-[10px] text-gray-500 uppercase font-bold">Venda (MT)</label><input type="number" id="novo-prod-preco" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-sm text-emerald-400 font-mono"></div>
@@ -338,6 +362,11 @@
     <script>
         const PIN_ADMIN_PADRAO = "5369"; 
 
+        const subcategoriasMap = {
+            bebidas: ["Cervejas", "Sumos", "Refrigerantes", "Vinhos", "Destilados", "Águas", "Outros"],
+            comidas: ["Petiscos", "Sopas", "Doses", "Pratos do Dia", "Acompanhamentos", "Sobremesas"]
+        };
+
         const firebaseConfig = {
             apiKey: "AIzaSyCI8EDvSqMGjrJ6GNdqDyeCsYUwymPXPw4",
             authDomain: "muchbar-c5839.firebaseapp.com",
@@ -362,6 +391,8 @@
 
         let usuarioAtivo = JSON.parse(sessionStorage.getItem('mb_sessao')) || null;
         let mesaSelecionadaId = null;
+        let categoriaFiltroAtiva = 'todas';
+        let subcategoriaFiltroAtiva = 'todas';
 
         const salvarDadosFirebase = (caminho, dados) => { db.ref(caminho).set(dados); };
 
@@ -371,15 +402,16 @@
                 const nomeA = a.nome.toLowerCase();
                 const nomeB = b.nome.toLowerCase();
                 
-                let posA = ordemPrioridade.findIndex(marca => nomeA.includes(marca));
-                let posB = ordemPrioridade.findIndex(marca => nomeB.includes(marca));
+                let posA = 999;
+                let posB = 999;
                 
-                if (posA === -1) posA = 999;
-                if (posB === -1) posB = 999;
+                ordemPrioridade.forEach((marca, index) => {
+                    if (nomeA.includes(marca) && posA === 999) posA = index;
+                    if (nomeB.includes(marca) && posB === 999) posB = index;
+                });
                 
                 if (posA !== posB) return posA - posB;
-                
-                return nomeA.localeCompare(nomeB);
+                return a.id - b.id; 
             });
         }
 
@@ -439,6 +471,63 @@
             });
         }
 
+        function atualizarSubcategoriasAdminSelect() {
+            const catSelect = document.getElementById('novo-prod-categoria');
+            const subSelect = document.getElementById('novo-prod-subcategoria');
+            if(!catSelect || !subSelect) return;
+            
+            const catVal = catSelect.value;
+            const subs = subcategoriasMap[catVal] || [];
+            subSelect.innerHTML = "";
+            subs.forEach(s => {
+                subSelect.innerHTML += `<option value="${s}">${s}</option>`;
+            });
+        }
+
+        function mudarFiltroCategoria(cat) {
+            categoriaFiltroAtiva = cat;
+            subcategoriaFiltroAtiva = 'todas';
+            
+            ['todas', 'bebidas', 'comidas'].forEach(c => {
+                const btn = document.getElementById(`filtro-cat-${c}`);
+                if(btn) {
+                    if(c === cat) btn.className = "px-2.5 py-1 rounded-lg text-[10px] font-bold bg-amber-500 text-gray-950 transition";
+                    else btn.className = "px-2.5 py-1 rounded-lg text-[10px] font-bold bg-gray-950 border border-gray-800 text-gray-300 transition";
+                }
+            });
+
+            renderizarBarraSubcategoriasFiltro();
+            renderizarBotoesProdutos();
+        }
+
+        function renderizarBarraSubcategoriasFiltro() {
+            const container = document.getElementById('container-subcategorias-filtro');
+            if(!container) return;
+            container.innerHTML = "";
+
+            if(categoriaFiltroAtiva === 'todas') {
+                container.classList.add('hidden');
+                return;
+            }
+            container.classList.remove('hidden');
+
+            const subs = subcategoriasMap[categoriaFiltroAtiva] || [];
+            
+            let html = `<button onclick="mudarFiltroSubcategoria('todas')" class="px-2 py-0.5 rounded text-[9px] font-bold ${subcategoriaFiltroAtiva === 'todas' ? 'bg-amber-600 text-gray-950' : 'bg-gray-950 border border-gray-800 text-gray-400'} shrink-0">Todas</button>`;
+            
+            subs.forEach(s => {
+                const ativo = subcategoriaFiltroAtiva === s;
+                html += `<button onclick="mudarFiltroSubcategoria('${s}')" class="px-2 py-0.5 rounded text-[9px] font-bold ${ativo ? 'bg-amber-600 text-gray-950' : 'bg-gray-950 border border-gray-800 text-gray-400'} shrink-0">${s}</button>`;
+            });
+            container.innerHTML = html;
+        }
+
+        function mudarFiltroSubcategoria(sub) {
+            subcategoriaFiltroAtiva = sub;
+            renderizarBarraSubcategoriasFiltro();
+            renderizarBotoesProdutos();
+        }
+
         function abrirModalStock() {
             document.getElementById('modal-stock-caixa').classList.remove('hidden');
             atualizarModalStockCaixa();
@@ -460,8 +549,11 @@
                 
                 container.innerHTML += `
                     <div class="flex justify-between items-center p-2.5 bg-gray-950 border border-gray-850 rounded-xl">
-                        <span class="font-bold text-gray-200 truncate pr-2">${p.nome}</span>
-                        <span class="px-2.5 py-1 font-mono font-black border rounded-lg text-xs tracking-wider ${badgeStockColor}">
+                        <div class="truncate pr-2">
+                            <span class="font-bold text-gray-200 block truncate">${p.nome}</span>
+                            <span class="text-[9px] text-gray-500 uppercase">${p.categoria || 'bebidas'} / ${p.subcategoria || 'Outros'}</span>
+                        </div>
+                        <span class="px-2.5 py-1 font-mono font-black border rounded-lg text-xs tracking-wider shrink-0 ${badgeStockColor}">
                             ${p.stock} UN
                         </span>
                     </div>`;
@@ -567,7 +659,21 @@
             if(!container) return;
             container.innerHTML = "";
             
-            produtos.forEach(p => {
+            const prodsFiltrados = produtos.filter(p => {
+                const catProd = p.categoria || 'bebidas';
+                const subProd = p.subcategoria || 'Outros';
+
+                if (categoriaFiltroAtiva !== 'todas' && catProd !== categoriaFiltroAtiva) return false;
+                if (subcategoriaFiltroAtiva !== 'todas' && subProd !== subcategoriaFiltroAtiva) return false;
+                return true;
+            });
+
+            if(prodsFiltrados.length === 0) {
+                container.innerHTML = `<p class="text-xs text-gray-500 text-center col-span-full py-4">Nenhum artigo encontrado nesta categoria.</p>`;
+                return;
+            }
+
+            prodsFiltrados.forEach(p => {
                 const esgotado = p.stock <= 0;
                 const cls = esgotado ? "bg-gray-950 border-gray-900 text-gray-600 opacity-40" : "bg-gray-950 border-gray-800 text-amber-400 active:bg-amber-500/10";
                 container.innerHTML += `
@@ -1310,9 +1416,15 @@
             if(!container) return;
             container.innerHTML = "";
             produtos.forEach(p => {
+                const catAtual = p.categoria || 'bebidas';
+                const subAtual = p.subcategoria || 'Outros';
+
                 container.innerHTML += `
                     <div class="bg-gray-950 p-3 rounded-xl border border-gray-855 space-y-2 text-xs flex flex-col">
-                        <div><b class="text-gray-200 block truncate">${p.nome}</b><span class="text-[10px] text-gray-500 font-mono">ID: ${p.id}</span></div>
+                        <div>
+                            <b class="text-gray-200 block truncate">${p.nome}</b>
+                            <span class="text-[9px] text-amber-400 font-bold uppercase">${catAtual} > ${subAtual}</span>
+                        </div>
                         <div class="grid grid-cols-3 gap-1.5 font-mono">
                             <div><label class="text-[9px] text-gray-500 block">Custo</label><input type="number" step="any" onchange="atualizarAtributoProduto(${p.id}, 'custo', this.value)" value="${p.custo}" class="w-full bg-gray-900 border border-gray-800 rounded px-1.5 py-1 text-red-400"></div>
                             <div><label class="text-[9px] text-gray-500 block">Venda</label><input type="number" step="any" onchange="atualizarAtributoProduto(${p.id}, 'preco', this.value)" value="${p.preco}" class="w-full bg-gray-900 border border-gray-800 rounded px-1.5 py-1 text-emerald-400"></div>
@@ -1338,13 +1450,15 @@
 
         function adicionarNovoProduto() {
             const n = document.getElementById('novo-prod-nome').value.trim();
+            const cat = document.getElementById('novo-prod-categoria').value;
+            const sub = document.getElementById('novo-prod-subcategoria').value;
             const c = parseFloat(document.getElementById('novo-prod-custo').value);
             const p = parseFloat(document.getElementById('novo-prod-preco').value);
             const s = parseInt(document.getElementById('novo-prod-stock').value) || 0;
             
             if(!n || isNaN(c) || isNaN(p)) return alert("Preencha os dados do produto corretamente!");
             
-            produtos.push({ id: Date.now(), nome: n, custo: c, preco: p, stock: s });
+            produtos.push({ id: Date.now(), nome: n, categoria: cat, subcategoria: sub, custo: c, preco: p, stock: s });
             salvarDadosFirebase('produtos', produtos);
             
             document.getElementById('novo-prod-nome').value = "";
@@ -1468,6 +1582,7 @@
                 else if(usuarioAtivo.permissao === 'admin') cargo = "Administrador";
                 document.getElementById('txt-permissao').innerText = cargo;
                 
+                atualizarSubcategoriasAdminSelect();
                 aplicarRestricoesPermissao();
                 atualizarListaOperadores();
                 mudarAba('home');
