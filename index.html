@@ -1,3 +1,306 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Much Bar - Sistema de Gestão</title>
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+    <style>
+        :root {
+            --primary: #1e293b;
+            --accent: #f59e0b;
+            --danger: #ef4444;
+            --success: #10b981;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text: #334155;
+            --border: #e2e8f0;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: var(--bg); color: var(--text); display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+        header { background-color: var(--primary); color: white; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        header h1 { font-size: 1.25rem; font-weight: 600; }
+        .user-info { font-size: 0.9rem; display: flex; gap: 15px; align-items: center; }
+        .main-container { display: flex; flex: 1; overflow: hidden; }
+        
+        /* Sidebar / Mesas */
+        .sidebar { width: 320px; background: var(--card-bg); border-right: 1px solid var(--border); display: flex; flex-direction: column; }
+        .sidebar-header { padding: 15px; border-bottom: 1px solid var(--border); display: flex; gap: 10px; }
+        .sidebar-header input { flex: 1; padding: 8px 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 0.95rem; }
+        .btn { background: var(--accent); color: white; border: none; padding: 8px 14px; border-radius: 6px; cursor: pointer; font-weight: 600; transition: opacity 0.2s; }
+        .btn:hover { opacity: 0.9; }
+        .btn-danger { background: var(--danger); }
+        .btn-success { background: var(--success); }
+        
+        .mesas-list { flex: 1; overflow-y: auto; padding: 10px; display: flex; flex-direction: column; gap: 8px; }
+        .mesa-item { padding: 12px 15px; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: all 0.2s; }
+        .mesa-item.active { border-color: var(--accent); background: #fef3c7; }
+        .mesa-item .nome { font-weight: 600; }
+        
+        /* Content Area */
+        .content { flex: 1; display: flex; flex-direction: column; background: white; overflow: hidden; }
+        .content-header { padding: 15px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; background: #fff; }
+        .workspace { flex: 1; display: flex; overflow: hidden; }
+        
+        .produtos-panel { flex: 1.2; padding: 20px; overflow-y: auto; border-right: 1px solid var(--border); }
+        .comanda-panel { flex: 1; padding: 20px; display: flex; flex-direction: column; background: #f8fafc; }
+        
+        .categories-tabs { display: flex; gap: 10px; margin-bottom: 15px; }
+        .tab-btn { padding: 8px 16px; border: 1px solid var(--border); background: white; border-radius: 6px; cursor: pointer; font-weight: 600; }
+        .tab-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
+        
+        .produtos-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; }
+        .produto-card { background: white; border: 1px solid var(--border); border-radius: 8px; padding: 12px; text-align: center; cursor: pointer; transition: transform 0.1s, box-shadow 0.1s; }
+        .produto-card:hover { transform: translateY(-2px); box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        .produto-card .prod-nome { font-weight: 600; font-size: 0.9rem; margin-bottom: 5px; }
+        .produto-card .prod-preco { color: var(--success); font-weight: 700; font-size: 0.85rem; }
+        
+        .comanda-items { flex: 1; overflow-y: auto; margin-bottom: 15px; border: 1px solid var(--border); background: white; border-radius: 8px; padding: 10px; }
+        .comanda-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
+        .comanda-total { font-size: 1.2rem; font-weight: 700; margin-bottom: 15px; display: flex; justify-content: space-between; }
+        
+        @media (max-width: 768px) {
+            .main-container { flex-direction: column; }
+            .sidebar { width: 100%; height: 200px; }
+            .workspace { flex-direction: column; }
+            .produtos-panel, .comanda-panel { border: none; height: auto; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Much Bar - Gestão de Mesas e Salas</h1>
+        <div class="user-info">
+            <span id="user-display">Utilizador: Caixa</span>
+            <button class="btn btn-danger" style="padding: 4px 8px; font-size: 0.8rem;" onclick="fecharTurno()">Fechar Turno</button>
+        </div>
+    </header>
+
+    <div class="main-container">
+        <!-- Sidebar de Mesas -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <input type="text" id="novo-nome-mesa" placeholder="Nome da Mesa / Sala...">
+                <button class="btn" onclick="criarNovaMesa()">+</button>
+            </div>
+            <div class="mesas-list" id="lista-mesas">
+                <!-- Preenchido dinamicamente -->
+            </div>
+        </div>
+
+        <!-- Painel Central -->
+        <div class="content" id="painel-conteudo" style="display: none;">
+            <div class="content-header">
+                <h2 id="titulo-mesa-atual">Mesa Selecionada</h2>
+                <button class="btn btn-danger" onclick="eliminarMesaAtual()">Eliminar Mesa Vazia</button>
+            </div>
+            <div class="workspace">
+                <!-- Produtos -->
+                <div class="produtos-panel">
+                    <div class="categories-tabs">
+                        <button class="tab-btn active" onclick="mudarCategoria('bebidas')">Bebidas</button>
+                        <button class="tab-btn tab-comidas" onclick="mudarCategoria('comidas')">Comidas</button>
+                    </div>
+                    <div class="produtos-grid" id="grid-produtos">
+                        <!-- Preenchido dinamicamente com base na sequência personalizada -->
+                    </div>
+                </div>
+                <!-- Comanda -->
+                <div class="comanda-panel">
+                    <h3>Itens Consumidos</h3>
+                    <div class="comanda-items" id="lista-comanda">
+                        <!-- Itens da mesa -->
+                    </div>
+                    <div class="comanda-total">
+                        <span>Total:</span>
+                        <span id="valor-total">0.00 MT</span>
+                    </div>
+                    <button class="btn btn-success" onclick="fecharConta()">Concluir & Fechar Conta</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuração Firebase (Simulada / Substituir pelas credenciais reais)
+        const firebaseConfig = {
+            databaseURL: "https://much-bar-default-rtdb.firebaseio.com/"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        let mesas = [];
+        let mesaAtualId = null;
+        let categoriaAtual = 'bebidas';
+        let usuarioAtivo = { nome: "Caixa Principal", nivel: "Caixa" };
+
+        // Sequência personalizada de produtos (respeitando ordem manual e não alfabética)
+        const produtosDB = {
+            bebidas: [
+                { id: 'b1', nome: 'Cerveja 2M', preco: 90, seq: 1 },
+                { id: 'b2', nome: 'Cerveja Laurentina', preco: 90, seq: 2 },
+                { id: 'b3', nome: 'Refrigerante Coca-Cola', preco: 60, seq: 3 },
+                { id: 'b4', nome: 'Água Mineral', preco: 40, seq: 4 },
+                { id: 'b5', nome: 'Vinho Tinto (Taça)', preco: 150, seq: 5 }
+            ],
+            comidas: [
+                { id: 'c1', nome: 'Frango Grelhado', preco: 350, seq: 1 },
+                { id: 'c2', nome: 'Caril de Amendoim', preco: 300, seq: 2 },
+                { id: 'c3', nome: 'Batata Frita', preco: 120, seq: 3 },
+                { id: 'c4', nome: 'Salada Mista', preco: 100, seq: 4 }
+            ]
+        };
+
+        // Ordenar produtos estritamente pela chave 'seq' (Sequência Personalizada)
+        function obterProdutosOrdenados(categoria) {
+            let prods = produtosDB[categoria] || [];
+            return prods.sort((a, b) => a.seq - b.seq);
+        }
+
+        // Inicializar ouvintes do Firebase para Mesas
+        db.ref('mesas').on('value', (snapshot) => {
+            const data = snapshot.val();
+            mesas = [];
+            if (data) {
+                Object.keys(data).forEach(key => {
+                    mesas.push({ id: key, ...data[key] });
+                });
+            }
+            renderizarMesas();
+            if (mesaAtualId) {
+                const mesaExistente = mesas.find(m => m.id == mesaAtualId);
+                if (mesaExistente) {
+                    atualizarComandaUI(mesaExistente);
+                } else {
+                    document.getElementById('painel-conteudo').style.display = 'none';
+                    mesaAtualId = null;
+                }
+            }
+        });
+
+        function renderizarMesas() {
+            const lista = document.getElementById('lista-mesas');
+            lista.innerHTML = '';
+            mesas.forEach(mesa => {
+                const div = document.createElement('div');
+                div.className = `mesa-item ${mesa.id == mesaAtualId ? 'active' : ''}`;
+                div.innerHTML = `<span class="nome">${mesa.nome}</span><span style="font-size:0.8rem; color:#64748b;">${mesa.itens ? mesa.itens.length : 0} itens</span>`;
+                div.onclick = () => selecionarMesa(mesa.id);
+                lista.appendChild(div);
+            });
+        }
+
+        // Correção aplicada para criação robusta de Salas/Mesas com tratamento de erros e validação
+        function criarNovaMesa() {
+            const inp = document.getElementById('novo-nome-mesa');
+            let nomeMesa = inp.value.trim();
+            if (!nomeMesa || nomeMesa === "+") {
+                nomeMesa = "Mesa " + (mesas.length + 1);
+            }
+            const novaMesaId = Date.now();
+            const novaMesa = { 
+                id: novaMesaId, 
+                nome: nomeMesa, 
+                itens: [],
+                abertaPor: usuarioAtivo ? usuarioAtivo.nome : "Desconhecido"
+            };
+            
+            db.ref(`mesas/${novaMesaId}`).set(novaMesa).then(() => {
+                inp.value = "";
+                selecionarMesa(novaMesaId);
+            }).catch(error => {
+                alert("Erro ao abrir sala/mesa: " + error.message);
+            });
+        }
+
+        function selecionarMesa(id) {
+            mesaAtualId = id;
+            document.getElementById('painel-conteudo').style.display = 'flex';
+            renderizarMesas();
+            const mesa = mesas.find(m => m.id == id);
+            if (mesa) {
+                document.getElementById('titulo-mesa-atual').innerText = mesa.nome;
+                atualizarComandaUI(mesa);
+            }
+            renderizarProdutos();
+        }
+
+        function mudarCategoria(cat) {
+            categoriaAtual = cat;
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            if(cat === 'bebidas') {
+                document.querySelector('.tab-btn').classList.add('active');
+            } else {
+                document.querySelector('.tab-comidas').classList.add('active');
+            }
+            renderizarProdutos();
+        }
+
+        function renderizarProdutos() {
+            const grid = document.getElementById('grid-produtos');
+            grid.innerHTML = '';
+            const prods = obterProdutosOrdenados(categoriaAtual);
+            prods.forEach(p => {
+                const card = document.createElement('div');
+                card.className = 'produto-card';
+                card.innerHTML = `<div class="prod-nome">${p.nome}</div><div class="prod-preco">${p.preco} MT</div>`;
+                card.onclick = () => adicionarItemMesa(p);
+                grid.appendChild(card);
+            });
+        }
+
+        function adicionarItemMesa(produto) {
+            if (!mesaAtualId) return;
+            const mesa = mesas.find(m => m.id == mesaAtualId);
+            if (!mesa) return;
+
+            let itens = mesa.itens || [];
+            const itemExistente = itens.find(i => i.id === produto.id);
+            if (itemExistente) {
+                itemExistente.qtd += 1;
+            } else {
+                itens.push({ id: produto.id, nome: produto.nome, preco: produto.preco, qtd: 1 });
+            }
+
+            db.ref(`mesas/${mesaAtualId}/itens`).set(itens);
+        }
+
+        function atualizarComandaUI(mesa) {
+            const listaComanda = document.getElementById('lista-comanda');
+            listaComanda.innerHTML = '';
+            let total = 0;
+
+            if (mesa.itens) {
+                mesa.itens.forEach((item, index) => {
+                    total += item.preco * item.qtd;
+                    const row = document.createElement('div');
+                    row.className = 'comanda-row';
+                    row.innerHTML = `
+                        <span>${item.nome} (x${item.qtd})</span>
+                        <span>${item.preco * item.qtd} MT</span>
+                        <button class="btn btn-danger" style="padding:2px 6px; font-size:0.75rem;" onclick="removerItem(${index})">X</button>
+                    `;
+                    listaComanda.appendChild(row);
+                });
+            }
+            document.getElementById('valor-total').innerText = total.toFixed(2) + ' MT';
+        }
+
+        function removerItem(index) {
+            const mesa = mesas.find(m => m.id == mesaAtualId);
+            if (!mesa || !mesa.itens) return;
+            mesa.itens.splice(index, 1);
+            db.ref(`mesas/${mesaAtualId}/itens`).set(mesa.itens);
+        }
+
+        function eliminarMesaAtual() {
+            if (!mesaAtualId) return;
+            const mesa = mesas.find(m => m.id == mesaAtualId);
+            if (mesa && mesa.itens && mesa.itens.length > 0) {
+                alert("Não é possível eliminar uma mesa com consumo registado.");
                 return;
             }
             if (confirm("Tem certeza que deseja eliminar esta mesa vazia?")) {
