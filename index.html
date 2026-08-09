@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- MuchBar Gestão Web v1.0.5 -->
+<!-- MuchBar Gestão Web v1.0.7 -->
 <html lang="pt-PT" class="h-full bg-gray-950 text-gray-100">
 <head>
     <meta charset="UTF-8">
@@ -100,6 +100,101 @@
         }
         .scrollbar-none::-webkit-scrollbar { display: none; }
         .scrollbar-none { -ms-overflow-style: none; scrollbar-width: none; }
+
+        .pos-category-strip {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 0.5rem;
+        }
+        .pos-category-button {
+            min-height: 3rem;
+            border: 2px solid #374151;
+            border-radius: 0.75rem;
+            background: #030712;
+            color: #d1d5db;
+            font-size: 0.72rem;
+            font-weight: 900;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.35rem;
+            transition: border-color 160ms ease, background-color 160ms ease, color 160ms ease, transform 160ms ease;
+        }
+        .pos-category-button[data-category="bebidas"] {
+            border-color: rgba(59, 130, 246, 0.75);
+            background: rgba(30, 58, 138, 0.28);
+            color: #93c5fd;
+        }
+        .pos-category-button[data-category="comidas"] {
+            border-color: rgba(249, 115, 22, 0.78);
+            background: rgba(124, 45, 18, 0.3);
+            color: #fdba74;
+        }
+        .pos-category-button[aria-pressed="true"] {
+            transform: translateY(-1px);
+            box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.2), 0 8px 20px rgba(0, 0, 0, 0.28);
+        }
+        .pos-category-button[data-category="todas"][aria-pressed="true"] {
+            border-color: #f59e0b;
+            background: #f59e0b;
+            color: #111827;
+        }
+        .pos-category-button[data-category="bebidas"][aria-pressed="true"] {
+            border-color: #60a5fa;
+            background: #2563eb;
+            color: #ffffff;
+        }
+        .pos-category-button[data-category="comidas"][aria-pressed="true"] {
+            border-color: #fb923c;
+            background: #ea580c;
+            color: #ffffff;
+        }
+
+        @media (max-width: 1023px) {
+            #bloco-detalhe-comanda {
+                flex: 1 1 auto;
+                height: 100%;
+                max-height: 100%;
+                overflow: hidden;
+            }
+            #itens-comanda {
+                flex: 1 1 auto;
+                min-height: 0;
+                padding-bottom: 0.75rem !important;
+                overscroll-behavior: contain;
+            }
+            #barra-fecho-conta {
+                position: relative !important;
+                inset: auto !important;
+                flex: 0 0 auto;
+                margin: 0 -1rem -1rem;
+                padding: 0.75rem 1rem calc(0.75rem + env(safe-area-inset-bottom));
+                background: rgba(3, 7, 18, 0.98);
+                border-top: 1px solid #374151;
+                box-shadow: 0 -12px 30px rgba(0, 0, 0, 0.42);
+                z-index: 60;
+            }
+            #btn-fechar-conta {
+                min-height: 3.5rem;
+                font-size: 0.8rem;
+            }
+            .pos-product-filters {
+                position: sticky;
+                top: 3.85rem;
+                z-index: 32;
+                margin: 0 -0.25rem 0.75rem;
+                padding: 0.5rem 0.25rem 0.25rem;
+                background: rgba(17, 24, 39, 0.98);
+                border-bottom: 1px solid rgba(55, 65, 81, 0.8);
+                box-shadow: 0 8px 16px rgba(0, 0, 0, 0.18);
+            }
+            .pos-category-button {
+                min-height: 3.25rem;
+                font-size: 0.74rem;
+            }
+        }
     </style>
 </head>
 <body class="h-full flex flex-col font-sans select-none antialiased selection:bg-amber-500/30 selection:text-amber-200 overflow-x-hidden bg-gray-950">
@@ -168,7 +263,7 @@
 
                 <div class="mt-5 flex items-center justify-between gap-3 border-t border-gray-800/60 pt-4 text-[9px] font-bold uppercase tracking-wider text-gray-600">
                     <span>MuchBar Gestão Web</span>
-                    <span>v1.0.5</span>
+                    <span>v1.0.7</span>
                 </div>
             </div>
         </div>
@@ -180,7 +275,7 @@
                 <img src="data:image/webp;base64,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" alt="" class="brand-logo brand-logo--header">
                 <div class="leading-tight">
                     <span class="block text-xs font-black tracking-tight text-gray-100">MuchBar Gestão</span>
-                    <span class="block text-[8px] font-bold text-amber-500">Web v1.0.5</span>
+                    <span class="block text-[8px] font-bold text-amber-500">Web v1.0.7</span>
                 </div>
                 <button onclick="abrirModalStock()" class="ml-2 bg-gray-900 border border-gray-800 hover:border-amber-500/50 text-[10px] font-bold px-2 py-1 rounded flex items-center gap-1 text-amber-400">
                     <span class="material-icons text-xs">inventory_2</span> Ver Stock
@@ -252,7 +347,7 @@
                         <p class="text-xs text-gray-600 text-center py-4">Selecione uma mesa acima.</p>
                     </div>
                     
-                    <div class="fixed bottom-0 left-0 right-0 p-4 bg-gray-950 border-t border-gray-850 lg:relative lg:bg-transparent lg:border-t-0 lg:p-0 mt-auto z-40 space-y-2.5">
+                    <div id="barra-fecho-conta" class="p-4 bg-gray-950 border-t border-gray-850 lg:relative lg:bg-transparent lg:border-t-0 lg:p-0 mt-auto z-40 space-y-2.5">
                         <div class="flex justify-between items-baseline lg:bg-gray-950 lg:p-3 lg:rounded-xl lg:border lg:border-gray-855">
                             <span class="text-xs font-bold text-gray-400">Total Geral (Faturação):</span>
                             <span id="total-comanda" class="text-xl font-mono font-black text-emerald-400">0,00 MT</span>
@@ -286,8 +381,10 @@
                             <span id="ultimo-item-adicionado" class="hidden text-[9px] font-bold text-emerald-400"></span>
                         </div>
                         
-                        <div id="container-botoes-categorias-filtro" class="flex gap-1.5 mb-2 overflow-x-auto scrollbar-none pb-1"></div>
-                        <div id="container-subcategorias-filtro" class="flex gap-1 overflow-x-auto scrollbar-none mb-3 pb-1 shrink-0"></div>
+                        <div class="pos-product-filters">
+                            <div id="container-botoes-categorias-filtro" class="pos-category-strip mb-2"></div>
+                            <div id="container-subcategorias-filtro" class="flex gap-1 overflow-x-auto scrollbar-none pb-1 shrink-0"></div>
+                        </div>
 
                         <div id="botoes-produtos" class="grid grid-cols-2 sm:grid-cols-3 gap-2 pb-12 lg:pb-0 lg:overflow-y-auto flex-1 content-start"></div>
                     </div>
@@ -302,9 +399,9 @@
                     
                     <div class="grid grid-cols-2 gap-3 mb-3 border-b border-gray-800/60 pb-3 text-xs">
                         <div>
-                            <p class="text-[9px] uppercase font-bold text-gray-500">Faturação de hoje</p>
+                            <p class="text-[9px] uppercase font-bold text-gray-500">Faturação do turno</p>
                             <p id="rel-turno-faturado" class="text-base font-mono font-black text-emerald-400">0,00 MT</p>
-                            <p class="text-[9px] text-gray-600 mt-0.5">Total das mesas fechadas hoje</p>
+                            <p class="text-[9px] text-gray-600 mt-0.5">Mantida até ao fecho manual do turno</p>
                         </div>
                         <div class="hidden master-only">
                             <p class="text-[9px] uppercase font-bold text-gray-500">Custo de bebidas</p>
@@ -320,20 +417,42 @@
                         </div>
                     </div>
 
-                    <p class="text-[9px] font-black text-gray-400 uppercase tracking-wider mb-1.5">Artigos vendidos hoje:</p>
+                    <p class="text-[9px] font-black text-gray-400 uppercase tracking-wider mb-1.5">Artigos vendidos no turno:</p>
                     <div id="rel-turno-lista-produtos" class="grid grid-cols-2 gap-2 text-[11px]"></div>
                     
-                    <p class="text-[9px] font-black text-blue-400 uppercase tracking-wider mt-3 mb-1.5 border-t border-gray-800/60 pt-3">Entradas de stock de hoje:</p>
+                    <p class="text-[9px] font-black text-blue-400 uppercase tracking-wider mt-3 mb-1.5 border-t border-gray-800/60 pt-3">Entradas de stock no turno:</p>
                     <div id="rel-turno-lista-entradas" class="grid grid-cols-2 gap-2 text-[11px]"></div>
                 </div>
 
+                <section class="hidden admin-fechos-only bg-gray-900 border border-amber-900/60 p-4 rounded-2xl space-y-3">
+                    <div class="flex items-start gap-2">
+                        <span class="material-icons text-amber-400 text-base">inventory</span>
+                        <div>
+                            <p class="text-[9px] font-black text-amber-500 uppercase tracking-widest">Operação autorizada ao Administrador</p>
+                            <h3 class="text-sm font-black text-gray-100">Fechos de período</h3>
+                            <p class="text-[10px] text-gray-500 mt-1">Apenas executa os fechos. Custos, lucros, margens e relatórios financeiros permanecem exclusivos do Master.</p>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                        <button onclick="fecharTurnoGeral()" class="bg-amber-950 hover:bg-amber-900 border border-amber-800 text-amber-300 px-4 py-2.5 rounded-xl text-xs font-black transition flex items-center justify-center gap-1 uppercase tracking-wider">
+                            <span class="material-icons text-xs">work_history</span> Fechar turno
+                        </button>
+                        <button onclick="fecharSemanaDefinitiva()" class="bg-blue-950 hover:bg-blue-900 border border-blue-800 text-blue-300 px-4 py-2.5 rounded-xl text-xs font-black transition flex items-center justify-center gap-1 uppercase tracking-wider">
+                            <span class="material-icons text-xs">calendar_view_week</span> Fechar semana
+                        </button>
+                        <button onclick="fecharMesDefinitivo()" class="bg-red-950 hover:bg-red-900 border border-red-800 text-red-300 px-4 py-2.5 rounded-xl text-xs font-black transition flex items-center justify-center gap-1 uppercase tracking-wider">
+                            <span class="material-icons text-xs">lock</span> Fechar mês
+                        </button>
+                    </div>
+                </section>
+
                 <div id="indicadores-financeiros-macro" class="hidden grid grid-cols-1 sm:grid-cols-3 gap-2 adm-geral">
                     <div class="bg-gray-900 border border-gray-800 p-3.5 rounded-xl flex justify-between items-center">
-                        <span class="text-[10px] text-gray-500 uppercase font-black tracking-wider">Faturação Geral</span>
+                        <span class="text-[10px] text-gray-500 uppercase font-black tracking-wider">Faturação do turno</span>
                         <span id="hoje-faturacao" class="font-mono font-black text-emerald-400">0,00 MT</span>
                     </div>
                     <div class="bg-gray-900 border border-gray-800 p-3.5 rounded-xl flex justify-between items-center">
-                        <span class="text-[10px] text-gray-500 uppercase font-black tracking-wider">Despesas / Sangrias</span>
+                        <span class="text-[10px] text-gray-500 uppercase font-black tracking-wider">Despesas do turno</span>
                         <span id="hoje-despesas" class="font-mono font-black text-red-400">0,00 MT</span>
                     </div>
                     <div class="hidden bg-gray-900 border border-gray-800 p-3.5 rounded-xl flex justify-between items-center master-only">
@@ -1334,7 +1453,10 @@
                     aliases: ['historico_mes'],
                     normalizador: normalizarHistoricoRecebido
                 });
-                if (usuarioAtivo) atualizarTabelaMensal();
+                if (usuarioAtivo) {
+                    atualizarTabelaMensal();
+                    atualizarPainelVendas();
+                }
             });
             
             db.ref('entradas_turno').on('value', (snapshot) => {
@@ -1367,6 +1489,7 @@
                 });
                 if (usuarioAtivo) {
                     atualizarListaPerdas();
+                    atualizarPainelVendas();
                     atualizarRelatoriosAutomaticos();
                 }
             });
@@ -1490,15 +1613,24 @@
 
             const cats = Object.keys(subcategoriasMap);
             const ativoTodas = categoriaFiltroAtiva === 'todas';
-            
-            container.innerHTML += `<button onclick="mudarFiltroCategoria('todas')" class="px-3 py-1.5 rounded-lg text-[10px] font-black ${ativoTodas ? 'bg-amber-500 text-gray-950' : 'bg-gray-950 border border-gray-800 text-gray-300'} transition shrink-0">TODOS</button>`;
+
+            container.innerHTML += `
+                <button type="button" onclick="mudarFiltroCategoria('todas')" data-category="todas" aria-pressed="${ativoTodas}" class="pos-category-button">
+                    <span class="material-icons text-sm">apps</span>
+                    <span>Todos</span>
+                </button>`;
 
             cats.forEach(c => {
                 const ativo = categoriaFiltroAtiva === c;
                 const isComida = c.toLowerCase().includes('comida');
-                const ativoCls = isComida ? 'bg-orange-500 text-gray-950' : 'bg-blue-500 text-gray-950';
-                const inativoCls = isComida ? 'bg-orange-950/20 border border-orange-900 text-orange-300' : 'bg-blue-950/20 border border-blue-900 text-blue-300';
-                container.innerHTML += `<button onclick="mudarFiltroCategoria('${c}')" class="px-3 py-1.5 rounded-lg text-[10px] font-black ${ativo ? ativoCls : inativoCls} transition shrink-0 uppercase">${c}</button>`;
+                const tipo = isComida ? 'comidas' : 'bebidas';
+                const icone = isComida ? 'restaurant' : 'local_bar';
+                const rotulo = isComida ? 'Comidas' : 'Bebidas';
+                container.innerHTML += `
+                    <button type="button" onclick="mudarFiltroCategoria('${c}')" data-category="${tipo}" aria-pressed="${ativo}" class="pos-category-button">
+                        <span class="material-icons text-sm">${icone}</span>
+                        <span>${rotulo}</span>
+                    </button>`;
             });
         }
 
@@ -1603,8 +1735,17 @@
             const botao = document.getElementById('btn-ver-comanda-mobile');
             if (!botao) return;
             const quantidade = (mesa?.itens || []).reduce((total, item) => total + numeroSeguro(item.qtd, 0), 0);
-            botao.innerHTML = `<span class="material-icons text-xs">shopping_cart</span> Ver comanda · ${quantidade}`;
-            botao.setAttribute('aria-label', `Ver comanda com ${quantidade} artigos`);
+            const totalComanda = (mesa?.itens || []).reduce(
+                (total, item) => total + numeroSeguro(item.preco, 0) * numeroSeguro(item.qtd, 0),
+                0
+            );
+            botao.innerHTML = `
+                <span class="material-icons text-sm">shopping_cart</span>
+                <span class="leading-tight text-left">
+                    <span class="block">Comanda · ${quantidade}</span>
+                    <span class="block text-[9px] font-mono">${totalComanda.toFixed(2)} MT</span>
+                </span>`;
+            botao.setAttribute('aria-label', `Ver comanda com ${quantidade} artigos, total ${totalComanda.toFixed(2)} meticais`);
         }
 
         function mostrarProdutosMesa() {
@@ -1954,6 +2095,10 @@
             return !acessoConfiguracaoInicialAtivo && usuarioAtivo?.permissao === 'master';
         }
 
+        function temPermissaoFechoPeriodos() {
+            return !acessoConfiguracaoInicialAtivo && ['admin', 'master'].includes(usuarioAtivo?.permissao);
+        }
+
         function emConfiguracaoInicialMaster() {
             return acessoConfiguracaoInicialAtivo && !existeContaMasterConfigurada();
         }
@@ -1970,6 +2115,12 @@
             return false;
         }
 
+        function exigirPermissaoFechoPeriodos() {
+            if (temPermissaoFechoPeriodos()) return true;
+            alert('Acesso negado. Apenas o Administrador ou Master pode executar fechos de período.');
+            return false;
+        }
+
         function aplicarRestricoesPermissao() {
             if (!usuarioAtivo) return;
             const configuracaoInicial = emConfiguracaoInicialMaster();
@@ -1982,6 +2133,12 @@
 
             document.querySelectorAll('.master-only').forEach(el => {
                 if (masterAutenticado) el.classList.remove('hidden');
+                else el.classList.add('hidden');
+            });
+
+            document.querySelectorAll('.admin-fechos-only').forEach(el => {
+                const administradorAutenticado = !acessoConfiguracaoInicialAtivo && usuarioAtivo?.permissao === 'admin';
+                if (administradorAutenticado) el.classList.remove('hidden');
                 else el.classList.add('hidden');
             });
 
@@ -2255,11 +2412,7 @@
             return lista.filter((item) => timestampMovimento(item) >= inicio);
         }
 
-        function agregarRelatorio(tipo = periodoRelatorioAtivo) {
-            const vendas = filtrarPorPeriodo(vendasCronologicas, tipo);
-            const despesas = filtrarPorPeriodo(despesasTurno, tipo);
-            const entradas = filtrarPorPeriodo(entradasTurno, tipo);
-            const perdas = filtrarPorPeriodo(perdasStock, tipo);
+        function agregarMovimentos(vendas = [], despesas = [], entradas = [], perdas = []) {
             const bebidas = {};
             const comidas = {};
             const entradasAgrupadas = {};
@@ -2305,6 +2458,56 @@
                 despesasGerais,
                 resultadoBebidas: receitaBebidas - custoBebidas - custoPerdas - despesasGerais
             };
+        }
+
+        function agregarRelatorio(tipo = periodoRelatorioAtivo) {
+            return agregarMovimentos(
+                filtrarPorPeriodo(vendasCronologicas, tipo),
+                filtrarPorPeriodo(despesasTurno, tipo),
+                filtrarPorPeriodo(entradasTurno, tipo),
+                filtrarPorPeriodo(perdasStock, tipo)
+            );
+        }
+
+        function inicioTurnoAtivoEstimado() {
+            const timestampsAtivos = [...vendasCronologicas, ...despesasTurno, ...entradasTurno]
+                .map(timestampMovimento)
+                .filter((timestamp) => timestamp > 0);
+            const primeiroMovimento = timestampsAtivos.length > 0 ? Math.min(...timestampsAtivos) : 0;
+            const timestampsFechos = historicoMensal
+                .map(timestampMovimento)
+                .filter((timestamp) => timestamp > 0 && (!primeiroMovimento || timestamp <= primeiroMovimento));
+
+            if (timestampsFechos.length > 0) return Math.max(...timestampsFechos);
+            if (primeiroMovimento) {
+                const timestampsPerdas = perdasStock.map(timestampMovimento).filter((timestamp) => timestamp > 0);
+                return timestampsPerdas.length > 0
+                    ? Math.min(primeiroMovimento, ...timestampsPerdas)
+                    : primeiroMovimento;
+            }
+
+            const ultimoFechoConhecido = historicoMensal
+                .map(timestampMovimento)
+                .filter((timestamp) => timestamp > 0)
+                .reduce((maior, timestamp) => Math.max(maior, timestamp), 0);
+            if (ultimoFechoConhecido) return ultimoFechoConhecido;
+
+            const primeiraPerdaConhecida = perdasStock
+                .map(timestampMovimento)
+                .filter((timestamp) => timestamp > 0)
+                .reduce((menor, timestamp) => Math.min(menor, timestamp), Number.POSITIVE_INFINITY);
+            return Number.isFinite(primeiraPerdaConhecida) ? primeiraPerdaConhecida : Date.now();
+        }
+
+        function agregarTurnoAtivo() {
+            const inicioTurno = inicioTurnoAtivoEstimado();
+            const perdasDoTurno = perdasStock.filter((perda) => timestampMovimento(perda) >= inicioTurno);
+            return agregarMovimentos(
+                [...vendasCronologicas],
+                [...despesasTurno],
+                [...entradasTurno],
+                perdasDoTurno
+            );
         }
 
         function escreverValor(id, valor, sufixo = ' MT') {
@@ -2386,28 +2589,27 @@
         }
 
         function atualizarPainelVendas() {
-            const vendasHoje = filtrarPorPeriodo(vendasCronologicas, 'hoje');
-            const despesasHoje = filtrarPorPeriodo(despesasTurno, 'hoje');
-            const entradasHoje = filtrarPorPeriodo(entradasTurno, 'hoje');
-            let faturamentoDia = vendasHoje.reduce((acc, cur) => acc + cur.total, 0);
-            let despesasDia = despesasHoje.reduce((acc, cur) => acc + cur.valor, 0);
-            let custoStockDia = vendasHoje.reduce((acc, cur) => acc + (cur.custoTotal || 0), 0);
-            const resumoFinanceiroHoje = agregarRelatorio('hoje');
-            let lucroLiquidoDia = resumoFinanceiroHoje.resultadoBebidas;
+            const vendasTurnoAtual = [...vendasCronologicas];
+            const despesasTurnoAtual = [...despesasTurno];
+            const entradasTurnoAtual = [...entradasTurno];
+            const faturamentoTurnoAtual = vendasTurnoAtual.reduce((acc, cur) => acc + cur.total, 0);
+            const despesasTurnoTotal = despesasTurnoAtual.reduce((acc, cur) => acc + cur.valor, 0);
+            const resumoFinanceiroTurno = agregarTurnoAtivo();
+            const resultadoBebidasTurno = resumoFinanceiroTurno.resultadoBebidas;
 
-            if(document.getElementById('hoje-faturacao')) document.getElementById('hoje-faturacao').innerText = `${faturamentoDia.toFixed(2)} MT`;
-            if(document.getElementById('hoje-despesas')) document.getElementById('hoje-despesas').innerText = `${despesasDia.toFixed(2)} MT`;
-            if(document.getElementById('hoje-lucro')) document.getElementById('hoje-lucro').innerText = `${lucroLiquidoDia.toFixed(2)} MT`;
+            if(document.getElementById('hoje-faturacao')) document.getElementById('hoje-faturacao').innerText = `${faturamentoTurnoAtual.toFixed(2)} MT`;
+            if(document.getElementById('hoje-despesas')) document.getElementById('hoje-despesas').innerText = `${despesasTurnoTotal.toFixed(2)} MT`;
+            if(document.getElementById('hoje-lucro')) document.getElementById('hoje-lucro').innerText = `${resultadoBebidasTurno.toFixed(2)} MT`;
 
-            if(document.getElementById('rel-turno-faturado')) document.getElementById('rel-turno-faturado').innerText = `${faturamentoDia.toFixed(2)} MT`;
-            if(document.getElementById('rel-turno-custo')) document.getElementById('rel-turno-custo').innerText = `${resumoFinanceiroHoje.custoBebidas.toFixed(2)} MT`;
-            if(document.getElementById('rel-turno-lucro')) document.getElementById('rel-turno-lucro').innerText = `${resumoFinanceiroHoje.resultadoBebidas.toFixed(2)} MT`;
-            if(document.getElementById('rel-turno-contas')) document.getElementById('rel-turno-contas').innerText = vendasHoje.length;
+            if(document.getElementById('rel-turno-faturado')) document.getElementById('rel-turno-faturado').innerText = `${faturamentoTurnoAtual.toFixed(2)} MT`;
+            if(document.getElementById('rel-turno-custo')) document.getElementById('rel-turno-custo').innerText = `${resumoFinanceiroTurno.custoBebidas.toFixed(2)} MT`;
+            if(document.getElementById('rel-turno-lucro')) document.getElementById('rel-turno-lucro').innerText = `${resumoFinanceiroTurno.resultadoBebidas.toFixed(2)} MT`;
+            if(document.getElementById('rel-turno-contas')) document.getElementById('rel-turno-contas').innerText = vendasTurnoAtual.length;
 
             let resumoProdsComida = {};
             let resumoProdsBebida = {};
             
-            vendasHoje.forEach(v => {
+            vendasTurnoAtual.forEach(v => {
                 (v.produtos || []).forEach(p => {
                     const isComida = (p.categoria || '').toLowerCase().includes('comida');
                     if (isComida) {
@@ -2451,7 +2653,7 @@
             }
             
             let resumoEntradas = {};
-            entradasHoje.forEach(e => {
+            entradasTurnoAtual.forEach(e => {
                 resumoEntradas[e.nome] = (resumoEntradas[e.nome] || 0) + e.qtd;
             });
 
@@ -2469,11 +2671,13 @@
 
             const containerCronologico = document.getElementById('lista-vendas-dia');
             if(containerCronologico) {
-                containerCronologico.innerHTML = vendasHoje.length === 0 ? `<p class="text-gray-600 text-center py-3 italic text-xs">Nenhuma transação fechada hoje.</p>` : "";
+                containerCronologico.innerHTML = vendasTurnoAtual.length === 0 ? `<p class="text-gray-600 text-center py-3 italic text-xs">Nenhuma transação fechada neste turno.</p>` : "";
                 
                 const perm = usuarioAtivo ? usuarioAtivo.permissao : 'funcionario';
                 
-                [...vendasHoje].reverse().forEach(v => {
+                [...vendasTurnoAtual]
+                    .sort((a, b) => timestampMovimento(b) - timestampMovimento(a))
+                    .forEach(v => {
                     let botoesAcao = "";
                     let visualizacaoValorMesa = `<span class="font-mono font-black text-emerald-400">${v.total.toFixed(2)} MT</span>`;
                     const idVenda = argumentoId(v.id);
@@ -2524,10 +2728,10 @@
 
             const containerDespesas = document.getElementById('lista-despesas-turno');
             if(containerDespesas) {
-                containerDespesas.innerHTML = despesasHoje.length === 0 ? `<p class="text-gray-600 text-center py-1 italic text-xs">Sem despesas registadas hoje.</p>` : "";
+                containerDespesas.innerHTML = despesasTurnoAtual.length === 0 ? `<p class="text-gray-600 text-center py-1 italic text-xs">Sem despesas registadas neste turno.</p>` : "";
                 
                 const perm = usuarioAtivo ? usuarioAtivo.permissao : 'funcionario';
-                despesasHoje.forEach(d => {
+                despesasTurnoAtual.forEach(d => {
                     let botoesDespesaAdmin = "";
                     const idDespesa = argumentoId(d.id);
                     if(perm === 'admin' || perm === 'master') {
@@ -2675,7 +2879,7 @@
         }
 
         async function fecharTurnoGeral() {
-            if (!exigirPermissaoMaster()) return;
+            if (!exigirPermissaoFechoPeriodos()) return;
             if (mesas.length > 0) {
                 return alert(`Existem ${mesas.length} sala(s) aberta(s). Feche todas as contas antes de arquivar o turno.`);
             }
@@ -2744,7 +2948,7 @@
         }
 
         async function fecharSemanaDefinitiva() {
-            if (!exigirPermissaoMaster()) return;
+            if (!exigirPermissaoFechoPeriodos()) return;
             let turnosParaConsolidar = historicoMensal.filter(h => h.tipo === "turno-fechado");
             if(turnosParaConsolidar.length === 0) {
                 return alert("Não existem turnos diários no histórico para consolidar uma semana.");
@@ -2886,7 +3090,7 @@
         }
 
         async function fecharMesDefinitivo() {
-            if (!exigirPermissaoMaster()) return;
+            if (!exigirPermissaoFechoPeriodos()) return;
             let itensParaConsolidar = historicoMensal.filter(h => h.tipo === "turno-fechado" || h.tipo === "semanal-consolidado");
             if(itensParaConsolidar.length === 0) {
                 return alert("Não existem turnos ou semanas no histórico para consolidar um mês.");
